@@ -1,0 +1,1 @@
+This library allows for reading and writing Password Safe version 3 files.
