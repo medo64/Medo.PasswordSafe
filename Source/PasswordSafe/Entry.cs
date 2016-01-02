@@ -26,6 +26,16 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             this.Title = title;
         }
 
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="group">Group.</param>
+        /// <param name="title">Title.</param>
+        public Entry(GroupPath group, string title) : this() {
+            this.Group = group;
+            this.Title = title;
+        }
+
 
         internal Entry(ICollection<Record> records) {
             this.Records = new RecordCollection(this, records);
@@ -53,7 +63,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <summary>
         /// Gets/sets group.
         /// </summary>
-        public string Group {
+        public GroupPath Group {
             get { return this.Records.Contains(RecordType.Group) ? this.Records[RecordType.Group].Text : ""; }
             set { this.Records[RecordType.Group].Text = value; }
         }

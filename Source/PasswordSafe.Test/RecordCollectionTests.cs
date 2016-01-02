@@ -12,7 +12,7 @@ namespace PasswordSafe.Test {
             doc.Entries.Add(new Entry());
             doc.Entries[0].Records.Add(new Record(RecordType.Group) { Text = "Test" });
 
-            Assert.AreEqual("Test", doc.Entries[0].Group);
+            Assert.IsTrue(string.Equals("Test", doc.Entries[0].Group, StringComparison.Ordinal));
         }
 
 

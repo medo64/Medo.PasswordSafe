@@ -322,7 +322,7 @@ namespace PasswordSafe.Test {
 
                 Assert.AreEqual(6, doc.Entries[0].Records.Count, "[0]");
                 Assert.AreEqual(new Guid("f76e3ba9-afc5-594a-90bd-5c20064cc62e"), doc.Entries[0].Uuid, "Uuid[0]");
-                Assert.AreEqual("X.Y", doc.Entries[0].Group, "Group", "Group[0]");
+                Assert.IsTrue(string.Equals("X.Y", doc.Entries[0].Group), "Group[0]");
                 Assert.AreEqual("A", doc.Entries[0].Title, "Title[0]");
                 Assert.AreEqual("A123", doc.Entries[0].Password, "Password[0]");
                 Assert.AreEqual(new DateTime(2015, 12, 28, 08, 36, 47, DateTimeKind.Utc), doc.Entries[0].CreationTime, "CreationTime[0]");
@@ -330,7 +330,7 @@ namespace PasswordSafe.Test {
 
                 Assert.AreEqual(6, doc.Entries[1].Records.Count, "[1]");
                 Assert.AreEqual(new Guid("fb40f24e-68ec-c74e-8e87-293dd274d10c"), doc.Entries[1].Uuid, "Uuid[1]");
-                Assert.AreEqual("Z", doc.Entries[1].Group, "Group[1]");
+                Assert.IsTrue(string.Equals("Z", doc.Entries[1].Group), "Group[1]");
                 Assert.AreEqual("B", doc.Entries[1].Title, "Title[1]");
                 Assert.AreEqual("B123", doc.Entries[1].Password, "Password[1]");
                 Assert.AreEqual(new DateTime(2015, 12, 28, 8, 36, 59, DateTimeKind.Utc), doc.Entries[1].CreationTime, "CreationTime[1]");
@@ -361,7 +361,7 @@ namespace PasswordSafe.Test {
 
                 Assert.AreEqual(6, doc.Entries[0].Records.Count, "[0]");
                 Assert.AreEqual(new Guid("f76e3ba9-afc5-594a-90bd-5c20064cc62e"), doc.Entries[0].Uuid, "Uuid[0]");
-                Assert.AreEqual("X.Y", doc.Entries[0].Group, "Group", "Group[0]");
+                Assert.IsTrue(string.Equals("X.Y", doc.Entries[0].Group), "Group[0]");
                 Assert.AreEqual("A", doc.Entries[0].Title, "Title[0]");
                 Assert.AreEqual("A123", doc.Entries[0].Password, "Password[0]");
                 Assert.AreEqual(new DateTime(2015, 12, 28, 08, 36, 47, DateTimeKind.Utc), doc.Entries[0].CreationTime, "CreationTime[0]");
@@ -369,7 +369,7 @@ namespace PasswordSafe.Test {
 
                 Assert.AreEqual(6, doc.Entries[1].Records.Count, "[1]");
                 Assert.AreEqual(new Guid("fb40f24e-68ec-c74e-8e87-293dd274d10c"), doc.Entries[1].Uuid, "Uuid[1]");
-                Assert.AreEqual("Z", doc.Entries[1].Group, "Group[1]");
+                Assert.IsTrue(string.Equals("Z", doc.Entries[1].Group), "Group[1]");
                 Assert.AreEqual("B", doc.Entries[1].Title, "Title[1]");
                 Assert.AreEqual("B123", doc.Entries[1].Password, "Password[1]");
                 Assert.AreEqual(new DateTime(2015, 12, 28, 8, 36, 59, DateTimeKind.Utc), doc.Entries[1].CreationTime, "CreationTime[1]");

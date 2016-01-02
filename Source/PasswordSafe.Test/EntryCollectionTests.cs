@@ -59,9 +59,18 @@ namespace PasswordSafe.Test {
             doc.Entries["A", RecordType.EmailAddress] = null;
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(NotSupportedException))]
+        public void EntryCollection_ReadOnly_IndexerWrite4() {
+            var doc = new Document();
+            doc.Entries.Add(new Entry("X.Y", "A"));
+            doc.IsReadOnly = true;
+            doc.Entries["X.Y", "A", RecordType.EmailAddress] = null;
+        }
+
 
         [TestMethod]
-        public void EntryCollection_IndexerReadByNameNonEmpty() {
+        public void EntryCollection_IndexerReadByTitleNonEmpty() {
             var doc = new Document();
             doc.Entries.Add(new Entry("A"));
             Assert.AreEqual("A", doc.Entries["A"].Title);
@@ -71,7 +80,7 @@ namespace PasswordSafe.Test {
         }
 
         [TestMethod]
-        public void EntryCollection_IndexerReadByNameAndTypeNonEmpty() {
+        public void EntryCollection_IndexerReadByTitleTypeNonEmpty() {
             var doc = new Document();
             doc.Entries.Add(new Entry("A"));
             Assert.AreEqual("A", doc.Entries["A"][RecordType.Title].Text);
@@ -80,21 +89,44 @@ namespace PasswordSafe.Test {
             Assert.AreEqual("B", doc.Entries["B"][RecordType.Title].Text);
         }
 
+        [TestMethod]
+        public void EntryCollection_IndexerReadByGroupTitleTypeNonEmpty() {
+            var doc = new Document();
+            doc.Entries.Add(new Entry("X.Y", "A"));
+            Assert.AreEqual("X.Y", doc.Entries["A"][RecordType.Group].Text);
+            Assert.AreEqual("A", doc.Entries["A"][RecordType.Title].Text);
+
+            doc.Entries["A"].Group = doc.Entries["A"].Group.Up();
+            doc.Entries["A"].Title = "B";
+            Assert.AreEqual("X", doc.Entries["B"][RecordType.Group].Text);
+            Assert.AreEqual("B", doc.Entries["B"][RecordType.Title].Text);
+        }
+
 
         [TestMethod]
-        public void EntryCollection_IndexerReadByName() {
+        public void EntryCollection_IndexerReadByTitle() {
             var doc = new Document();
             Assert.AreNotEqual(Guid.Empty, doc.Entries["A"].Uuid);
             Assert.AreEqual("A", doc.Entries["A"].Title);
         }
 
         [TestMethod]
-        public void EntryCollection_IndexerReadByNameAndType() {
+        public void EntryCollection_IndexerReadByTitleType() {
             var doc = new Document();
             Assert.AreNotEqual(Guid.Empty, doc.Entries["A", RecordType.Uuid].Uuid);
             Assert.AreEqual("A", doc.Entries["A", RecordType.Title].Text);
             Assert.AreNotEqual(Guid.Empty, doc.Entries["A"][RecordType.Uuid].Uuid);
             Assert.AreEqual("A", doc.Entries["A"][RecordType.Title].Text);
+        }
+
+        [TestMethod]
+        public void EntryCollection_IndexerReadByGroupTitleType() {
+            var doc = new Document();
+            Assert.AreNotEqual(Guid.Empty, doc.Entries["X.Y", "A", RecordType.Uuid].Uuid);
+            Assert.AreEqual("X.Y", doc.Entries["X.Y", "A", RecordType.Group].Text);
+            Assert.AreEqual("A", doc.Entries["X.Y", "A", RecordType.Title].Text);
+            Assert.AreNotEqual(Guid.Empty, doc.Entries["X.Y", "A"][RecordType.Uuid].Uuid);
+            Assert.AreEqual("A", doc.Entries["X.Y", "A"][RecordType.Title].Text);
         }
 
     }
