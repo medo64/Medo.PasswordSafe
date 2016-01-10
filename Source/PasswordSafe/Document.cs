@@ -12,10 +12,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
     /// </summary>
     public class Document : IDisposable {
 
-        /// <summary>
-        /// Creates a new instance.
-        /// </summary>
-        public Document() {
+        private Document() {
             this.Headers = new HeaderCollection(this, new Header[] {
                 new Header(HeaderType.Version, BitConverter.GetBytes(Header.DefaultVersion)),
                 new Header(HeaderType.Uuid,Guid.NewGuid().ToByteArray()),
@@ -25,6 +22,34 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             this.TrackAccess = true;
             this.TrackModify = true;
         }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        public Document(byte[] passphraseBuffer)
+            : this() {
+            if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
+
+            this.Passphrase = passphraseBuffer; //no need for copy - will be done in property setter
+        }
+
+        /// <summary>
+        /// Creates a new instance.
+        /// </summary>
+        /// <param name="passphrase">Password.</param>
+        public Document(string passphrase)
+            : this() {
+            if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
+
+            var passphraseBuffer = Utf8Encoding.GetBytes(passphrase);
+            try {
+                this.Passphrase = passphraseBuffer; //no need for copy - will be done in property setter
+            } finally {
+                Array.Clear(passphraseBuffer, 0, passphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+            }
+        }
+
 
         internal Document(ICollection<Header> headers, params ICollection<Record>[] records) {
             this.Headers = new HeaderCollection(this, headers);

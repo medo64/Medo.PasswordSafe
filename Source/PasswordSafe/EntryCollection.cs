@@ -303,6 +303,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="title">Title.</param>
         /// <exception cref="ArgumentOutOfRangeException">Only null value is supported.</exception>
         /// <exception cref="NotSupportedException">Collection is read-only.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1023:IndexersShouldNotBeMultidimensional", Justification = "Done intentionally for the ease of use.")]
         public Entry this[GroupPath group, string title] {
             get {
                 foreach (var entry in this.BaseCollection) {

@@ -8,7 +8,7 @@ namespace PasswordSafe.Test {
 
         [TestMethod]
         public void HeaderCollection_New() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Headers.Add(new Header(HeaderType.DatabaseName) { Text = "Test" });
 
             Assert.AreEqual("Test", doc.Name);
@@ -18,14 +18,14 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void HeaderCollection_ReadOnly() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.IsReadOnly = true;
             doc.Headers.Add(new Header(HeaderType.DatabaseName) { Text = "Test" });
         }
 
         [TestMethod]
         public void HeaderCollection_ReadOnly_IndexerRead() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.IsReadOnly = true;
             Assert.IsNotNull(doc.Headers[HeaderType.DatabaseName]);
             Assert.AreEqual("", doc.Headers[HeaderType.DatabaseName].Text);
@@ -34,7 +34,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void HeaderCollection_ReadOnly_IndexerWrite() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.IsReadOnly = true;
             doc.Headers[HeaderType.DatabaseName] = null;
         }

@@ -380,6 +380,27 @@ namespace PasswordSafe.Test {
         }
 
 
+        [TestMethod]
+        public void Document_NewSaveAndLoad() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new Document("Password")) {
+                    doc.Entries.Add(new Entry("Test"));
+                    doc.Save(msFile);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = Document.Load(msFile, "Password")) {
+                    Assert.AreEqual(1, doc.Entries.Count);
+                    Assert.AreEqual("Test", doc.Entries[0].Title);
+                }
+
+            }
+
+
+
+        }
+
         #region Utils
 
         private static MemoryStream GetResourceStream(string fileName) {

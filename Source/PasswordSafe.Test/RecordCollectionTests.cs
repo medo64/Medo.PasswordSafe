@@ -8,7 +8,7 @@ namespace PasswordSafe.Test {
 
         [TestMethod]
         public void RecordCollection_New() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Entries.Add(new Entry());
             doc.Entries[0].Records.Add(new Record(RecordType.Group) { Text = "Test" });
 
@@ -19,7 +19,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void RecordCollection_ReadOnly() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Entries.Add(new Entry());
             doc.IsReadOnly = true;
             doc.Entries[0].Records.Add(new Record(RecordType.Group));
@@ -27,7 +27,7 @@ namespace PasswordSafe.Test {
 
         [TestMethod]
         public void RecordCollection_ReadOnly_IndexerRead() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Entries.Add(new Entry());
             doc.IsReadOnly = true;
             Assert.AreEqual("", doc.Entries[0].Records[RecordType.Title].Text);
@@ -36,7 +36,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void RecordCollection_ReadOnly_IndexerWrite() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Entries.Add(new Entry());
             doc.IsReadOnly = true;
             doc.Entries[0].Records[RecordType.Title] = null;

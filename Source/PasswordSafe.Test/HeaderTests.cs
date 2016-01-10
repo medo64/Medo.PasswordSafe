@@ -22,7 +22,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void Header_ReadOnly() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Headers.Add(new Header(HeaderType.DatabaseName) { Text = "Test" });
 
             doc.IsReadOnly = true;
@@ -31,7 +31,7 @@ namespace PasswordSafe.Test {
 
         [TestMethod]
         public void Header_ReadOnly_IndexerRead() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.IsReadOnly = true;
             Assert.IsNotNull(doc.Headers[HeaderType.DatabaseName]);
             Assert.AreEqual("", doc.Headers[HeaderType.DatabaseName].Text);
@@ -40,7 +40,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void Header_ReadOnly_IndexerWrite() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.IsReadOnly = true;
             doc.Headers[HeaderType.DatabaseName] = null;
         }

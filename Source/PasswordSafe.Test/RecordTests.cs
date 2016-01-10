@@ -22,7 +22,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void Record_ReadOnly() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Entries["Test"].Password = "Old";
 
             doc.IsReadOnly = true;

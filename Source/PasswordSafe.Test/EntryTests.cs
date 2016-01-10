@@ -34,7 +34,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
         public void Entry_ReadOnly() {
-            var doc = new Document();
+            var doc = new Document("Password");
             doc.Entries["Test"].Password = "Old";
 
             doc.IsReadOnly = true;
@@ -44,7 +44,7 @@ namespace PasswordSafe.Test {
 
         [TestMethod]
         public void Entry_AccessByRecordType() {
-            var doc = new Document();
+            var doc = new Document("Password");
 
             doc.Entries["Test"].Password = "Old";
             Assert.IsTrue(doc.Entries["Test"][RecordType.Uuid].Uuid != Guid.Empty);
