@@ -25,6 +25,13 @@ namespace PasswordSafe.Test {
             }
         }
 
+        [TestMethod]
+        [ExpectedException(typeof(FormatException))]
+        public void Document_Empty_PasswordMismatch() {
+            using (var doc = Document.Load(GetResourceStream("Empty.psafe3"), "XXX")) {
+            }
+        }
+
 
         [TestMethod]
         public void Document_Simple() {

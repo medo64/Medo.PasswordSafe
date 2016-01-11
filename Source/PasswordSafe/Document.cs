@@ -164,8 +164,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="stream">Stream.</param>
         /// <param name="passphrase">Password.</param>
         /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
-        /// <exception cref="FormatException">Unrecognized file format.</exception>
-        /// <exception cref="CryptographicException">Password mismatch. -or- Authentication mismatch.</exception>
+        /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
         public static Document Load(Stream stream, string passphrase) {
             if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
@@ -185,8 +184,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="stream">Stream.</param>
         /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
         /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
-        /// <exception cref="FormatException">Unrecognized file format.</exception>
-        /// <exception cref="CryptographicException">Password mismatch. -or- Authentication mismatch.</exception>
+        /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
         public static Document Load(Stream stream, byte[] passphraseBuffer) {
             if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
@@ -289,6 +287,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                     document.Passphrase = passphraseBuffer; //to avoid keeping password in memory for save - at least we don't need to deal with string's immutability.
                     return document;
                 }
+            } catch (CryptographicException ex) {
+                throw new FormatException(ex.Message, ex);
             } finally { //best effort to sanitize memory
                 if (stretchedKey != null) { Array.Clear(stretchedKey, 0, stretchedKey.Length); }
                 if (keyK != null) { Array.Clear(keyK, 0, keyK.Length); }
