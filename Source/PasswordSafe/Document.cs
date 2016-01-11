@@ -428,26 +428,70 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <summary>
         /// Change password.
         /// </summary>
-        /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
-        public void ChangePassphrase(byte[] passphraseBuffer) {
-            if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
+        /// <param name="newPassphraseBuffer">New password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        public void ChangePassphrase(byte[] newPassphraseBuffer) {
+            if (newPassphraseBuffer == null) { throw new ArgumentNullException(nameof(newPassphraseBuffer), "Passphrase cannot be null."); }
 
-            this.Passphrase = passphraseBuffer; //no need for copy - will be done in property setter
+            this.Passphrase = newPassphraseBuffer; //no need for copy - will be done in property setter
             this.MarkAsChanged();
         }
 
         /// <summary>
         /// Change password.
         /// </summary>
-        /// <param name="passphrase">Password.</param>
-        public void ChangePassphrase(string passphrase) {
-            if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
+        /// <param name="newPassphrase">New password.</param>
+        public void ChangePassphrase(string newPassphrase) {
+            if (newPassphrase == null) { throw new ArgumentNullException(nameof(newPassphrase), "Passphrase cannot be null."); }
 
-            var passphraseBuffer = Utf8Encoding.GetBytes(passphrase);
+            var passphraseBuffer = Utf8Encoding.GetBytes(newPassphrase);
             try {
                 this.ChangePassphrase(passphraseBuffer);
             } finally {
                 Array.Clear(passphraseBuffer, 0, passphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+            }
+        }
+
+
+        /// <summary>
+        /// Change password only if old password matches and returns whether operation was successful.
+        /// </summary>
+        /// <param name="oldPassphraseBuffer">Old password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        /// <param name="newPassphraseBuffer">New password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        public bool ChangePassphrase(byte[] oldPassphraseBuffer, byte[] newPassphraseBuffer) {
+            if (oldPassphraseBuffer == null) { throw new ArgumentNullException(nameof(oldPassphraseBuffer), "Passphrase cannot be null."); }
+            if (newPassphraseBuffer == null) { throw new ArgumentNullException(nameof(newPassphraseBuffer), "Passphrase cannot be null."); }
+
+            var currPassphraseBuffer = this.Passphrase;
+            try {
+                if (currPassphraseBuffer != null) {
+                    if (currPassphraseBuffer.Length != oldPassphraseBuffer.Length) { return false; }
+                    for (int i = 0; i < currPassphraseBuffer.Length; i++) {
+                        if (currPassphraseBuffer[i] != oldPassphraseBuffer[i]) { return false; }
+                    }
+                }
+                this.ChangePassphrase(newPassphraseBuffer);
+                return true;
+            } finally {
+                Array.Clear(currPassphraseBuffer, 0, currPassphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+            }
+        }
+
+        /// <summary>
+        /// Change password only if old password matches and returns whether operation was successful.
+        /// </summary>
+        /// <param name="oldPassphrase">Old password.</param>
+        /// <param name="newPassphrase">New password.</param>
+        public bool ChangePassphrase(string oldPassphrase, string newPassphrase) {
+            if (oldPassphrase == null) { throw new ArgumentNullException(nameof(oldPassphrase), "Passphrase cannot be null."); }
+            if (newPassphrase == null) { throw new ArgumentNullException(nameof(newPassphrase), "Passphrase cannot be null."); }
+
+            var oldPassphraseBuffer = Utf8Encoding.GetBytes(oldPassphrase);
+            var newPassphraseBuffer = Utf8Encoding.GetBytes(newPassphrase);
+            try {
+                return this.ChangePassphrase(oldPassphraseBuffer, newPassphraseBuffer);
+            } finally {
+                Array.Clear(oldPassphraseBuffer, 0, oldPassphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+                Array.Clear(newPassphraseBuffer, 0, newPassphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
             }
         }
 

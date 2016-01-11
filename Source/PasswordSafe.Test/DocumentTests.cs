@@ -394,7 +394,6 @@ namespace PasswordSafe.Test {
                     Assert.AreEqual(1, doc.Entries.Count);
                     Assert.AreEqual("Test", doc.Entries[0].Title);
                 }
-
             }
         }
 
@@ -422,7 +421,59 @@ namespace PasswordSafe.Test {
                     Assert.AreEqual(1, doc.Entries.Count);
                     Assert.AreEqual("Test", doc.Entries[0].Title);
                 }
+            }
+        }
 
+
+        [TestMethod]
+        public void Document_ChangeOldPassword() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new Document("Password")) {
+                    doc.Entries.Add(new Entry("Test"));
+                    doc.Save(msFile);
+                    Assert.IsFalse(doc.HasChanged);
+
+                    var result = doc.ChangePassphrase("Password", "Password2");
+                    Assert.IsTrue(result);
+                    Assert.IsTrue(doc.HasChanged);
+
+                    msFile.SetLength(0); //clean previous save
+                    doc.Save(msFile);
+                    Assert.IsFalse(doc.HasChanged);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = Document.Load(msFile, "Password2")) {
+                    Assert.AreEqual(1, doc.Entries.Count);
+                    Assert.AreEqual("Test", doc.Entries[0].Title);
+                }
+            }
+        }
+
+        [TestMethod]
+        public void Document_ChangeOldPasswordFailed() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new Document("Password")) {
+                    doc.Entries.Add(new Entry("Test"));
+                    doc.Save(msFile);
+                    Assert.IsFalse(doc.HasChanged);
+
+                    var result = doc.ChangePassphrase("Password1", "Password2");
+                    Assert.IsFalse(result);
+                    Assert.IsFalse(doc.HasChanged);
+
+                    msFile.SetLength(0); //clean previous save
+                    doc.Save(msFile);
+                    Assert.IsFalse(doc.HasChanged);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = Document.Load(msFile, "Password")) {
+                    Assert.AreEqual(1, doc.Entries.Count);
+                    Assert.AreEqual("Test", doc.Entries[0].Title);
+                }
             }
         }
 
