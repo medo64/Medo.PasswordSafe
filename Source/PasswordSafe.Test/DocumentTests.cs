@@ -433,7 +433,7 @@ namespace PasswordSafe.Test {
                     doc.Save(msFile);
                     Assert.IsFalse(doc.HasChanged);
 
-                    var result = doc.ChangePassphrase("Password", "Password2");
+                    var result = doc.TryChangePassphrase("Password", "Password2");
                     Assert.IsTrue(result);
                     Assert.IsTrue(doc.HasChanged);
 
@@ -459,7 +459,7 @@ namespace PasswordSafe.Test {
                     doc.Save(msFile);
                     Assert.IsFalse(doc.HasChanged);
 
-                    var result = doc.ChangePassphrase("Password1", "Password2");
+                    var result = doc.TryChangePassphrase("Password1", "Password2");
                     Assert.IsFalse(result);
                     Assert.IsFalse(doc.HasChanged);
 
@@ -473,6 +473,26 @@ namespace PasswordSafe.Test {
                 using (var doc = Document.Load(msFile, "Password")) {
                     Assert.AreEqual(1, doc.Entries.Count);
                     Assert.AreEqual("Test", doc.Entries[0].Title);
+                }
+            }
+        }
+
+
+        [TestMethod]
+        public void Document_ValidatePassword() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new Document("Password")) {
+                    doc.Entries.Add(new Entry("Test"));
+                    doc.Save(msFile);
+                    Assert.IsFalse(doc.HasChanged);
+
+                    var result1 = doc.ValidatePassphrase("Password2");
+                    Assert.IsFalse(result1);
+                    Assert.IsFalse(doc.HasChanged);
+
+                    var result2 = doc.ValidatePassphrase("Password");
+                    Assert.IsTrue(result2);
+                    Assert.IsFalse(doc.HasChanged);
                 }
             }
         }
