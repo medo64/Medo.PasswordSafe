@@ -381,6 +381,127 @@ namespace PasswordSafe.Test {
 
 
         [TestMethod]
+        public void Document_Test10() {
+            var msSave = new MemoryStream();
+            using (var doc = Document.Load(GetResourceStream("Test10.psafe3"), "Test")) {
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.AreEqual(8, doc.Headers.Count);
+                Assert.AreEqual(0x030D, doc.Headers[HeaderType.Version].Version);
+                Assert.AreEqual(new Guid("f80256c7-3aef-7447-8d2c-65c54981c2ff"), doc.Uuid);
+                Assert.AreEqual("", doc.Headers[HeaderType.NonDefaultPreferences].Text);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 39, 31, DateTimeKind.Utc), doc.LastSaveTime);
+                Assert.AreEqual("Josip", doc.LastSaveUser);
+                Assert.AreEqual("GANDALF", doc.LastSaveHost);
+                Assert.AreEqual("Password Safe V3.37", doc.LastSaveApplication);
+                Assert.AreEqual("1", doc.Headers[HeaderType.TreeDisplayStatus].Text);
+
+                Assert.AreEqual(1, doc.Entries.Count);
+
+                Assert.AreEqual(6, doc.Entries[0].Records.Count);
+                Assert.AreEqual(new Guid("74c96b2d-950a-4643-b202-b7967947f781"), doc.Entries[0].Uuid);
+                Assert.AreEqual("1234567890", (string)doc.Entries[0].Group);
+                Assert.AreEqual("1234567890", doc.Entries[0].Title);
+                Assert.AreEqual("1234567890", doc.Entries[0].Password);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 35, 01, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 39, 10, DateTimeKind.Utc), doc.Entries[0].PasswordModificationTime);
+
+                Assert.IsFalse(doc.HasChanged);
+                doc.Save(msSave);
+                Assert.IsFalse(doc.HasChanged);
+            }
+
+            msSave.Position = 0;
+
+            using (var doc = Document.Load(msSave, "Test")) { //reload to verify
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.AreEqual(8, doc.Headers.Count);
+                Assert.AreEqual(0x030D, doc.Headers[HeaderType.Version].Version);
+                Assert.AreEqual(new Guid("f80256c7-3aef-7447-8d2c-65c54981c2ff"), doc.Uuid);
+                Assert.AreEqual("", doc.Headers[HeaderType.NonDefaultPreferences].Text);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 39, 31, DateTimeKind.Utc), doc.LastSaveTime);
+                Assert.AreEqual("Josip", doc.LastSaveUser);
+                Assert.AreEqual("GANDALF", doc.LastSaveHost);
+                Assert.AreEqual("Password Safe V3.37", doc.LastSaveApplication);
+                Assert.AreEqual("1", doc.Headers[HeaderType.TreeDisplayStatus].Text);
+
+                Assert.AreEqual(1, doc.Entries.Count);
+
+                Assert.AreEqual(6, doc.Entries[0].Records.Count);
+                Assert.AreEqual(new Guid("74c96b2d-950a-4643-b202-b7967947f781"), doc.Entries[0].Uuid);
+                Assert.AreEqual("1234567890", (string)doc.Entries[0].Group);
+                Assert.AreEqual("1234567890", doc.Entries[0].Title);
+                Assert.AreEqual("1234567890", doc.Entries[0].Password);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 35, 01, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 39, 10, DateTimeKind.Utc), doc.Entries[0].PasswordModificationTime);
+
+                Assert.IsFalse(doc.HasChanged);
+            }
+        }
+
+        [TestMethod]
+        public void Document_Test11() {
+            var msSave = new MemoryStream();
+            using (var doc = Document.Load(GetResourceStream("Test11.psafe3"), "Test")) {
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.AreEqual(7, doc.Headers.Count);
+                Assert.AreEqual(0x030D, doc.Headers[HeaderType.Version].Version);
+                Assert.AreEqual(new Guid("f80256c7-3aef-7447-8d2c-65c54981c2ff"), doc.Uuid);
+                Assert.AreEqual("", doc.Headers[HeaderType.NonDefaultPreferences].Text);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 35, 01, DateTimeKind.Utc), doc.LastSaveTime);
+                Assert.AreEqual("Josip", doc.LastSaveUser);
+                Assert.AreEqual("GANDALF", doc.LastSaveHost);
+                Assert.AreEqual("Password Safe V3.37", doc.LastSaveApplication);
+
+                Assert.AreEqual(1, doc.Entries.Count);
+
+                Assert.AreEqual(5, doc.Entries[0].Records.Count);
+                Assert.AreEqual(new Guid("74c96b2d-950a-4643-b202-b7967947f781"), doc.Entries[0].Uuid);
+                Assert.AreEqual("12345678901", (string)doc.Entries[0].Group);
+                Assert.AreEqual("12345678901", doc.Entries[0].Title);
+                Assert.AreEqual("12345678901", doc.Entries[0].Password);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 35, 01, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+
+                Assert.IsFalse(doc.HasChanged);
+                doc.Save(msSave);
+                Assert.IsFalse(doc.HasChanged);
+            }
+
+            msSave.Position = 0;
+
+            using (var doc = Document.Load(msSave, "Test")) { //reload to verify
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.AreEqual(7, doc.Headers.Count);
+                Assert.AreEqual(0x030D, doc.Headers[HeaderType.Version].Version);
+                Assert.AreEqual(new Guid("f80256c7-3aef-7447-8d2c-65c54981c2ff"), doc.Uuid);
+                Assert.AreEqual("", doc.Headers[HeaderType.NonDefaultPreferences].Text);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 35, 01, DateTimeKind.Utc), doc.LastSaveTime);
+                Assert.AreEqual("Josip", doc.LastSaveUser);
+                Assert.AreEqual("GANDALF", doc.LastSaveHost);
+                Assert.AreEqual("Password Safe V3.37", doc.LastSaveApplication);
+
+                Assert.AreEqual(1, doc.Entries.Count);
+
+                Assert.AreEqual(5, doc.Entries[0].Records.Count);
+                Assert.AreEqual(new Guid("74c96b2d-950a-4643-b202-b7967947f781"), doc.Entries[0].Uuid);
+                Assert.AreEqual("12345678901", (string)doc.Entries[0].Group);
+                Assert.AreEqual("12345678901", doc.Entries[0].Title);
+                Assert.AreEqual("12345678901", doc.Entries[0].Password);
+                Assert.AreEqual(new DateTime(2016, 01, 11, 07, 35, 01, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+
+                Assert.IsFalse(doc.HasChanged);
+            }
+        }
+
+
+        [TestMethod]
         public void Document_NewSaveAndLoad() {
             using (var msFile = new MemoryStream()) {
                 using (var doc = new Document("Password")) {

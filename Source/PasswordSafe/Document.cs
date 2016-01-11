@@ -236,7 +236,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                     var headerFields = new List<Header>();
                     while (dataOffset < data.Length) {
                         var fieldLength = BitConverter.ToInt32(data, dataOffset + 0);
-                        var fieldLengthFull = ((fieldLength + 5) / 16 + 1) * 16;
+                        var fieldLengthFull = ((fieldLength + 5 - 1) / 16 + 1) * 16;
                         var fieldType = (HeaderType)data[dataOffset + 4];
                         var fieldData = new byte[fieldLength];
                         try {
@@ -258,7 +258,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                     List<Record> records = null;
                     while (dataOffset < data.Length) {
                         var fieldLength = BitConverter.ToInt32(data, dataOffset + 0);
-                        var fieldLengthFull = (fieldLength / 16 + 1) * 16;
+                        var fieldLengthFull = ((fieldLength + 5 - 1) / 16 + 1) * 16;
                         var fieldType = (RecordType)data[dataOffset + 4];
                         var fieldData = new byte[fieldLength];
                         try {
@@ -530,7 +530,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
             byte[] fieldBlock = null;
             try {
-                var fieldLengthPadded = ((fieldData.Length + 5) / 16 + 1) * 16;
+                var fieldLengthPadded = ((fieldData.Length + 5 - 1) / 16 + 1) * 16;
                 fieldBlock = new byte[fieldLengthPadded];
 
                 Rnd.GetBytes(fieldBlock);
