@@ -396,10 +396,36 @@ namespace PasswordSafe.Test {
                 }
 
             }
-
-
-
         }
+
+
+        [TestMethod]
+        public void Document_ChangePassword() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new Document("Password")) {
+                    doc.Entries.Add(new Entry("Test"));
+                    doc.Save(msFile);
+                    Assert.IsFalse(doc.HasChanged);
+
+                    msFile.SetLength(0); //clean previous save
+
+                    doc.ChangePassphrase("Password2");
+                    Assert.IsTrue(doc.HasChanged);
+
+                    doc.Save(msFile);
+                    Assert.IsFalse(doc.HasChanged);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = Document.Load(msFile, "Password2")) {
+                    Assert.AreEqual(1, doc.Entries.Count);
+                    Assert.AreEqual("Test", doc.Entries[0].Title);
+                }
+
+            }
+        }
+
 
         #region Utils
 

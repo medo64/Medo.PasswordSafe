@@ -424,6 +424,34 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             }
         }
 
+
+        /// <summary>
+        /// Change password.
+        /// </summary>
+        /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        public void ChangePassphrase(byte[] passphraseBuffer) {
+            if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
+
+            this.Passphrase = passphraseBuffer; //no need for copy - will be done in property setter
+            this.MarkAsChanged();
+        }
+
+        /// <summary>
+        /// Change password.
+        /// </summary>
+        /// <param name="passphrase">Password.</param>
+        public void ChangePassphrase(string passphrase) {
+            if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
+
+            var passphraseBuffer = Utf8Encoding.GetBytes(passphrase);
+            try {
+                this.ChangePassphrase(passphraseBuffer);
+            } finally {
+                Array.Clear(passphraseBuffer, 0, passphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+            }
+        }
+
+
         private static void WriteBlock(Stream stream, HashAlgorithm dataHash, ICryptoTransform dataEncryptor, byte type, byte[] fieldData) {
             dataHash.TransformBlock(fieldData, 0, fieldData.Length, null, 0);
 
