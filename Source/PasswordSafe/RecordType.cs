@@ -102,6 +102,33 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Entry keyboard shortcut.
         /// </summary>
         EntryKeyboardShortcut = 0x19,
+
+        /// <summary>
+        /// Two-factor authentication key.
+        /// This is the shared secret for sites using Time-Based One-Time Password Algorithm (per RFC6238) such as Google Authenticator. At least 10 bytes.
+        /// </summary>
+        TwoFactorKey = 0x1b,
+        /// <summary>
+        /// Credit card number.
+        /// Number should consist of digits and spaces.
+        /// </summary>
+        CreditCardNumber = 0x1c,
+        /// <summary>
+        /// Credit card expiration.
+        /// Expiration should be MM/YY, where MM is 01-12, and YY 00-99.
+        /// </summary>
+        CreditCardExpiration = 0x1d,
+        /// <summary>
+        /// Credit card verification value.
+        /// CVV (CVV2) is three or four digits.
+        /// </summary>
+        CreditCardVerificationValue = 0x1e,
+        /// <summary>
+        /// Credit card PIN.
+        /// PIN is four to twelve digits long (ISO-9564).
+        /// </summary>
+        CreditCardPin = 0x1f,
+
         /// <summary>
         /// End of entries.
         /// </summary>

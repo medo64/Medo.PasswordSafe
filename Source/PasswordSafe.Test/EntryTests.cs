@@ -54,5 +54,51 @@ namespace PasswordSafe.Test {
             Assert.AreEqual("New", doc.Entries["Test"][RecordType.Password].Text);
         }
 
+
+        [TestMethod]
+        public void Entry_TestNamed() {
+            var guid = Guid.NewGuid();
+
+            var doc = new Document("Password") { TrackAccess = false, TrackModify = false };
+            var entry = new Entry();
+            doc.Entries.Add(entry);
+
+            entry.Uuid = guid;
+            entry.Group = "Group";
+            entry.Title = "Title";
+            entry.UserName = "UserName";
+            entry.Notes = "Notes";
+            entry.Password = "Password";
+            entry.CreationTime = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            entry.PasswordModificationTime = new DateTime(2002, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            entry.LastAccessTime = new DateTime(2003, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            entry.PasswordExpiryTime = new DateTime(2004, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            entry.LastModificationTime = new DateTime(2005, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+            entry.Url = "http://example.com";
+            entry.TwoFactorKey = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+            entry.CreditCardNumber = "1234 5678 9012 3456";
+            entry.CreditCardExpiration = "Title";
+            entry.CreditCardVerificationValue = "0987";
+            entry.CreditCardPin = "6543";
+
+            Assert.AreEqual(guid, entry.Uuid);
+            Assert.AreEqual("Group", (string)entry.Group);
+            Assert.AreEqual("Title", entry.Title);
+            Assert.AreEqual("UserName", entry.UserName);
+            Assert.AreEqual("Notes", entry.Notes);
+            Assert.AreEqual("Password", entry.Password);
+            Assert.AreEqual(new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.CreationTime);
+            Assert.AreEqual(new DateTime(2002, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.PasswordModificationTime);
+            Assert.AreEqual(new DateTime(2003, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.LastAccessTime);
+            Assert.AreEqual(new DateTime(2004, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.PasswordExpiryTime);
+            Assert.AreEqual(new DateTime(2005, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.LastModificationTime);
+            Assert.AreEqual("http://example.com", entry.Url);
+            Assert.AreEqual("00-01-02-03-04-05-06-07-08-09", BitConverter.ToString(entry.TwoFactorKey));
+            Assert.AreEqual("1234 5678 9012 3456", entry.CreditCardNumber);
+            Assert.AreEqual("Title", entry.CreditCardExpiration);
+            Assert.AreEqual("0987", entry.CreditCardVerificationValue);
+            Assert.AreEqual("6543", entry.CreditCardPin);
+        }
+
     }
 }
