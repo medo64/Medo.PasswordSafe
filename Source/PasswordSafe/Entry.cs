@@ -154,6 +154,15 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
 
         /// <summary>
+        /// Gets/sets e-mail address.
+        /// </summary>
+        public string Email {
+            get { return this.Records.Contains(RecordType.EmailAddress) ? this.Records[RecordType.EmailAddress].Text : ""; }
+            set { this.Records[RecordType.EmailAddress].Text = value; }
+        }
+
+
+        /// <summary>
         /// Gets/sets two factor key.
         /// Should be encoded as base 32.
         /// </summary>

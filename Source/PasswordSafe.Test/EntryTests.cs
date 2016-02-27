@@ -75,6 +75,7 @@ namespace PasswordSafe.Test {
             entry.PasswordExpiryTime = new DateTime(2004, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             entry.LastModificationTime = new DateTime(2005, 1, 1, 0, 0, 0, DateTimeKind.Utc);
             entry.Url = "http://example.com";
+            entry.Email = "example@example.com";
             entry.TwoFactorKey = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
             entry.CreditCardNumber = "1234 5678 9012 3456";
             entry.CreditCardExpiration = "Title";
@@ -93,6 +94,7 @@ namespace PasswordSafe.Test {
             Assert.AreEqual(new DateTime(2004, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.PasswordExpiryTime);
             Assert.AreEqual(new DateTime(2005, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry.LastModificationTime);
             Assert.AreEqual("http://example.com", entry.Url);
+            Assert.AreEqual("example@example.com", entry.Email);
             Assert.AreEqual("00-01-02-03-04-05-06-07-08-09", BitConverter.ToString(entry.TwoFactorKey));
             Assert.AreEqual("1234 5678 9012 3456", entry.CreditCardNumber);
             Assert.AreEqual("Title", entry.CreditCardExpiration);
