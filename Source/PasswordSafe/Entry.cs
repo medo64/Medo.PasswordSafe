@@ -98,7 +98,15 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         public string Password {
             get { return this.Records.Contains(RecordType.Password) ? this.Records[RecordType.Password].Text : ""; }
-            set { this.Records[RecordType.Password].Text = value; }
+            set {
+                if (this.Records.Contains(RecordType.PasswordHistory) && this.PasswordHistory.Enabled) {
+                    var time = this.Records.Contains(RecordType.PasswordModificationTime) ? this.PasswordModificationTime : DateTime.UtcNow;
+                    if (this.Records.Contains(RecordType.Password)) {
+                        this.PasswordHistory.AddPasswordToHistory(time, this.Password); //save current password
+                    }
+                }
+                this.Records[RecordType.Password].Text = value;
+            }
         }
 
 
@@ -207,6 +215,13 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public string CreditCardPin {
             get { return this.Records.Contains(RecordType.CreditCardPin) ? this.Records[RecordType.CreditCardPin].Text : ""; }
             set { this.Records[RecordType.CreditCardPin].Text = value; }
+        }
+
+        /// <summary>
+        /// Gets password history.
+        /// </summary>
+        public PasswordHistoryCollection PasswordHistory {
+            get { return new PasswordHistoryCollection(this); }
         }
 
 
