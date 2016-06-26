@@ -117,7 +117,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
 
         internal void AddPasswordToHistory(DateTime time, string password) {
-            if (this.Enabled) { //change only if enabled
+            if (this.Enabled && !string.IsNullOrEmpty(password)) { //change only if enabled and not empty
                 this.BaseCollection.Add(new PasswordHistoryItem(this, time, password));
                 while (this.BaseCollection.Count > this.MaximumCount) {
                     this.BaseCollection.RemoveAt(0);
