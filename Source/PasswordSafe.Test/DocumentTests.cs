@@ -681,6 +681,95 @@ namespace PasswordSafe.Test {
         }
 
         [TestMethod]
+        public void Document_TestPasswordHistoryIndirectChange() {
+            var msSave = new MemoryStream();
+            using (var doc = Document.Load(GetResourceStream("PasswordHistory.psafe3"), "123")) {
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.AreEqual(8, doc.Headers.Count);
+                Assert.AreEqual(0x030D, doc.Headers[HeaderType.Version].Version);
+                Assert.AreEqual(new Guid("257a6fba-9816-2a43-9aa7-9bbea870e713"), doc.Uuid);
+                Assert.AreEqual("", doc.Headers[HeaderType.NonDefaultPreferences].Text);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 47, 40, DateTimeKind.Utc), doc.LastSaveTime);
+                Assert.AreEqual("Josip", doc.LastSaveUser);
+                Assert.AreEqual("GANDALF", doc.LastSaveHost);
+                Assert.AreEqual("Password Safe V3.38", doc.LastSaveApplication);
+
+                Assert.AreEqual(1, doc.Entries.Count);
+
+                Assert.AreEqual(7, doc.Entries[0].Records.Count);
+                Assert.AreEqual(new Guid("e857fe9c-091e-b44c-8574-e435549e1cc7"), doc.Entries[0].Uuid);
+                Assert.AreEqual("", (string)doc.Entries[0].Group);
+                Assert.AreEqual("Test", doc.Entries[0].Title);
+                Assert.AreEqual("3", doc.Entries[0].Password);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 15, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+
+                Assert.AreEqual(true, doc.Entries[0].PasswordHistory.Enabled);
+                Assert.AreEqual(2, doc.Entries[0].PasswordHistory.MaximumCount);
+                Assert.AreEqual(2, doc.Entries[0].PasswordHistory.Count);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 15, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[0].TimeFirstUsed);
+                Assert.AreEqual("1", doc.Entries[0].PasswordHistory[0].HistoricalPassword);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 27, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[1].TimeFirstUsed);
+                Assert.AreEqual("2", doc.Entries[0].PasswordHistory[1].HistoricalPassword);
+
+                Assert.IsFalse(doc.HasChanged);
+
+                doc.Entries[0].PasswordHistory.MaximumCount = 3;
+                doc.Entries[0][RecordType.Password].Text = "4";
+                Assert.IsTrue(doc.HasChanged);
+
+                Assert.AreEqual(7, doc.Entries[0].Records.Count);
+                Assert.AreEqual(new Guid("e857fe9c-091e-b44c-8574-e435549e1cc7"), doc.Entries[0].Uuid);
+                Assert.AreEqual("", (string)doc.Entries[0].Group);
+                Assert.AreEqual("Test", doc.Entries[0].Title);
+                Assert.AreEqual("4", doc.Entries[0].Password);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 15, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+
+                Assert.AreEqual(true, doc.Entries[0].PasswordHistory.Enabled);
+                Assert.AreEqual(3, doc.Entries[0].PasswordHistory.MaximumCount);
+                Assert.AreEqual(3, doc.Entries[0].PasswordHistory.Count);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 15, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[0].TimeFirstUsed);
+                Assert.AreEqual("1", doc.Entries[0].PasswordHistory[0].HistoricalPassword);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 27, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[1].TimeFirstUsed);
+                Assert.AreEqual("2", doc.Entries[0].PasswordHistory[1].HistoricalPassword);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 44, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[2].TimeFirstUsed);
+                Assert.AreEqual("3", doc.Entries[0].PasswordHistory[2].HistoricalPassword);
+
+                doc.Save(msSave);
+                Assert.IsFalse(doc.HasChanged);
+            }
+
+            msSave.Position = 0;
+
+            using (var doc = Document.Load(msSave, "123")) { //reload to verify
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.AreEqual(1, doc.Entries.Count);
+
+                Assert.AreEqual(7, doc.Entries[0].Records.Count);
+                Assert.AreEqual(new Guid("e857fe9c-091e-b44c-8574-e435549e1cc7"), doc.Entries[0].Uuid);
+                Assert.AreEqual("", (string)doc.Entries[0].Group);
+                Assert.AreEqual("Test", doc.Entries[0].Title);
+                Assert.AreEqual("4", doc.Entries[0].Password);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 15, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+
+                Assert.AreEqual(true, doc.Entries[0].PasswordHistory.Enabled);
+                Assert.AreEqual(3, doc.Entries[0].PasswordHistory.MaximumCount);
+                Assert.AreEqual(3, doc.Entries[0].PasswordHistory.Count);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 15, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[0].TimeFirstUsed);
+                Assert.AreEqual("1", doc.Entries[0].PasswordHistory[0].HistoricalPassword);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 27, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[1].TimeFirstUsed);
+                Assert.AreEqual("2", doc.Entries[0].PasswordHistory[1].HistoricalPassword);
+                Assert.AreEqual(new DateTime(2016, 06, 25, 20, 32, 44, DateTimeKind.Utc), doc.Entries[0].PasswordHistory[2].TimeFirstUsed);
+                Assert.AreEqual("3", doc.Entries[0].PasswordHistory[2].HistoricalPassword);
+
+                Assert.IsFalse(doc.HasChanged);
+            }
+        }
+
+        [TestMethod]
         public void Document_TestPasswordHistoryDisabled() {
             var msSave = new MemoryStream();
             using (var doc = Document.Load(GetResourceStream("PasswordHistory.psafe3"), "123")) {
