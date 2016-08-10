@@ -81,6 +81,7 @@ namespace PasswordSafe.Test {
             entry.CreditCardExpiration = "Title";
             entry.CreditCardVerificationValue = "0987";
             entry.CreditCardPin = "6543";
+            entry.QRCode = "https://medo64.com/";
 
             Assert.AreEqual(guid, entry.Uuid);
             Assert.AreEqual("Group", (string)entry.Group);
@@ -100,6 +101,27 @@ namespace PasswordSafe.Test {
             Assert.AreEqual("Title", entry.CreditCardExpiration);
             Assert.AreEqual("0987", entry.CreditCardVerificationValue);
             Assert.AreEqual("6543", entry.CreditCardPin);
+            Assert.AreEqual("https://medo64.com/", entry.QRCode);
+
+            Assert.AreEqual(guid, entry[RecordType.Uuid].Uuid);
+            Assert.AreEqual("Group", entry[RecordType.Group].Text);
+            Assert.AreEqual("Title", entry[RecordType.Title].Text);
+            Assert.AreEqual("UserName", entry[RecordType.UserName].Text);
+            Assert.AreEqual("Notes", entry[RecordType.Notes].Text);
+            Assert.AreEqual("Password", entry[RecordType.Password].Text);
+            Assert.AreEqual(new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry[RecordType.CreationTime].Time);
+            Assert.AreEqual(new DateTime(2002, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry[RecordType.PasswordModificationTime].Time);
+            Assert.AreEqual(new DateTime(2003, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry[RecordType.LastAccessTime].Time);
+            Assert.AreEqual(new DateTime(2004, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry[RecordType.PasswordExpiryTime].Time);
+            Assert.AreEqual(new DateTime(2005, 1, 1, 0, 0, 0, DateTimeKind.Utc), entry[RecordType.LastModificationTime].Time);
+            Assert.AreEqual("http://example.com", entry[RecordType.Url].Text);
+            Assert.AreEqual("example@example.com", entry[RecordType.EmailAddress].Text);
+            Assert.AreEqual("00-01-02-03-04-05-06-07-08-09", BitConverter.ToString(entry[RecordType.TwoFactorKey].GetBytes()));
+            Assert.AreEqual("1234 5678 9012 3456", entry[RecordType.CreditCardNumber].Text);
+            Assert.AreEqual("Title", entry[RecordType.CreditCardExpiration].Text);
+            Assert.AreEqual("0987", entry[RecordType.CreditCardVerificationValue].Text);
+            Assert.AreEqual("6543", entry[RecordType.CreditCardPin].Text);
+            Assert.AreEqual("https://medo64.com/", entry[RecordType.QRCode].Text);
         }
 
     }
