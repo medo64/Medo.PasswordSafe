@@ -246,24 +246,24 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                         var command = parts[0];
                         var argument = (parts.Length > 1) ? parts[1] : null;
                         switch (command) {
-                            case "UserName": foreach (var key in AutotypeToken.GetIndividualKeys(this.UserName)) { yield return key; } break;
-                            case "Password": foreach (var key in AutotypeToken.GetIndividualKeys(this.Password)) { yield return key; } break;
+                            case "UserName": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.UserName)) { yield return key; } break;
+                            case "Password": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.Password)) { yield return key; } break;
                             case "TwoFactorCode": yield return token; break;
 
-                            case "CreditCardNumber": foreach (var key in AutotypeToken.GetIndividualKeys(this.CreditCardNumber)) { yield return key; } break;
-                            case "CreditCardExpiration": foreach (var key in AutotypeToken.GetIndividualKeys(this.CreditCardExpiration)) { yield return key; } break;
-                            case "CreditCardVerificationValue": foreach (var key in AutotypeToken.GetIndividualKeys(this.CreditCardVerificationValue)) { yield return key; } break;
-                            case "CreditCardPin": foreach (var key in AutotypeToken.GetIndividualKeys(this.CreditCardPin)) { yield return key; } break;
+                            case "CreditCardNumber": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.CreditCardNumber)) { yield return key; } break;
+                            case "CreditCardExpiration": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.CreditCardExpiration)) { yield return key; } break;
+                            case "CreditCardVerificationValue": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.CreditCardVerificationValue)) { yield return key; } break;
+                            case "CreditCardPin": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.CreditCardPin)) { yield return key; } break;
 
-                            case "Group": foreach (var key in AutotypeToken.GetIndividualKeys(this.Group)) { yield return key; } break;
-                            case "Title": foreach (var key in AutotypeToken.GetIndividualKeys(this.Title)) { yield return key; } break;
-                            case "Url": foreach (var key in AutotypeToken.GetIndividualKeys(this.Url)) { yield return key; } break;
-                            case "Email": foreach (var key in AutotypeToken.GetIndividualKeys(this.Email)) { yield return key; } break;
+                            case "Group": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.Group)) { yield return key; } break;
+                            case "Title": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.Title)) { yield return key; } break;
+                            case "Url": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.Url)) { yield return key; } break;
+                            case "Email": foreach (var key in AutotypeToken.GetIndividualKeyTokens(this.Email)) { yield return key; } break;
 
                             case "Notes":
                                 var noteLines = this.Notes.Split(new string[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
                                 if (string.IsNullOrEmpty(argument)) {
-                                    foreach (var key in AutotypeToken.GetIndividualKeys(string.Join("\n", noteLines))) {
+                                    foreach (var key in AutotypeToken.GetIndividualKeyTokens(string.Join("\n", noteLines))) {
                                         yield return key;
                                     }
                                 } else {
@@ -272,7 +272,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                                         if (lineNumber <= noteLines.Length) {
                                             var lineText = noteLines[lineNumber - 1];
                                             if (lineText.Length > 0) {
-                                                foreach (var key in AutotypeToken.GetIndividualKeys(lineText)) {
+                                                foreach (var key in AutotypeToken.GetIndividualKeyTokens(lineText)) {
                                                     yield return key;
                                                 }
                                             }
@@ -385,7 +385,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                                         break;
 
                                     default: //if escape doesn't exist
-                                        foreach (var key in AutotypeToken.GetIndividualKeys("c" + ch)) {
+                                        foreach (var key in AutotypeToken.GetIndividualKeyTokens("c" + ch)) {
                                             yield return key;
                                         }
                                         state = AutoTypeState.Default;
@@ -398,7 +398,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                                     sbCommandArguments.Append(ch);
                                     state = AutoTypeState.EscapeOptionalNumber;
                                 } else {
-                                    foreach (var key in AutotypeToken.GetIndividualKeys(command + sbCommandArguments.ToString() + ch)) {
+                                    foreach (var key in AutotypeToken.GetIndividualKeyTokens(command + sbCommandArguments.ToString() + ch)) {
                                         yield return key;
                                     }
                                     command = null;
@@ -428,7 +428,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
                     if (command != null) {
                         if ((sbCommandArguments.Length == 0) && (command.Equals("d", StringComparison.Ordinal) || command.Equals("w", StringComparison.Ordinal) || command.Equals("W", StringComparison.Ordinal))) {
-                            foreach (var key in AutotypeToken.GetIndividualKeys(command)) {
+                            foreach (var key in AutotypeToken.GetIndividualKeyTokens(command)) {
                                 yield return key;
                             }
                         } else {

@@ -40,10 +40,10 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
 
         /// <summary>
-        /// Returns individual keys from the text.
+        /// Returns individual tokens from the text.
         /// </summary>
         /// <param name="content">Text.</param>
-        public static IEnumerable<AutotypeToken> GetIndividualKeys(string content) {
+        public static IEnumerable<AutotypeToken> GetIndividualKeyTokens(string content) {
             foreach (var ch in content) {
                 switch (ch) {
                     case '+':
