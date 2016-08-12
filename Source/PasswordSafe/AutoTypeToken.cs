@@ -44,6 +44,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
         /// <summary>
         /// Return auto-type tokens without any field processing; i.e. UserName won't be converted to actual user name.
+        /// If given auto-type text is null or empty, default is returned (UserName {Tab} Password {Tab} Enter).
         /// </summary>
         /// <param name="autotypeText">Auto-type text.</param>
         public static IEnumerable<AutotypeToken> GetAutotypeTokens(string autotypeText) {
@@ -197,13 +198,14 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// * Wait: Pause in milliseconds.
         /// * Legacy: Switches processing to legacy mode.
         /// </summary>
-        /// <param name="autotypeText">Auto-type text.</param>
+        /// <param name="tokens">Auto-type tokens.</param>
         /// <param name="entry">Entry to base fill-in on.</param>
-        /// <exception cref="System.ArgumentNullException">Entry cannot be null.</exception>
-        public static IEnumerable<AutotypeToken> GetAutotypeTokens(string autotypeText, Entry entry) {
+        /// <exception cref="System.ArgumentNullException">Tokens cannot be null. -or- Entry cannot be null.</exception>
+        public static IEnumerable<AutotypeToken> GetAutotypeTokens(IEnumerable<AutotypeToken> tokens, Entry entry) {
+            if (tokens == null) { throw new ArgumentNullException("tokens", "Tokens cannot be null."); }
             if (entry == null) { throw new ArgumentNullException("entry", "Entry cannot be null."); }
 
-            foreach (var token in GetAutotypeTokens(autotypeText)) {
+            foreach (var token in tokens) {
                 if (token.Kind == AutotypeTokenKind.Command) {
                     var parts = token.Content.Split(':');
                     var command = parts[0];
@@ -252,6 +254,24 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                     yield return token;
                 }
             }
+        }
+
+        /// <summary>
+        /// Return auto-type tokens with textual fields filled in. Command fields, e.g. Wait, are not filled.
+        /// Following commands are possible:
+        /// * TwoFactorCode: 6-digit code for two-factor authentication.
+        /// * Delay: Delay between characters in milliseconds.
+        /// * Wait: Pause in milliseconds.
+        /// * Legacy: Switches processing to legacy mode.
+        /// </summary>
+        /// <param name="autotypeText">Auto-type text.</param>
+        /// <param name="entry">Entry to base fill-in on.</param>
+        /// <exception cref="System.ArgumentNullException">Entry cannot be null.</exception>
+        public static IEnumerable<AutotypeToken> GetAutotypeTokens(string autotypeText, Entry entry) {
+            if (entry == null) { throw new ArgumentNullException("entry", "Entry cannot be null."); }
+
+            var tokens = GetAutotypeTokens(autotypeText);
+            return GetAutotypeTokens(tokens, entry);
         }
 
 
