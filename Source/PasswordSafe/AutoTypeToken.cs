@@ -8,7 +8,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
     /// <summary>
     /// Token representing either one key or command.
     /// </summary>
-    [DebuggerDisplay("{Text}")]
+    [DebuggerDisplay("{Content}")]
     public class AutotypeToken {
 
         internal AutotypeToken(string content)
