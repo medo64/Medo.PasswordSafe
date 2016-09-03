@@ -215,7 +215,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                         case "Password": foreach (var key in AutotypeToken.GetAutotypeTokensFromText(entry.Password)) { yield return key; } break;
                         case "TwoFactorCode": yield return token; break;
 
-                        case "CreditCardNumber": foreach (var key in AutotypeToken.GetAutotypeTokensFromText(entry.CreditCardNumber)) { yield return key; } break;
+                        case "CreditCardNumber": foreach (var key in AutotypeToken.GetAutotypeTokensFromText(TrimCreditCardNumber(entry.CreditCardNumber))) { yield return key; } break;
                         case "CreditCardExpiration": foreach (var key in AutotypeToken.GetAutotypeTokensFromText(entry.CreditCardExpiration)) { yield return key; } break;
                         case "CreditCardVerificationValue": foreach (var key in AutotypeToken.GetAutotypeTokensFromText(entry.CreditCardVerificationValue)) { yield return key; } break;
                         case "CreditCardPin": foreach (var key in AutotypeToken.GetAutotypeTokensFromText(entry.CreditCardPin)) { yield return key; } break;
@@ -333,6 +333,13 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             }
         }
 
+        private static string TrimCreditCardNumber(string creditCardNumber) {
+            var sb = new StringBuilder();
+            foreach (var ch in creditCardNumber) {
+                if (char.IsDigit(ch)) { sb.Append(ch); }
+            }
+            return sb.ToString();
+        }
         #endregion
 
     }

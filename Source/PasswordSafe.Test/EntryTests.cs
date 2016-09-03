@@ -349,7 +349,7 @@ namespace PasswordSafe.Test {
                 Group = "Examples",
                 UserName = "Default",
                 Password = "Passw0rd",
-                CreditCardNumber = "1234567890123456",
+                CreditCardNumber = "1234 5678 9012 3456",
                 CreditCardExpiration = "01/79",
                 CreditCardVerificationValue = "123",
                 CreditCardPin = "1234",
