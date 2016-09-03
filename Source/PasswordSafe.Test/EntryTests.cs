@@ -169,6 +169,20 @@ namespace PasswordSafe.Test {
             Assert.AreEqual("1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 {Tab} 0 1 / 7 9 {Tab} 1 2 3 {Tab} 1 2 3 4", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
+        [TestMethod]
+        public void Entry_Autotype_Tokens_CreditCardTabbed() {
+            var autoTypeText = @"\ct\t\ce\t\cv\t\cp";
+            Assert.AreEqual("CreditCardNumberTabbed {Tab} CreditCardExpiration {Tab} CreditCardVerificationValue {Tab} CreditCardPin", string.Join(" ", AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
+            Assert.AreEqual("1 2 3 4 {Tab} 5 6 7 8 {Tab} 9 0 1 2 {Tab} 3 4 5 6 {Tab} 0 1 / 7 9 {Tab} 1 2 3 {Tab} 1 2 3 4", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
+        }
+
+        [TestMethod]
+        public void Entry_Autotype_Tokens_CreditCardTabbedAmex() {
+            var autoTypeText = @"\ct\t\ce\t\cv\t\cp";
+            Assert.AreEqual("CreditCardNumberTabbed {Tab} CreditCardExpiration {Tab} CreditCardVerificationValue {Tab} CreditCardPin", string.Join(" ", AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
+            Assert.AreEqual("1 2 3 {Tab} 4 5 6 7 {Tab} 8 9 0 1 {Tab} 2 3 4 5 {Tab} 0 1 / 7 9 {Tab} 1 2 3 {Tab} 1 2 3 4", string.Join(" ", GetExampleEntry(autoTypeText, amexCard: true).AutotypeTokens));
+        }
+
 
         [TestMethod]
         public void Entry_Autotype_Tokens_OptionalNumberNotUsed() {
@@ -343,13 +357,13 @@ namespace PasswordSafe.Test {
         }
 
 
-        private static Entry GetExampleEntry(string autotypeText) {
+        private static Entry GetExampleEntry(string autotypeText, bool amexCard = false) {
             var entry = new Entry() {
                 Title = "Example",
                 Group = "Examples",
                 UserName = "Default",
                 Password = "Passw0rd",
-                CreditCardNumber = "1234 5678 9012 3456",
+                CreditCardNumber = amexCard ? "123 4567 8901 2345" : "1234 5678 9012 3456",
                 CreditCardExpiration = "01/79",
                 CreditCardVerificationValue = "123",
                 CreditCardPin = "1234",
