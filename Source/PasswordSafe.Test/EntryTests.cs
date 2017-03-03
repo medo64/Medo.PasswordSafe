@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Medo.Security.Cryptography.PasswordSafe;
+using System.IO;
 
 namespace PasswordSafe.Test {
     [TestClass]
@@ -28,6 +29,38 @@ namespace PasswordSafe.Test {
             Assert.IsTrue(entry.Uuid != Guid.Empty);
             Assert.AreEqual("Test", entry.Title);
             Assert.AreEqual("", entry.Password);
+        }
+
+
+        [TestMethod]
+        public void Entry_Clone() {
+            var entry = new Entry("Test");
+            Assert.AreEqual(3, entry.Records.Count);
+            Assert.IsTrue(entry.Records.Contains(RecordType.Uuid));
+            Assert.IsTrue(entry.Records.Contains(RecordType.Title));
+            Assert.IsTrue(entry.Records.Contains(RecordType.Password));
+            Assert.IsTrue(entry.Uuid != Guid.Empty);
+            Assert.AreEqual("Test", entry.Title);
+            Assert.AreEqual("", entry.Password);
+
+            var clone = entry.Clone();
+            Assert.AreEqual(3, clone.Records.Count);
+            Assert.IsTrue(clone.Records.Contains(RecordType.Uuid));
+            Assert.IsTrue(clone.Records.Contains(RecordType.Title));
+            Assert.IsTrue(clone.Records.Contains(RecordType.Password));
+            Assert.IsTrue(clone.Uuid != Guid.Empty);
+            Assert.AreEqual("Test", clone.Title);
+            Assert.AreEqual("", clone.Password);
+        }
+
+        [TestMethod]
+        public void Entry_Clone_Document() {
+            var doc = new Document("Password");
+            doc.Entries.Add(new Entry("Test"));
+            doc.Save(new MemoryStream());
+
+            var clone = doc.Entries[0].Clone();
+            Assert.AreEqual(false, doc.HasChanged);
         }
 
 
