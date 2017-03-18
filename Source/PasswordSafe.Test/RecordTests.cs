@@ -18,6 +18,12 @@ namespace PasswordSafe.Test {
             var field = new Record(RecordType.Title) { Time = DateTime.Now };
         }
 
+        [TestMethod]
+        public void Record_New_Autotype() {
+            var field = new Record(RecordType.Autotype);
+            Assert.AreEqual(@"\u\t\p\t\n", field.Text);
+        }
+
 
         [TestMethod]
         [ExpectedException(typeof(NotSupportedException))]
