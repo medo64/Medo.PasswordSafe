@@ -161,8 +161,8 @@ namespace PasswordSafe.Test {
 
         [TestMethod]
         public void Entry_Autotype_Tokens_Default() {
-            Assert.AreEqual("UserName {Tab} Password {Tab} {Enter}", string.Join(" ", AutotypeToken.GetUnexpandedAutotypeTokens(null)));
-            Assert.AreEqual("D e f a u l t {Tab} P a s s w 0 r d {Tab} {Enter}", string.Join(" ", GetExampleEntry(null).AutotypeTokens));
+            Assert.AreEqual("UserName {Tab} Password {Enter}", string.Join(" ", AutotypeToken.GetUnexpandedAutotypeTokens(null)));
+            Assert.AreEqual("D e f a u l t {Tab} P a s s w 0 r d {Enter}", string.Join(" ", GetExampleEntry(null).AutotypeTokens));
         }
 
         [TestMethod]

@@ -21,7 +21,7 @@ namespace PasswordSafe.Test {
         [TestMethod]
         public void Record_New_Autotype() {
             var field = new Record(RecordType.Autotype);
-            Assert.AreEqual(@"\u\t\p\t\n", field.Text);
+            Assert.AreEqual(@"\u\t\p\n", field.Text);
         }
 
 
