@@ -1,4 +1,4 @@
-﻿using Medo.Security.Cryptography.PasswordSafe;
+using Medo.Security.Cryptography.PasswordSafe;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 

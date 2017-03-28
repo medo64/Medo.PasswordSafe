@@ -1,4 +1,4 @@
-﻿using PasswordSafe = Medo.Security.Cryptography.PasswordSafe;
+using PasswordSafe = Medo.Security.Cryptography.PasswordSafe;
 using System;
 using System.IO;
 

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Medo.Security.Cryptography.PasswordSafe {
     /// <summary>
