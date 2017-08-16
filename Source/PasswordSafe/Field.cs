@@ -2,6 +2,7 @@ using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
+using static PasswordSafe.Helpers;
 
 namespace Medo.Security.Cryptography.PasswordSafe {
     /// <summary>
@@ -186,7 +187,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             set {
                 if (this.IsReadOnly) { throw new NotSupportedException("Object is read-only."); }
                 Rnd.GetBytes(this.RawDataEntropy); //new entropy every save
-                this._rawData = ProtectedData.Protect(value, this.RawDataEntropy, DataProtectionScope.CurrentUser);
+                this._rawData = ProtectData(value, this.RawDataEntropy);
                 Array.Clear(value, 0, value.Length);
             }
         }
@@ -197,7 +198,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         protected byte[] RawDataDirect {
             get {
                 if (this._rawData == null) { return new byte[0]; } //return empty array if no value has been set so far
-                return ProtectedData.Unprotect(this._rawData, this.RawDataEntropy, DataProtectionScope.CurrentUser);
+                return UnprotectData(this._rawData, this.RawDataEntropy);
             }
         }
 

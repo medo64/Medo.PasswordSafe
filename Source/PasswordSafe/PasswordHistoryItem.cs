@@ -1,8 +1,8 @@
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
+using static PasswordSafe.Helpers;
 
 namespace Medo.Security.Cryptography.PasswordSafe {
     /// <summary>
@@ -68,11 +68,11 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         private byte[] RawHistoricalPasswordData {
             get {
                 if (this._rawHistoricalPasswordData == null) { return new byte[0]; } //return empty array if no value has been set so far
-                return ProtectedData.Unprotect(this._rawHistoricalPasswordData, this.RawHistoricalPasswordDataEntropy, DataProtectionScope.CurrentUser);
+                return UnprotectData(this._rawHistoricalPasswordData, this.RawHistoricalPasswordDataEntropy);
             }
             set {
                 Rnd.GetBytes(this.RawHistoricalPasswordDataEntropy); //new entropy every save
-                this._rawHistoricalPasswordData = ProtectedData.Protect(value, this.RawHistoricalPasswordDataEntropy, DataProtectionScope.CurrentUser);
+                this._rawHistoricalPasswordData = ProtectData(value, this.RawHistoricalPasswordDataEntropy);
                 Array.Clear(value, 0, value.Length);
             }
         }

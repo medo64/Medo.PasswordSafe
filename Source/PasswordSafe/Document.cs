@@ -5,6 +5,7 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
+using static PasswordSafe.Helpers;
 
 namespace Medo.Security.Cryptography.PasswordSafe {
     /// <summary>
@@ -555,11 +556,11 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         private byte[] Passphrase {
             get {
-                return (this._passphrase != null) ? ProtectedData.Unprotect(this._passphrase, this.PassphraseEntropy, DataProtectionScope.CurrentUser) : null;
+                return (this._passphrase != null) ? UnprotectData(this._passphrase, this.PassphraseEntropy) : null;
             }
             set {
                 Rnd.GetBytes(PassphraseEntropy);
-                this._passphrase = ProtectedData.Protect(value, this.PassphraseEntropy, DataProtectionScope.CurrentUser);
+                this._passphrase = ProtectData(value, this.PassphraseEntropy);
                 Array.Clear(value, 0, value.Length);
             }
         }
