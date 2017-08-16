@@ -1012,6 +1012,66 @@ namespace PasswordSafe.Test {
         }
 
 
+        [Fact]
+        public void Document_Empty_FileName_Load() {
+            var fileName = Path.GetTempFileName();
+            try {
+
+                using (var streamIn = GetResourceStream("Empty.psafe3"))
+                using (var streamOut = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
+                    var buffer = new byte[streamIn.Length];
+                    streamIn.Read(buffer, 0, buffer.Length);
+                    streamOut.Write(buffer, 0, buffer.Length);
+                }
+
+                using (var doc = PwSafe.Document.Load(fileName, "123")) {
+                    Assert.Equal(7, doc.Headers.Count);
+                    Assert.Equal(0x030D, doc.Headers[PwSafe.HeaderType.Version].Version);
+                    Assert.Equal(new Guid("3b872b47-dee9-4c4f-ba63-4d93a86dfa4c"), doc.Headers[PwSafe.HeaderType.Uuid].Uuid);
+                    Assert.Equal("", doc.Headers[PwSafe.HeaderType.NonDefaultPreferences].Text);
+                    Assert.Equal(new DateTime(2015, 12, 28, 5, 57, 23, DateTimeKind.Utc), doc.Headers[PwSafe.HeaderType.TimestampOfLastSave].Time);
+                    Assert.Equal("Josip", doc.Headers[PwSafe.HeaderType.LastSavedByUser].Text);
+                    Assert.Equal("GANDALF", doc.Headers[PwSafe.HeaderType.LastSavedOnHost].Text);
+                    Assert.Equal("Password Safe V3.37", doc.Headers[PwSafe.HeaderType.WhatPerformedLastSave].Text);
+
+                    Assert.Equal(0, doc.Entries.Count);
+                }
+
+            } finally {
+                File.Delete(fileName);
+            }
+        }
+
+        [Fact]
+        public void Document_Empty_FileName_Save() {
+            var fileName = Path.GetTempFileName();
+            try {
+
+                using (var doc = PwSafe.Document.Load(GetResourceStream("Empty.psafe3"), "123")) {
+                    doc.IsReadOnly = true;
+                    doc.Save(fileName);
+                }
+
+                using (var doc = PwSafe.Document.Load(fileName, "123")) {
+                    Assert.Equal(7, doc.Headers.Count);
+                    Assert.Equal(0x030D, doc.Headers[PwSafe.HeaderType.Version].Version);
+                    Assert.Equal(new Guid("3b872b47-dee9-4c4f-ba63-4d93a86dfa4c"), doc.Headers[PwSafe.HeaderType.Uuid].Uuid);
+                    Assert.Equal("", doc.Headers[PwSafe.HeaderType.NonDefaultPreferences].Text);
+                    Assert.Equal(new DateTime(2015, 12, 28, 5, 57, 23, DateTimeKind.Utc), doc.Headers[PwSafe.HeaderType.TimestampOfLastSave].Time);
+                    Assert.Equal("Josip", doc.Headers[PwSafe.HeaderType.LastSavedByUser].Text);
+                    Assert.Equal("GANDALF", doc.Headers[PwSafe.HeaderType.LastSavedOnHost].Text);
+                    Assert.Equal("Password Safe V3.37", doc.Headers[PwSafe.HeaderType.WhatPerformedLastSave].Text);
+
+                    Assert.Equal(0, doc.Entries.Count);
+                }
+
+            } finally {
+                File.Delete(fileName);
+            }
+        }
+
+
+
         #region Utils
 
         private static MemoryStream GetResourceStream(string fileName) {

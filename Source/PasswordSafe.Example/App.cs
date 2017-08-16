@@ -6,14 +6,10 @@ namespace Example {
     class App {
         static void Main(string[] args) {
             var existingFile = @"Resources\Simple.psafe3";
-            var newFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), @"New.psafe3");
-
-            PwSafe.Document doc;
+            var newFile = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), @"NewExample.psafe3");
 
             //Load
-            using (var inputStream = new FileStream(existingFile, FileMode.Open)) {
-                doc = PwSafe.Document.Load(inputStream, "123");
-            }
+            var doc = PwSafe.Document.Load(existingFile, "123");
             Show(doc, ConsoleColor.Gray);
 
             //modify
@@ -32,14 +28,11 @@ namespace Example {
             Show(doc, ConsoleColor.White);
 
             //save
-            using (var outputStream = new FileStream(newFile, FileMode.Create)) {
-                doc.Save(outputStream);
-            }
+            doc.Save(newFile);
 
-            using (var inputStream = new FileStream(newFile, FileMode.Open)) {
-                doc = PwSafe.Document.Load(inputStream, "123");
-            }
-            Show(doc, ConsoleColor.Yellow);
+            //load again
+            var doc2 = PwSafe.Document.Load(newFile, "123");
+            Show(doc2, ConsoleColor.Yellow);
 
             Console.ReadKey();
         }

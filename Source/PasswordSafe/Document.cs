@@ -161,6 +161,23 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <summary>
         /// Loads data from a file.
         /// </summary>
+        /// <param name="fileName">File name.</param>
+        /// <param name="passphrase">Password.</param>
+        /// <exception cref="ArgumentNullException">File name cannot be null. -or- Passphrase cannot be null.</exception>
+        /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
+        public static Document Load(String fileName, string passphrase) {
+            if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
+            if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
+
+            using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
+                return Load(stream, passphrase);
+            }
+        }
+
+        /// <summary>
+        /// Loads data from a file.
+        /// </summary>
         /// <param name="stream">Stream.</param>
         /// <param name="passphrase">Password.</param>
         /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
@@ -302,6 +319,20 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <summary>
         /// Save document using the same password as for Load.
         /// </summary>
+        /// <param name="fileName">File name.</param>
+        /// <exception cref="ArgumentNullException">File name cannot be null.</exception>
+        /// <exception cref="NotSupportedException">Missing passphrase.</exception>
+        public void Save(string fileName) {
+            if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
+
+            using (var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
+                Save(stream);
+            }
+        }
+
+        /// <summary>
+        /// Save document using the same password as for Load.
+        /// </summary>
         /// <param name="stream">Stream.</param>
         /// <exception cref="ArgumentNullException">Stream cannot be null.</exception>
         /// <exception cref="NotSupportedException">Missing passphrase.</exception>
@@ -314,6 +345,21 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 Save(stream, passphraseBytes);
             } finally {
                 Array.Clear(passphraseBytes, 0, passphraseBytes.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+            }
+        }
+
+        /// <summary>
+        /// Save document.
+        /// </summary>
+        /// <param name="fileName">File name.</param>
+        /// <param name="passphrase">Password.</param>
+        /// <exception cref="ArgumentNullException">File name cannot be null. -or- Passphrase cannot be null.</exception>
+        public void Save(string fileName, string passphrase) {
+            if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
+            if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
+
+            using (var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
+                Save(stream, passphrase);
             }
         }
 
