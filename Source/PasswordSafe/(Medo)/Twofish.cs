@@ -1,5 +1,7 @@
-//Josip Medved <jmedved@jmedved.com>
+//Josip Medved <jmedved@jmedved.com>   www.medo64.com
 
+//2017-08-15: Replacing ThreadStatic with Lazy<RandomNumberGenerator>.
+//2016-01-08: Added ANSIX923 and ISO10126 padding modes.
 //2015-12-27: Initial version.
 
 
@@ -15,7 +17,7 @@ namespace Medo.Security.Cryptography {
     /// This class cannot be inherited.
     /// </summary>
     /// <remarks>https://www.schneier.com/twofish.html</remarks>
-    internal sealed class TwofishManaged : SymmetricAlgorithm {
+    public sealed class TwofishManaged : SymmetricAlgorithm {
 
         /// <summary>
         /// Initializes a new instance.
@@ -70,7 +72,7 @@ namespace Medo.Security.Cryptography {
         /// </summary>
         public override void GenerateIV() {
             this.IVValue = new byte[this.FeedbackSizeValue / 8];
-            Rng.GetBytes(this.IVValue);
+            Rng.Value.GetBytes(this.IVValue);
         }
 
         /// <summary>
@@ -78,7 +80,7 @@ namespace Medo.Security.Cryptography {
         /// </summary>
         public override void GenerateKey() {
             this.KeyValue = new byte[this.KeySizeValue / 8];
-            Rng.GetBytes(this.KeyValue);
+            Rng.Value.GetBytes(this.KeyValue);
         }
 
 
@@ -101,28 +103,33 @@ namespace Medo.Security.Cryptography {
         public override PaddingMode Padding {
             get { return base.Padding; }
             set {
-                if ((value != PaddingMode.None) && (value != PaddingMode.PKCS7) && (value != PaddingMode.Zeros)) {
-                    throw new CryptographicException("Padding mode is not supported.");
+                switch (value) {
+                    case PaddingMode.None:
+                    case PaddingMode.PKCS7:
+                    case PaddingMode.Zeros:
+                    case PaddingMode.ANSIX923:
+                    case PaddingMode.ISO10126:
+                        base.Padding = value;
+                        break;
+                    default: throw new CryptographicException("Padding mode is not supported.");
                 }
-                base.Padding = value;
             }
         }
 
 
         #region Private
 
-        [ThreadStatic()]
-        private static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
+        private static Lazy<RandomNumberGenerator> Rng = new Lazy<RandomNumberGenerator>(() => RandomNumberGenerator.Create());
 
         private ICryptoTransform NewEncryptor(byte[] rgbKey, CipherMode mode, byte[] rgbIV, TwofishManagedTransformMode encryptMode) {
             if (rgbKey == null) {
                 rgbKey = new byte[this.KeySize / 8];
-                Rng.GetBytes(rgbKey);
+                Rng.Value.GetBytes(rgbKey);
             }
 
             if ((mode != CipherMode.ECB) && (rgbIV == null)) {
                 rgbIV = new byte[this.KeySize / 8];
-                Rng.GetBytes(rgbIV);
+                Rng.Value.GetBytes(rgbIV);
             }
 
             return new TwofishManagedTransform(rgbKey, mode, rgbIV, encryptMode, this.Padding);
@@ -196,7 +203,10 @@ namespace Medo.Security.Cryptography {
         }
 
 
-        private byte[] PaddingBuffer; //used to store last block block under decrypting as to work around CryptoStream implementation details.
+        [ThreadStatic()]
+        private static RandomNumberGenerator Rng = RandomNumberGenerator.Create();
+
+        private byte[] PaddingBuffer; //used to store last block under decrypting as to work around CryptoStream implementation details.
 
 
         /// <summary>
@@ -293,6 +303,19 @@ namespace Medo.Security.Cryptography {
                     paddedInputBuffer = new byte[paddedLength];
                     paddedInputOffset = 0;
                     Buffer.BlockCopy(inputBuffer, inputOffset, paddedInputBuffer, 0, inputCount);
+                } else if (this.PaddingMode == PaddingMode.ANSIX923) {
+                    paddedLength = inputCount / 16 * 16 + 16; //to round to next whole block
+                    paddedInputBuffer = new byte[paddedLength];
+                    paddedInputOffset = 0;
+                    Buffer.BlockCopy(inputBuffer, inputOffset, paddedInputBuffer, 0, inputCount);
+                    paddedInputBuffer[paddedInputBuffer.Length - 1] = (byte)(paddedLength - inputCount);
+                } else if (this.PaddingMode == PaddingMode.ISO10126) {
+                    paddedLength = inputCount / 16 * 16 + 16; //to round to next whole block
+                    paddedInputBuffer = new byte[paddedLength];
+                    Rng.GetBytes(paddedInputBuffer);
+                    paddedInputOffset = 0;
+                    Buffer.BlockCopy(inputBuffer, inputOffset, paddedInputBuffer, 0, inputCount);
+                    paddedInputBuffer[paddedInputBuffer.Length - 1] = (byte)(paddedLength - inputCount);
                 } else {
                     if (inputCount % 16 != 0) { throw new ArgumentOutOfRangeException("inputCount", "Invalid input count for a given padding."); }
                     paddedLength = inputCount;
@@ -328,36 +351,55 @@ namespace Medo.Security.Cryptography {
                     this.Implementation.BlockDecrypt(inputBuffer, inputOffset + i, outputBuffer, outputOffset + i);
                 }
 
-                if (this.PaddingMode == PaddingMode.PKCS7) {
-                    var padding = outputBuffer[outputBuffer.Length - 1];
-                    if ((padding < 1) || (padding > 16)) { throw new CryptographicException("Invalid padding."); }
-                    for (int i = outputBuffer.Length - padding; i < outputBuffer.Length; i++) {
-                        if (outputBuffer[i] != padding) { throw new CryptographicException("Invalid padding."); }
-                    }
-                    var newOutputBuffer = new byte[outputBuffer.Length - padding];
-                    Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
-                    return newOutputBuffer;
-                } else if (this.PaddingMode == PaddingMode.Zeros) {
-                    var newOutputLength = outputBuffer.Length;
-                    for (int i = outputBuffer.Length - 1; i >= outputBuffer.Length - 16; i--) {
-                        if (outputBuffer[i] != 0) {
-                            newOutputLength = i + 1;
-                            break;
-                        }
-                    }
-                    if (newOutputLength == outputBuffer.Length) {
-                        return outputBuffer;
-                    } else {
-                        var newOutputBuffer = new byte[newOutputLength];
-                        Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
-                        return newOutputBuffer;
-                    }
-                } else {
-                    return outputBuffer;
-                }
+                return RemovePadding(outputBuffer, this.PaddingMode);
 
                 #endregion
 
+            }
+        }
+
+        private static byte[] RemovePadding(byte[] outputBuffer, PaddingMode paddingMode) {
+            if (paddingMode == PaddingMode.PKCS7) {
+                var padding = outputBuffer[outputBuffer.Length - 1];
+                if ((padding < 1) || (padding > 16)) { throw new CryptographicException("Invalid padding."); }
+                for (int i = outputBuffer.Length - padding; i < outputBuffer.Length; i++) {
+                    if (outputBuffer[i] != padding) { throw new CryptographicException("Invalid padding."); }
+                }
+                var newOutputBuffer = new byte[outputBuffer.Length - padding];
+                Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
+                return newOutputBuffer;
+            } else if (paddingMode == PaddingMode.Zeros) {
+                var newOutputLength = outputBuffer.Length;
+                for (int i = outputBuffer.Length - 1; i >= outputBuffer.Length - 16; i--) {
+                    if (outputBuffer[i] != 0) {
+                        newOutputLength = i + 1;
+                        break;
+                    }
+                }
+                if (newOutputLength == outputBuffer.Length) {
+                    return outputBuffer;
+                } else {
+                    var newOutputBuffer = new byte[newOutputLength];
+                    Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
+                    return newOutputBuffer;
+                }
+            } else if (paddingMode == PaddingMode.ANSIX923) {
+                var padding = outputBuffer[outputBuffer.Length - 1];
+                if ((padding < 1) || (padding > 16)) { throw new CryptographicException("Invalid padding."); }
+                for (int i = outputBuffer.Length - padding; i < outputBuffer.Length - 1; i++) {
+                    if (outputBuffer[i] != 0) { throw new CryptographicException("Invalid padding."); }
+                }
+                var newOutputBuffer = new byte[outputBuffer.Length - padding];
+                Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
+                return newOutputBuffer;
+            } else if (paddingMode == PaddingMode.ISO10126) {
+                var padding = outputBuffer[outputBuffer.Length - 1];
+                if ((padding < 1) || (padding > 16)) { throw new CryptographicException("Invalid padding."); }
+                var newOutputBuffer = new byte[outputBuffer.Length - padding];
+                Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
+                return newOutputBuffer;
+            } else {
+                return outputBuffer;
             }
         }
 
@@ -836,6 +878,7 @@ namespace Medo.Security.Cryptography {
             }
 
         }
+
     }
 
 
