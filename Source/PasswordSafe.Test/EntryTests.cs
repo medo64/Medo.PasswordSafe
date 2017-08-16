@@ -6,7 +6,7 @@ using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 namespace PasswordSafe.Test {
     public class EntryTests {
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: New")]
         public void Entry_New() {
             var entry = new PwSafe.Entry();
             Assert.Equal(3, entry.Records.Count);
@@ -18,7 +18,7 @@ namespace PasswordSafe.Test {
             Assert.Equal("", entry.Password);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: New with Title")]
         public void Entry_New_WithTitle() {
             var entry = new PwSafe.Entry("Test");
             Assert.Equal(3, entry.Records.Count);
@@ -31,7 +31,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Clone")]
         public void Entry_Clone() {
             var entry = new PwSafe.Entry("Test");
             Assert.Equal(3, entry.Records.Count);
@@ -52,7 +52,7 @@ namespace PasswordSafe.Test {
             Assert.Equal("", clone.Password);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Clone (in document)")]
         public void Entry_Clone_Document() {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry("Test"));
@@ -63,7 +63,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Change (read-only)")]
         public void Entry_ReadOnly() {
             Assert.Throws<NotSupportedException>(() => {
                 var doc = new PwSafe.Document("Password");
@@ -75,7 +75,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Indexer Get via Type")]
         public void Entry_AccessByRecordType() {
             var doc = new PwSafe.Document("Password");
 
@@ -88,7 +88,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Add")]
         public void Entry_TestNamed() {
             var guid = Guid.NewGuid();
 
@@ -159,13 +159,13 @@ namespace PasswordSafe.Test {
 
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (default tokens)")]
         public void Entry_Autotype_Tokens_Default() {
             Assert.Equal("UserName {Tab} Password {Enter}", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(null)));
             Assert.Equal("D e f a u l t {Tab} P a s s w 0 r d {Enter}", string.Join(" ", GetExampleEntry(null).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (two-factor)")]
         public void Entry_Autotype_Tokens_TwoFactor() {
             var autoTypeText = @"\u\t\p\t\2\t\n";
             Assert.Equal("UserName {Tab} Password {Tab} TwoFactorCode {Tab} {Enter}", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -173,21 +173,21 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (some text)")]
         public void Entry_Autotype_Tokens_SomeText1() {
             var autoTypeText = @"admin\n\p\n";
             Assert.Equal("a d m i n {Enter} Password {Enter}", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("a d m i n {Enter} P a s s w 0 r d {Enter}", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (some text 2)")]
         public void Entry_Autotype_Tokens_SomeText2() {
             var autoTypeText = @"\badmin\n\p\n";
             Assert.Equal("{Backspace} a d m i n {Enter} Password {Enter}", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("{Backspace} a d m i n {Enter} P a s s w 0 r d {Enter}", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (some text 3)")]
         public void Entry_Autotype_Tokens_SomeText3() {
             var autoTypeText = @"admin\n\p\nXXX";
             Assert.Equal("a d m i n {Enter} Password {Enter} X X X", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -195,21 +195,21 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (credit card)")]
         public void Entry_Autotype_Tokens_CreditCard() {
             var autoTypeText = @"\cn\t\ce\t\cv\t\cp";
             Assert.Equal("CreditCardNumber {Tab} CreditCardExpiration {Tab} CreditCardVerificationValue {Tab} CreditCardPin", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("1 2 3 4 5 6 7 8 9 0 1 2 3 4 5 6 {Tab} 0 1 / 7 9 {Tab} 1 2 3 {Tab} 1 2 3 4", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (credit card, tabbed)")]
         public void Entry_Autotype_Tokens_CreditCardTabbed() {
             var autoTypeText = @"\ct\t\ce\t\cv\t\cp";
             Assert.Equal("CreditCardNumberTabbed {Tab} CreditCardExpiration {Tab} CreditCardVerificationValue {Tab} CreditCardPin", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("1 2 3 4 {Tab} 5 6 7 8 {Tab} 9 0 1 2 {Tab} 3 4 5 6 {Tab} 0 1 / 7 9 {Tab} 1 2 3 {Tab} 1 2 3 4", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (credit card, tabbed Amex)")]
         public void Entry_Autotype_Tokens_CreditCardTabbedAmex() {
             var autoTypeText = @"\ct\t\ce\t\cv\t\cp";
             Assert.Equal("CreditCardNumberTabbed {Tab} CreditCardExpiration {Tab} CreditCardVerificationValue {Tab} CreditCardPin", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -217,7 +217,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, not used)")]
         public void Entry_Autotype_Tokens_OptionalNumberNotUsed() {
             var autoTypeText = @"\oTest";
             Assert.Equal("Notes T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -225,35 +225,35 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, line 1)")]
         public void Entry_Autotype_Tokens_OptionalNumber_Line1() {
             var autoTypeText = @"\o1Test";
             Assert.Equal("Notes:1 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("1 T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, line 2)")]
         public void Entry_Autotype_Tokens_OptionalNumber_Line2() {
             var autoTypeText = @"\o2Test";
             Assert.Equal("Notes:2 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("2 T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, line 3)")]
         public void Entry_Autotype_Tokens_OptionalNumber_Line3() {
             var autoTypeText = @"\o3Test";
             Assert.Equal("Notes:3 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("3 T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, line 4)")]
         public void Entry_Autotype_Tokens_OptionalNumber_Line4() {
             var autoTypeText = @"\o4Test";
             Assert.Equal("Notes:4 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("{^} T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, line 5)")]
         public void Entry_Autotype_Tokens_OptionalNumber_Line5() {
             var autoTypeText = @"\o5Test";
             Assert.Equal("Notes:5 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -261,21 +261,21 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, single digit)")]
         public void Entry_Autotype_Tokens_OptionalNumberOneDigit() {
             var autoTypeText = @"\o9Test";
             Assert.Equal("Notes:9 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, two digit)")]
         public void Entry_Autotype_Tokens_OptionalNumberTwoDigits() {
             var autoTypeText = @"\o98Test";
             Assert.Equal("Notes:98 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, three digits)")]
         public void Entry_Autotype_Tokens_OptionalNumberThreeDigits() {
             var autoTypeText = @"\o987Test";
             Assert.Equal("Notes:987 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -283,7 +283,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (optional number, no suffix)")]
         public void Entry_Autotype_Tokens_OptionalNumberNoSuffix() {
             var autoTypeText = @"\o12";
             Assert.Equal("Notes:12", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -291,28 +291,28 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (mandatory number, single digit)")]
         public void Entry_Autotype_Tokens_MandatoryNumberOneDigit() {
             var autoTypeText = @"\W1Test";
             Assert.Equal("Wait:1000 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("Wait:1000 T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (mandatory number, two digits)")]
         public void Entry_Autotype_Tokens_MandatoryNumberTwoDigit() {
             var autoTypeText = @"\w12Test";
             Assert.Equal("Wait:12 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("Wait:12 T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (mandatory number, three digits)")]
         public void Entry_Autotype_Tokens_MandatoryNumberThreeDigit() {
             var autoTypeText = @"\d123Test";
             Assert.Equal("Delay:123 T e s t", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("Delay:123 T e s t", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (mandatory number, no suffix)")]
         public void Entry_Autotype_Tokens_MandatoryNumberNoSuffix() {
             var autoTypeText = @"\d12";
             Assert.Equal("Delay:12", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -320,14 +320,14 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (example 1)")]
         public void Entry_Autotype_Tokens_Example1() {
             var autoTypeText = @"\z\u\t\p\n";
             Assert.Equal("Legacy UserName {Tab} Password {Enter}", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("Legacy D e f a u l t {Tab} P a s s w 0 r d {Enter}", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype (example 2)")]
         public void Entry_Autotype_Tokens_Example2() {
             var autoTypeText = @"\i\g\l\m";
             Assert.Equal("Title Group Url Email", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -337,14 +337,14 @@ namespace PasswordSafe.Test {
 
         #region Typos
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype typo (no escape)")]
         public void Entry_Autotype_Tokens_TypoNoEscape() {
             var autoTypeText = @"\x";
             Assert.Equal("x", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal("x", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype typo (no escape, two char)")]
         public void Entry_Autotype_Tokens_TypoNoEscapeDouble() {
             var autoTypeText = @"\cx\p";
             Assert.Equal("c x Password", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -352,7 +352,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype typo (no escape, hanging escape)")]
         public void Entry_Autotype_Tokens_HangingEscape() {
             var autoTypeText = @"admin\";
             Assert.Equal(@"a d m i n \", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -360,7 +360,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype typo (optional number, too long)")]
         public void Entry_Autotype_Tokens_OptionalNumberTooLong() {
             var autoTypeText = @"\o1234";
             Assert.Equal(@"Notes:123 4", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
@@ -368,21 +368,21 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype typo (mandatory number, too long)")]
         public void Entry_Autotype_Tokens_MandatoryNumberTooLong() {
             var autoTypeText = @"\w1234";
             Assert.Equal(@"Wait:123 4", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal(@"Wait:123 4", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype typo (mandatory number, invalid number)")]
         public void Entry_Autotype_Tokens_MandatoryNumberNotPresent() {
             var autoTypeText = @"\dX";
             Assert.Equal(@"d X", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));
             Assert.Equal(@"d X", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Entry: Autotype typo (mandatory number, no number)")]
         public void Entry_Autotype_Tokens_MandatoryIncompleteCommand() {
             var autoTypeText = @"\W";
             Assert.Equal(@"W", string.Join(" ", PwSafe.AutotypeToken.GetUnexpandedAutotypeTokens(autoTypeText)));

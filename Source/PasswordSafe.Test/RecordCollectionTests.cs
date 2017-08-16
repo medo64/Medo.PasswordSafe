@@ -5,7 +5,7 @@ using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 namespace PasswordSafe.Test {
     public class RecordCollectionTests {
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: RecordCollection: Add")]
         public void RecordCollection_New() {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry());
@@ -15,7 +15,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: RecordCollection: Add (read-only document)")]
         public void RecordCollection_ReadOnly() {
             Assert.Throws<NotSupportedException>(() => {
                 var doc = new PwSafe.Document("Password");
@@ -25,7 +25,7 @@ namespace PasswordSafe.Test {
             });
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: RecordCollection: Indexer Get")]
         public void RecordCollection_ReadOnly_IndexerRead() {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry());
@@ -33,7 +33,7 @@ namespace PasswordSafe.Test {
             Assert.Equal("", doc.Entries[0].Records[PwSafe.RecordType.Title].Text);
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: RecordCollection: Indexer Set")]
         public void RecordCollection_ReadOnly_IndexerWrite() {
             Assert.Throws<NotSupportedException>(() => {
                 var doc = new PwSafe.Document("Password");

@@ -7,7 +7,7 @@ using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 namespace PasswordSafe.Test {
     public class DocumentTests {
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load Empty.psafe3")]
         public void Document_Empty() {
             using (var doc = PwSafe.Document.Load(GetResourceStream("Empty.psafe3"), "123")) {
                 Assert.Equal(7, doc.Headers.Count);
@@ -23,7 +23,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load Empty.psafe3 (password mismatch)")]
         public void Document_Empty_PasswordMismatch() {
             Assert.Throws<FormatException>(() => {
                 using (var doc = PwSafe.Document.Load(GetResourceStream("Empty.psafe3"), "XXX")) {
@@ -32,7 +32,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3")]
         public void Document_Simple() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
@@ -102,7 +102,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 (track modify)")]
         public void Document_Simple_TrackModify() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
@@ -152,7 +152,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 (track access)")]
         public void Document_Simple_TrackAccess() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
@@ -202,7 +202,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 (track access and modify)")]
         public void Document_Simple_TrackAccessAndModify() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
@@ -251,7 +251,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 read-only (track access and modify)")]
         public void Document_Simple_TrackAccessAndModify_Readonly() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
@@ -295,7 +295,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 read-only (try modify)")]
         public void Document_Simple_Readonly_TryModify() {
             Assert.Throws<NotSupportedException>(() => {
                 var msSave = new MemoryStream();
@@ -307,7 +307,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save SimpleTree.psafe3")]
         public void Document_SimpleTree() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("SimpleTree.psafe3"), "123")) {
@@ -387,7 +387,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Test10.psafe3")]
         public void Document_Test10() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Test10.psafe3"), "Test")) {
@@ -449,7 +449,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Test11.psafe3")]
         public void Document_Test11() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Test11.psafe3"), "Test")) {
@@ -507,7 +507,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save PasswordHistory.psafe3 (history enabled)")]
         public void Document_TestPasswordHistoryEnabled() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("PasswordHistory.psafe3"), "123")) {
@@ -591,7 +591,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save PasswordHistory.psafe3 (history enabled, more entries)")]
         public void Document_TestPasswordHistoryEnabledMore() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("PasswordHistory.psafe3"), "123")) {
@@ -680,7 +680,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save PasswordHistory.psafe3 (history enabled, indirect change)")]
         public void Document_TestPasswordHistoryIndirectChange() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("PasswordHistory.psafe3"), "123")) {
@@ -769,7 +769,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save PasswordHistory.psafe3 (history disabled)")]
         public void Document_TestPasswordHistoryDisabled() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("PasswordHistory.psafe3"), "123")) {
@@ -807,7 +807,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save PasswordHistory.psafe3 (history enabled, clear)")]
         public void Document_TestPasswordHistoryClear() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("PasswordHistory.psafe3"), "123")) {
@@ -894,7 +894,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save new file")]
         public void Document_NewSaveAndLoad() {
             using (var msFile = new MemoryStream()) {
                 using (var doc = new PwSafe.Document("Password")) {
@@ -912,7 +912,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Change password")]
         public void Document_ChangePassword() {
             using (var msFile = new MemoryStream()) {
                 using (var doc = new PwSafe.Document("Password")) {
@@ -939,7 +939,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Change password (verify old)")]
         public void Document_ChangeOldPassword() {
             using (var msFile = new MemoryStream()) {
                 using (var doc = new PwSafe.Document("Password")) {
@@ -965,7 +965,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Change password (verify failed)")]
         public void Document_ChangeOldPasswordFailed() {
             using (var msFile = new MemoryStream()) {
                 using (var doc = new PwSafe.Document("Password")) {
@@ -992,7 +992,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Validate password")]
         public void Document_ValidatePassword() {
             using (var msFile = new MemoryStream()) {
                 using (var doc = new PwSafe.Document("Password")) {
@@ -1012,7 +1012,7 @@ namespace PasswordSafe.Test {
         }
 
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Load Empty.psafe3 (via file name)")]
         public void Document_Empty_FileName_Load() {
             var fileName = Path.GetTempFileName();
             try {
@@ -1042,7 +1042,7 @@ namespace PasswordSafe.Test {
             }
         }
 
-        [Fact]
+        [Fact(DisplayName = "PasswordSafe: Document: Save Empty.psafe3 (via file name)")]
         public void Document_Empty_FileName_Save() {
             var fileName = Path.GetTempFileName();
             try {
