@@ -1,48 +1,50 @@
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Medo.Security.Cryptography.PasswordSafe;
+using Xunit;
+using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace PasswordSafe.Test {
-    [TestClass]
     public class HeaderTests {
 
-        [TestMethod]
+        [Fact]
         public void Header_New() {
-            var field = new Header(HeaderType.DatabaseName) { Text = "Test" };
-            Assert.AreEqual("Test", field.Text);
+            var field = new PwSafe.Header(PwSafe.HeaderType.DatabaseName) { Text = "Test" };
+            Assert.Equal("Test", field.Text);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(FormatException))]
+        [Fact]
         public void Header_New_WrongType() {
-            var field = new Header(HeaderType.DatabaseName) { Uuid = new Guid() };
+            Assert.Throws<FormatException>(() => {
+                var field = new PwSafe.Header(PwSafe.HeaderType.DatabaseName) { Uuid = new Guid() };
+            });
         }
 
 
-        [TestMethod]
-        [ExpectedException(typeof(NotSupportedException))]
+        [Fact]
         public void Header_ReadOnly() {
-            var doc = new Document("Password");
-            doc.Headers.Add(new Header(HeaderType.DatabaseName) { Text = "Test" });
+            Assert.Throws<NotSupportedException>(() => {
+                var doc = new PwSafe.Document("Password");
+                doc.Headers.Add(new PwSafe.Header(PwSafe.HeaderType.DatabaseName) { Text = "Test" });
 
-            doc.IsReadOnly = true;
-            doc.Headers[HeaderType.DatabaseName].Text = "NewName";
+                doc.IsReadOnly = true;
+                doc.Headers[PwSafe.HeaderType.DatabaseName].Text = "NewName";
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void Header_ReadOnly_IndexerRead() {
-            var doc = new Document("Password");
+            var doc = new PwSafe.Document("Password");
             doc.IsReadOnly = true;
-            Assert.IsNotNull(doc.Headers[HeaderType.DatabaseName]);
-            Assert.AreEqual("", doc.Headers[HeaderType.DatabaseName].Text);
+            Assert.NotNull(doc.Headers[PwSafe.HeaderType.DatabaseName]);
+            Assert.Equal("", doc.Headers[PwSafe.HeaderType.DatabaseName].Text);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(NotSupportedException))]
+        [Fact]
         public void Header_ReadOnly_IndexerWrite() {
-            var doc = new Document("Password");
-            doc.IsReadOnly = true;
-            doc.Headers[HeaderType.DatabaseName] = null;
+            Assert.Throws<NotSupportedException>(() => {
+                var doc = new PwSafe.Document("Password");
+                doc.IsReadOnly = true;
+                doc.Headers[PwSafe.HeaderType.DatabaseName] = null;
+            });
         }
 
     }

@@ -1,38 +1,39 @@
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Medo.Security.Cryptography.PasswordSafe;
+using Xunit;
+using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace PasswordSafe.Test {
-    [TestClass]
     public class RecordTests {
 
-        [TestMethod]
+        [Fact]
         public void Record_New() {
-            var field = new Record(RecordType.Title) { Text = "Test" };
-            Assert.AreEqual("Test", field.Text);
+            var field = new PwSafe.Record(PwSafe.RecordType.Title) { Text = "Test" };
+            Assert.Equal("Test", field.Text);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(FormatException))]
+        [Fact]
         public void Record_New_WrongType() {
-            var field = new Record(RecordType.Title) { Time = DateTime.Now };
+            Assert.Throws<FormatException>(() => {
+                var field = new PwSafe.Record(PwSafe.RecordType.Title) { Time = DateTime.Now };
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void Record_New_Autotype() {
-            var field = new Record(RecordType.Autotype);
-            Assert.AreEqual(@"\u\t\p\n", field.Text);
+            var field = new PwSafe.Record(PwSafe.RecordType.Autotype);
+            Assert.Equal(@"\u\t\p\n", field.Text);
         }
 
 
-        [TestMethod]
-        [ExpectedException(typeof(NotSupportedException))]
+        [Fact]
         public void Record_ReadOnly() {
-            var doc = new Document("Password");
-            doc.Entries["Test"].Password = "Old";
+            Assert.Throws<NotSupportedException>(() => {
+                var doc = new PwSafe.Document("Password");
+                doc.Entries["Test"].Password = "Old";
 
-            doc.IsReadOnly = true;
-            doc.Entries[0].Records[RecordType.Password].Text = "New";
+                doc.IsReadOnly = true;
+                doc.Entries[0].Records[PwSafe.RecordType.Password].Text = "New";
+            });
         }
 
     }

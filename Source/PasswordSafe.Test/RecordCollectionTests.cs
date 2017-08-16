@@ -1,45 +1,46 @@
 using System;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Medo.Security.Cryptography.PasswordSafe;
+using Xunit;
+using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace PasswordSafe.Test {
-    [TestClass]
     public class RecordCollectionTests {
 
-        [TestMethod]
+        [Fact]
         public void RecordCollection_New() {
-            var doc = new Document("Password");
-            doc.Entries.Add(new Entry());
-            doc.Entries[0].Records.Add(new Record(RecordType.Group) { Text = "Test" });
+            var doc = new PwSafe.Document("Password");
+            doc.Entries.Add(new PwSafe.Entry());
+            doc.Entries[0].Records.Add(new PwSafe.Record(PwSafe.RecordType.Group) { Text = "Test" });
 
-            Assert.IsTrue(string.Equals("Test", doc.Entries[0].Group, StringComparison.Ordinal));
+            Assert.True(string.Equals("Test", doc.Entries[0].Group, StringComparison.Ordinal));
         }
 
 
-        [TestMethod]
-        [ExpectedException(typeof(NotSupportedException))]
+        [Fact]
         public void RecordCollection_ReadOnly() {
-            var doc = new Document("Password");
-            doc.Entries.Add(new Entry());
-            doc.IsReadOnly = true;
-            doc.Entries[0].Records.Add(new Record(RecordType.Group));
+            Assert.Throws<NotSupportedException>(() => {
+                var doc = new PwSafe.Document("Password");
+                doc.Entries.Add(new PwSafe.Entry());
+                doc.IsReadOnly = true;
+                doc.Entries[0].Records.Add(new PwSafe.Record(PwSafe.RecordType.Group));
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void RecordCollection_ReadOnly_IndexerRead() {
-            var doc = new Document("Password");
-            doc.Entries.Add(new Entry());
+            var doc = new PwSafe.Document("Password");
+            doc.Entries.Add(new PwSafe.Entry());
             doc.IsReadOnly = true;
-            Assert.AreEqual("", doc.Entries[0].Records[RecordType.Title].Text);
+            Assert.Equal("", doc.Entries[0].Records[PwSafe.RecordType.Title].Text);
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(NotSupportedException))]
+        [Fact]
         public void RecordCollection_ReadOnly_IndexerWrite() {
-            var doc = new Document("Password");
-            doc.Entries.Add(new Entry());
-            doc.IsReadOnly = true;
-            doc.Entries[0].Records[RecordType.Title] = null;
+            Assert.Throws<NotSupportedException>(() => {
+                var doc = new PwSafe.Document("Password");
+                doc.Entries.Add(new PwSafe.Entry());
+                doc.IsReadOnly = true;
+                doc.Entries[0].Records[PwSafe.RecordType.Title] = null;
+            });
         }
 
     }
