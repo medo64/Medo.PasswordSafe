@@ -139,7 +139,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
 
         /// <summary>
-        /// Gets data as bytes.
+        /// Returns data as bytes.
         /// </summary>
         public byte[] GetBytes() {
             var data = this.RawData;
@@ -153,7 +153,14 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
         /// <summary>
-        /// Sets data as bytes.
+        /// Returns data as bytes without marking the field as accessed.
+        /// </summary>
+        internal byte[] GetBytesSilently() {
+            return this.RawDataDirect;
+        }
+
+        /// <summary>
+        /// Sets byte data.
         /// </summary>
         /// <param name="value">Bytes.</param>
         /// <exception cref="System.ArgumentNullException">Value cannot be null.</exception>

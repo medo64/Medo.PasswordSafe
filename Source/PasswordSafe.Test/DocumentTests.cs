@@ -152,6 +152,102 @@ namespace PasswordSafe.Test {
             }
         }
 
+
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 (track read bytes)")]
+        public void Document_Simple_TrackAccess_ReadBytes() {
+            var msSave = new MemoryStream();
+            using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
+                doc.TrackModify = false;
+
+                doc.Headers[PwSafe.HeaderType.NonDefaultPreferences] = null;
+                doc.Headers[PwSafe.HeaderType.RecentlyUsedEntries] = null;
+                var x = doc.Entries[0].Records[PwSafe.RecordType.Password].GetBytes(); //just access
+
+                Assert.True(doc.HasChanged);
+                doc.Save(msSave);
+                Assert.False(doc.HasChanged);
+            }
+
+            msSave.Position = 0;
+
+            using (var doc = PwSafe.Document.Load(msSave, "123")) { //reload to verify
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.Equal(6, doc.Headers.Count);
+                Assert.Equal(0x030D, doc.Version);
+                Assert.Equal(new Guid("0b073824-a406-2f4b-87b2-48656a6b5011"), doc.Uuid);
+                Assert.Equal(new DateTime(2015, 12, 28, 8, 36, 59, DateTimeKind.Utc), doc.LastSaveTime);
+                Assert.Equal("Josip", doc.LastSaveUser);
+                Assert.Equal("GANDALF", doc.LastSaveHost);
+                Assert.Equal("Password Safe V3.37", doc.LastSaveApplication);
+
+                Assert.Equal(2, doc.Entries.Count);
+
+                Assert.Equal(5, doc.Entries[0].Records.Count);
+                Assert.Equal(new Guid("f76e3ba9-afc5-594a-90bd-5c20064cc62e"), doc.Entries[0].Uuid);
+                Assert.Equal("A", doc.Entries[0].Title);
+                Assert.Equal("A123", doc.Entries[0].Password);
+                Assert.Equal(new DateTime(2015, 12, 28, 8, 36, 47, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+                Assert.True((DateTime.UtcNow >= doc.Entries[0].LastAccessTime) && (doc.Entries[0].Records.Contains(PwSafe.RecordType.LastAccessTime)));
+
+                Assert.Equal(4, doc.Entries[1].Records.Count);
+                Assert.Equal(new Guid("fb40f24e-68ec-c74e-8e87-293dd274d10c"), doc.Entries[1].Uuid);
+                Assert.Equal("B", doc.Entries[1].Title);
+                Assert.Equal("B123", doc.Entries[1].Password);
+                Assert.Equal(new DateTime(2015, 12, 28, 8, 36, 59, DateTimeKind.Utc), doc.Entries[1].CreationTime);
+
+                Assert.False(doc.HasChanged);
+            }
+        }
+
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 (don't track silently read bytes)")]
+        public void Document_Simple_TrackAccess_ReadBytesSilently() {
+            var msSave = new MemoryStream();
+            using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
+                doc.TrackModify = false;
+
+                doc.Headers[PwSafe.HeaderType.NonDefaultPreferences] = null;
+                doc.Headers[PwSafe.HeaderType.RecentlyUsedEntries] = null;
+                var x = doc.Entries[0].Records[PwSafe.RecordType.Password].GetBytesSilently(); //just access
+
+                Assert.True(doc.HasChanged);
+                doc.Save(msSave);
+                Assert.False(doc.HasChanged);
+            }
+
+            msSave.Position = 0;
+
+            using (var doc = PwSafe.Document.Load(msSave, "123")) { //reload to verify
+                doc.TrackAccess = false;
+                doc.TrackModify = false;
+
+                Assert.Equal(6, doc.Headers.Count);
+                Assert.Equal(0x030D, doc.Version);
+                Assert.Equal(new Guid("0b073824-a406-2f4b-87b2-48656a6b5011"), doc.Uuid);
+                Assert.Equal(new DateTime(2015, 12, 28, 8, 36, 59, DateTimeKind.Utc), doc.LastSaveTime);
+                Assert.Equal("Josip", doc.LastSaveUser);
+                Assert.Equal("GANDALF", doc.LastSaveHost);
+                Assert.Equal("Password Safe V3.37", doc.LastSaveApplication);
+
+                Assert.Equal(2, doc.Entries.Count);
+
+                Assert.Equal(4, doc.Entries[0].Records.Count);
+                Assert.Equal(new Guid("f76e3ba9-afc5-594a-90bd-5c20064cc62e"), doc.Entries[0].Uuid);
+                Assert.Equal("A", doc.Entries[0].Title);
+                Assert.Equal("A123", doc.Entries[0].Password);
+                Assert.Equal(new DateTime(2015, 12, 28, 8, 36, 47, DateTimeKind.Utc), doc.Entries[0].CreationTime);
+
+                Assert.Equal(4, doc.Entries[1].Records.Count);
+                Assert.Equal(new Guid("fb40f24e-68ec-c74e-8e87-293dd274d10c"), doc.Entries[1].Uuid);
+                Assert.Equal("B", doc.Entries[1].Title);
+                Assert.Equal("B123", doc.Entries[1].Password);
+                Assert.Equal(new DateTime(2015, 12, 28, 8, 36, 59, DateTimeKind.Utc), doc.Entries[1].CreationTime);
+
+                Assert.False(doc.HasChanged);
+            }
+        }
+
         [Fact(DisplayName = "PasswordSafe: Document: Load/Save Simple.psafe3 (track access)")]
         public void Document_Simple_TrackAccess() {
             var msSave = new MemoryStream();
