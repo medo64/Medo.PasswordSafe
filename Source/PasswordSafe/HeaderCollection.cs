@@ -96,7 +96,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public void Clear() {
             if (this.IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
 
-            for (int i = this.BaseCollection.Count - 1; i > 0; i--) { //remove all except first field (Version)
+            for (var i = this.BaseCollection.Count - 1; i > 0; i--) { //remove all except first field (Version)
                 this.BaseCollection[i].Owner = null;
                 this.BaseCollection.RemoveAt(i);
             }
@@ -279,7 +279,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
                 var newField = new Header(this, type); //create a new field if one cannot be found
 
-                int i = this.BaseCollection.Count;
+                var i = this.BaseCollection.Count;
                 for (i = 0; i < this.BaseCollection.Count; i++) {
                     if (this.BaseCollection[i].HeaderType > type) { break; }
                 }

@@ -311,7 +311,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
                 var newField = new Record(this, type); //create a new field if one cannot be found
 
-                int i = this.BaseCollection.Count;
+                var i = this.BaseCollection.Count;
                 for (i = 0; i < this.BaseCollection.Count; i++) {
                     if (this.BaseCollection[i].RecordType > type) { break; }
                 }
