@@ -605,7 +605,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 return (this._passphrase != null) ? UnprotectData(this._passphrase, this.PassphraseEntropy) : null;
             }
             set {
-                Rnd.GetBytes(PassphraseEntropy);
+                Rnd.GetBytes(this.PassphraseEntropy);
                 this._passphrase = ProtectData(value, this.PassphraseEntropy);
                 Array.Clear(value, 0, value.Length);
             }

@@ -1,5 +1,3 @@
-root = true
-
 [*]
 indent_style             = space
 indent_size              = 4
@@ -11,10 +9,10 @@ insert_final_newline     = true
 max_line_length          = off
 
 [*.cs]
-dotnet_style_qualification_for_field                               = true       : silent
+dotnet_style_qualification_for_field                               = true       : suggestion
 dotnet_style_qualification_for_property                            = true       : suggestion
 dotnet_style_qualification_for_method                              = true       : suggestion
-dotnet_style_qualification_for_event                               = false      : silent
+dotnet_style_qualification_for_event                               = true       : suggestion
 dotnet_style_predefined_type_for_locals_parameters_members         = true       : silent
 dotnet_style_predefined_type_for_member_access                     = true       : silent
 dotnet_style_object_initializer                                    = true       : suggestion
@@ -32,7 +30,7 @@ csharp_style_expression_bodied_properties                          = false      
 csharp_style_expression_bodied_indexers                            = false      : suggestion
 csharp_style_expression_bodied_accessors                           = false      : suggestion
 csharp_style_pattern_matching_over_is_with_cast_check              = true       : suggestion
-csharp_style_pattern_matching_over_as_with_null_check              = true       : silent
+csharp_style_pattern_matching_over_as_with_null_check              = true       : suggestion
 csharp_style_inlined_variable_declaration                          = true       : suggestion
 csharp_prefer_simple_default_expression                            = true       : suggestion
 csharp_style_throw_expression                                      = true       : silent
