@@ -19,6 +19,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 new Header(HeaderType.Uuid,Guid.NewGuid().ToByteArray()),
             });
             this.Entries = new EntryCollection(this);
+            this.PasswordPolicies = new PasswordPolicyCollection(this);
 
             this.TrackAccess = true;
             this.TrackModify = true;
@@ -53,6 +54,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
         internal Document(ICollection<Header> headers, params ICollection<Record>[] records) {
             this.Headers = new HeaderCollection(this, headers);
+            this.PasswordPolicies = new PasswordPolicyCollection(this);
             this.Entries = new EntryCollection(this, records);
 
             this.TrackAccess = true;
@@ -150,6 +152,11 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets list of entries.
         /// </summary>
         public EntryCollection Entries { get; }
+
+        /// <summary>
+        /// Gets list of password policies.
+        /// </summary>
+        public PasswordPolicyCollection PasswordPolicies { get; }
 
 
         #region Load/Save

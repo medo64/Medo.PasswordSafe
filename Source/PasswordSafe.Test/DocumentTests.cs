@@ -1186,6 +1186,157 @@ namespace PasswordSafe.Test {
         }
 
 
+        [Fact(DisplayName = "PasswordSafe: Document: Load/Save Policies.psafe3")]
+        public void Document_Policies() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = PwSafe.Document.Load(GetResourceStream("Policies.psafe3"), "123")) {
+                    Assert.False(doc.HasChanged);
+                    Assert.Equal(1, doc.Entries.Count);
+
+                    Assert.Equal(3, doc.PasswordPolicies.Count);
+
+                    var policy1 = doc.PasswordPolicies[0];
+                    Assert.Equal("Even", policy1.Name);
+                    Assert.Equal((int)(PwSafe.PasswordPolicyStyle.UseUppercase | PwSafe.PasswordPolicyStyle.UseSymbols | PwSafe.PasswordPolicyStyle.MakePronounceable), (int)policy1.Style);
+                    Assert.Equal(12, policy1.TotalPasswordLength);
+                    Assert.Equal(0, policy1.MinimumLowercaseCount);
+                    Assert.Equal(0, policy1.MinimumUppercaseCount);
+                    Assert.Equal(1, policy1.MinimumDigitCount);
+                    Assert.Equal(3, policy1.MinimumSymbolCount);
+                    Assert.Equal("!#$&(+@|", new string(policy1.GetSpecialSymbolSet()));
+
+                    var policy2 = doc.PasswordPolicies[1];
+                    Assert.Equal("Hex", policy2.Name);
+                    Assert.Equal((int)(PwSafe.PasswordPolicyStyle.UseHexDigits), (int)policy2.Style);
+                    Assert.Equal(10, policy2.TotalPasswordLength);
+                    Assert.Equal(0, policy2.MinimumLowercaseCount);
+                    Assert.Equal(0, policy2.MinimumUppercaseCount);
+                    Assert.Equal(0, policy2.MinimumDigitCount);
+                    Assert.Equal(0, policy2.MinimumSymbolCount);
+                    Assert.Equal("!#$%&()*+,-./:;<=>?@[\\]^_{|}~", new string(policy2.GetSpecialSymbolSet()));
+
+                    var policy3 = doc.PasswordPolicies[2];
+                    Assert.Equal("Odd", policy3.Name);
+                    Assert.Equal((int)(PwSafe.PasswordPolicyStyle.UseLowercase | PwSafe.PasswordPolicyStyle.UseDigits | PwSafe.PasswordPolicyStyle.UseEasyVision), (int)policy3.Style);
+                    Assert.Equal(11, policy3.TotalPasswordLength);
+                    Assert.Equal(2, policy3.MinimumLowercaseCount);
+                    Assert.Equal(4, policy3.MinimumUppercaseCount);
+                    Assert.Equal(1, policy3.MinimumDigitCount);
+                    Assert.Equal(3, policy3.MinimumSymbolCount);
+                    Assert.Equal("!#$%&()*+,-./:;<=>?@[\\]^_{|}~", new string(policy3.GetSpecialSymbolSet()));
+
+                    doc.Save(msFile);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = PwSafe.Document.Load(msFile, "123")) {
+                    Assert.False(doc.HasChanged);
+                    Assert.Equal(1, doc.Entries.Count);
+
+                    Assert.Equal(3, doc.PasswordPolicies.Count);
+
+                    var policy1 = doc.PasswordPolicies[0];
+                    Assert.Equal("Even", policy1.Name);
+                    Assert.Equal((int)(PwSafe.PasswordPolicyStyle.UseUppercase | PwSafe.PasswordPolicyStyle.UseSymbols | PwSafe.PasswordPolicyStyle.MakePronounceable), (int)policy1.Style);
+                    Assert.Equal(12, policy1.TotalPasswordLength);
+                    Assert.Equal(0, policy1.MinimumLowercaseCount);
+                    Assert.Equal(0, policy1.MinimumUppercaseCount);
+                    Assert.Equal(1, policy1.MinimumDigitCount);
+                    Assert.Equal(3, policy1.MinimumSymbolCount);
+                    Assert.Equal("!#$&(+@|", new string(policy1.GetSpecialSymbolSet()));
+
+                    var policy2 = doc.PasswordPolicies[1];
+                    Assert.Equal("Hex", policy2.Name);
+                    Assert.Equal((int)(PwSafe.PasswordPolicyStyle.UseHexDigits), (int)policy2.Style);
+                    Assert.Equal(10, policy2.TotalPasswordLength);
+                    Assert.Equal(0, policy2.MinimumLowercaseCount);
+                    Assert.Equal(0, policy2.MinimumUppercaseCount);
+                    Assert.Equal(0, policy2.MinimumDigitCount);
+                    Assert.Equal(0, policy2.MinimumSymbolCount);
+                    Assert.Equal("!#$%&()*+,-./:;<=>?@[\\]^_{|}~", new string(policy2.GetSpecialSymbolSet()));
+
+                    var policy3 = doc.PasswordPolicies[2];
+                    Assert.Equal("Odd", policy3.Name);
+                    Assert.Equal((int)(PwSafe.PasswordPolicyStyle.UseLowercase | PwSafe.PasswordPolicyStyle.UseDigits | PwSafe.PasswordPolicyStyle.UseEasyVision), (int)policy3.Style);
+                    Assert.Equal(11, policy3.TotalPasswordLength);
+                    Assert.Equal(2, policy3.MinimumLowercaseCount);
+                    Assert.Equal(4, policy3.MinimumUppercaseCount);
+                    Assert.Equal(1, policy3.MinimumDigitCount);
+                    Assert.Equal(3, policy3.MinimumSymbolCount);
+                    Assert.Equal("!#$%&()*+,-./:;<=>?@[\\]^_{|}~", new string(policy3.GetSpecialSymbolSet()));
+                }
+            }
+        }
+
+
+        [Fact(DisplayName = "PasswordSafe: Document: Single policy")]
+        public void Document_Policies_Single() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new PwSafe.Document("123")) {
+                    doc.Headers[PwSafe.HeaderType.NamedPasswordPolicies].Text = "0104Test020000a00100200300400";
+                    doc.Save(msFile);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = PwSafe.Document.Load(msFile, "123")) {
+                    Assert.Equal(1, doc.PasswordPolicies.Count);
+                    var policy = doc.PasswordPolicies[0];
+                    Assert.Equal("Test", policy.Name);
+                    Assert.Equal(0x0200, (int)policy.Style);
+                    Assert.Equal(10, policy.TotalPasswordLength);
+                    Assert.Equal(1, policy.MinimumLowercaseCount);
+                    Assert.Equal(2, policy.MinimumUppercaseCount);
+                    Assert.Equal(3, policy.MinimumDigitCount);
+                    Assert.Equal(4, policy.MinimumSymbolCount);
+                    Assert.Equal("", new string(policy.GetSpecialSymbolSet()));
+                }
+            }
+        }
+
+        [Fact(DisplayName = "PasswordSafe: Document: Single policy (too short)")]
+        public void Document_Policies_Single_TooShort() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new PwSafe.Document("123")) {
+                    doc.Headers[PwSafe.HeaderType.NamedPasswordPolicies].Text = "0104Test020000a0010020030040";
+                    doc.Save(msFile);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = PwSafe.Document.Load(msFile, "123")) {
+                    Assert.Equal(0, doc.PasswordPolicies.Count);
+                }
+            }
+        }
+
+        [Fact(DisplayName = "PasswordSafe: Document: Single policy (too long)")]
+        public void Document_Policies_Single_TooLong() {
+            using (var msFile = new MemoryStream()) {
+                using (var doc = new PwSafe.Document("123")) {
+                    doc.Headers[PwSafe.HeaderType.NamedPasswordPolicies].Text = "0104Test020000a00100200300400+";
+                    doc.Save(msFile);
+                }
+
+                msFile.Position = 0;
+
+                using (var doc = PwSafe.Document.Load(msFile, "123")) {
+                    Assert.Equal(1, doc.PasswordPolicies.Count);
+                    var policy = doc.PasswordPolicies[0];
+                    Assert.Equal("Test", policy.Name);
+                    Assert.Equal(0x0200, (int)policy.Style);
+                    Assert.Equal(10, policy.TotalPasswordLength);
+                    Assert.Equal(1, policy.MinimumLowercaseCount);
+                    Assert.Equal(2, policy.MinimumUppercaseCount);
+                    Assert.Equal(3, policy.MinimumDigitCount);
+                    Assert.Equal(4, policy.MinimumSymbolCount);
+                    Assert.Equal("", new string(policy.GetSpecialSymbolSet()));
+                }
+            }
+        }
+
+
         #region Utils
 
         private static MemoryStream GetResourceStream(string fileName) {
