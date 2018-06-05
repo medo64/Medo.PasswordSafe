@@ -10,9 +10,9 @@ namespace Medo.Security.Cryptography.PasswordSafe {
     /// Password policy collection.
     /// </summary>
     [DebuggerDisplay("{Count} policies")]
-    public sealed class PasswordPolicyCollection : IEnumerable<PasswordPolicy> {
+    public sealed class NamedPasswordPolicyCollection : IEnumerable<NamedPasswordPolicy> {
 
-        internal PasswordPolicyCollection(Document owner) {
+        internal NamedPasswordPolicyCollection(Document owner) {
             this.Owner = owner;
 
             if (owner.Headers.Contains(HeaderType.NamedPasswordPolicies)) {
@@ -65,7 +65,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        private readonly List<PasswordPolicy> BaseCollection = new List<PasswordPolicy>();
+        private readonly List<NamedPasswordPolicy> BaseCollection = new List<NamedPasswordPolicy>();
 
 
         /// <summary>
@@ -80,13 +80,13 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         /// <param name="index">The zero-based index of the element to get or set.</param>
         /// <exception cref="ArgumentOutOfRangeException">Index is less than 0. -or- Index is equal to or greater than collection count. -or- Duplicate name in collection.</exception>
-        public PasswordPolicy this[int index] {
+        public NamedPasswordPolicy this[int index] {
             get { return this.BaseCollection[index]; }
         }
 
         #region IEnumerable
 
-        IEnumerator<PasswordPolicy> IEnumerable<PasswordPolicy>.GetEnumerator() {
+        IEnumerator<NamedPasswordPolicy> IEnumerable<NamedPasswordPolicy>.GetEnumerator() {
             return this.BaseCollection.AsReadOnly().GetEnumerator();
         }
 
@@ -99,7 +99,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
         #region Parse
 
-        private IEnumerable<PasswordPolicy> ParseMultiple(string text) {
+        private IEnumerable<NamedPasswordPolicy> ParseMultiple(string text) {
             var sb = new StringBuilder(text);
 
             if ((sb.Length < 2) || !int.TryParse(sb.ToString(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var count)) {
@@ -113,7 +113,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             }
         }
 
-        private PasswordPolicy ParseSingle(StringBuilder text) {
+        private NamedPasswordPolicy ParseSingle(StringBuilder text) {
             if ((text.Length < 2) || !int.TryParse(text.ToString(0, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var nameLength)) {
                 return null;
             }
@@ -167,7 +167,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             text.Remove(0, symbolLength);
 
             try {
-                return new PasswordPolicy(this, name, (PasswordPolicyStyle)styleFlags, totalPasswordLength,
+                return new NamedPasswordPolicy(this, name, (PasswordPolicyStyle)styleFlags, totalPasswordLength,
                     minimumLowercase, minimumUppercase, minimumDigits, minimumSymbols, symbols.ToCharArray());
             } catch (ArgumentException) {
                 return null;
