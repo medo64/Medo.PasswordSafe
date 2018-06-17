@@ -1018,16 +1018,23 @@ namespace PasswordSafe.Test {
 
                     msFile.SetLength(0); //clean previous save
 
+                    Assert.Equal("50-61-73-73-77-6F-72-64", BitConverter.ToString(doc.GetPassphrase()));
+
                     doc.ChangePassphrase("Password2");
                     Assert.True(doc.HasChanged);
 
+                    Assert.Equal("50-61-73-73-77-6F-72-64-32", BitConverter.ToString(doc.GetPassphrase()));
+
                     doc.Save(msFile);
                     Assert.False(doc.HasChanged);
+
+                    Assert.Equal("50-61-73-73-77-6F-72-64-32", BitConverter.ToString(doc.GetPassphrase()));
                 }
 
                 msFile.Position = 0;
 
                 using (var doc = PwSafe.Document.Load(msFile, "Password2")) {
+                    Assert.Equal("50-61-73-73-77-6F-72-64-32", BitConverter.ToString(doc.GetPassphrase()));
                     Assert.Equal(1, doc.Entries.Count);
                     Assert.Equal("Test", doc.Entries[0].Title);
                 }
@@ -1043,18 +1050,25 @@ namespace PasswordSafe.Test {
                     doc.Save(msFile);
                     Assert.False(doc.HasChanged);
 
+                    Assert.Equal("50-61-73-73-77-6F-72-64", BitConverter.ToString(doc.GetPassphrase()));
+
                     var result = doc.TryChangePassphrase("Password", "Password2");
                     Assert.True(result);
                     Assert.True(doc.HasChanged);
 
+                    Assert.Equal("50-61-73-73-77-6F-72-64-32", BitConverter.ToString(doc.GetPassphrase()));
+
                     msFile.SetLength(0); //clean previous save
                     doc.Save(msFile);
                     Assert.False(doc.HasChanged);
+
+                    Assert.Equal("50-61-73-73-77-6F-72-64-32", BitConverter.ToString(doc.GetPassphrase()));
                 }
 
                 msFile.Position = 0;
 
                 using (var doc = PwSafe.Document.Load(msFile, "Password2")) {
+                    Assert.Equal("50-61-73-73-77-6F-72-64-32", BitConverter.ToString(doc.GetPassphrase()));
                     Assert.Equal(1, doc.Entries.Count);
                     Assert.Equal("Test", doc.Entries[0].Title);
                 }
@@ -1069,18 +1083,25 @@ namespace PasswordSafe.Test {
                     doc.Save(msFile);
                     Assert.False(doc.HasChanged);
 
+                    Assert.Equal("50-61-73-73-77-6F-72-64", BitConverter.ToString(doc.GetPassphrase()));
+
                     var result = doc.TryChangePassphrase("Password1", "Password2");
                     Assert.False(result);
                     Assert.False(doc.HasChanged);
 
+                    Assert.Equal("50-61-73-73-77-6F-72-64", BitConverter.ToString(doc.GetPassphrase()));
+
                     msFile.SetLength(0); //clean previous save
                     doc.Save(msFile);
                     Assert.False(doc.HasChanged);
+
+                    Assert.Equal("50-61-73-73-77-6F-72-64", BitConverter.ToString(doc.GetPassphrase()));
                 }
 
                 msFile.Position = 0;
 
                 using (var doc = PwSafe.Document.Load(msFile, "Password")) {
+                    Assert.Equal("50-61-73-73-77-6F-72-64", BitConverter.ToString(doc.GetPassphrase()));
                     Assert.Equal(1, doc.Entries.Count);
                     Assert.Equal("Test", doc.Entries[0].Title);
                 }
