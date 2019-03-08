@@ -411,8 +411,23 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Medo.Security.Cryptography.PasswordSafe.Field.set_Text(System.String)", Justification = "String is not exposed to the end user.")]
         public void Save(Stream stream, byte[] passphraseBuffer) {
+            this.Save(stream, passphraseBuffer, null);
+        }
+
+        /// <summary>
+        /// Save document.
+        /// If key buffer is given, keys won't be randomized. This will reduce security!
+        /// If passphrase is null, attempt will be made to use passphrase that was used for load.
+        /// </summary>
+        /// <param name="stream">Stream.</param>
+        /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Medo.Security.Cryptography.PasswordSafe.Field.set_Text(System.String)", Justification = "String is not exposed to the end user.")]
+        internal void Save(Stream stream, byte[] passphraseBuffer, byte[] keyBuffer) {
             if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
+            if (passphraseBuffer == null) { passphraseBuffer = this.GetPassphrase(); } //first try old passphrase
             if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
+            if ((keyBuffer != null) && (keyBuffer.Length != 64)) { throw new ArgumentOutOfRangeException(nameof(keyBuffer), "Keys must be 64 bytes long."); }
 
             if (!this.IsReadOnly && this.TrackModify) {
                 this.Headers[HeaderType.TimestampOfLastSave].Time = DateTime.UtcNow;
@@ -427,7 +442,6 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             byte[] stretchedKey = null;
             byte[] keyK = null;
             byte[] keyL = null;
-            //byte[] data = null;
             try {
                 stream.Write(BitConverter.GetBytes(Tag), 0, 4);
 
@@ -443,11 +457,16 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 stream.Write(GetSha256Hash(stretchedKey), 0, 32);
 
                 keyK = new byte[32];
-                Rnd.GetBytes(keyK);
-                stream.Write(EncryptKey(stretchedKey, keyK, 0), 0, 32);
-
                 keyL = new byte[32];
-                Rnd.GetBytes(keyL);
+                if (keyBuffer == null) {
+                    Rnd.GetBytes(keyK);
+                    Rnd.GetBytes(keyL);
+                } else {
+                    Buffer.BlockCopy(keyBuffer, 0, keyK, 0, keyK.Length);
+                    Buffer.BlockCopy(keyBuffer, 32, keyL, 0, keyL.Length);
+                }
+
+                stream.Write(EncryptKey(stretchedKey, keyK, 0), 0, 32);
                 stream.Write(EncryptKey(stretchedKey, keyL, 0), 0, 32);
 
                 var iv = new byte[16];
