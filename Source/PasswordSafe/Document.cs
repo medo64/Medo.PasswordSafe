@@ -51,7 +51,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             this.NamedPasswordPolicies = new NamedPasswordPolicyCollection(this);
             this.Entries = new EntryCollection(this, records);
             this._iterations = iterations; //set directly to avoid usual minimum of 2048 iterations
-            this.SetPassphrase(passphraseBuffer);
+            if (passphraseBuffer != null) { this.SetPassphrase(passphraseBuffer); }
 
             this.TrackAccess = true;
             this.TrackModify = true;
@@ -207,8 +207,24 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
         [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
         public static Document Load(Stream stream, byte[] passphraseBuffer) {
+            return Load(stream, passphraseBuffer, null);
+        }
+
+        /// <summary>
+        /// Loads data from a file.
+        /// If both passphrase and key are present, passphrase takes precedence.
+        /// </summary>
+        /// <param name="stream">Stream.</param>
+        /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Keys must be 64 bytes long.</exception>
+        /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
+        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
+        internal static Document Load(Stream stream, byte[] passphraseBuffer, byte[] keyBuffer) {
             if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
-            if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
+            if ((passphraseBuffer == null) && (keyBuffer == null)) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
+            if ((passphraseBuffer == null) && (keyBuffer != null) && (keyBuffer.Length != 64)) { throw new ArgumentOutOfRangeException(nameof(keyBuffer), "Keys must be 64 bytes long."); }
 
             var buffer = new byte[16384];
             using (var ms = new MemoryStream()) {
@@ -235,13 +251,19 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
             byte[] stretchedKey = null, keyK = null, keyL = null, data = null;
             try {
-                stretchedKey = GetStretchedKey(passphraseBuffer, salt, iter);
-                if (!AreBytesTheSame(GetSha256Hash(stretchedKey), buffer, 40)) {
-                    throw new CryptographicException("Password mismatch.");
+                if (passphraseBuffer != null) {
+                    stretchedKey = GetStretchedKey(passphraseBuffer, salt, iter);
+                    if (!AreBytesTheSame(GetSha256Hash(stretchedKey), buffer, 40)) {
+                        throw new CryptographicException("Password mismatch.");
+                    }
+                    keyK = DecryptKey(stretchedKey, buffer, 72);
+                    keyL = DecryptKey(stretchedKey, buffer, 104);
+                } else {
+                    keyK = new byte[32];
+                    keyL = new byte[32];
+                    Buffer.BlockCopy(keyBuffer, 0, keyK, 0, keyK.Length);
+                    Buffer.BlockCopy(keyBuffer, 32, keyL, 0, keyL.Length);
                 }
-
-                keyK = DecryptKey(stretchedKey, buffer, 72);
-                keyL = DecryptKey(stretchedKey, buffer, 104);
 
                 var iv = new byte[16];
                 Buffer.BlockCopy(buffer, 136, iv, 0, iv.Length);
@@ -311,6 +333,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 if (keyK != null) { Array.Clear(keyK, 0, keyK.Length); }
                 if (keyL != null) { Array.Clear(keyL, 0, keyL.Length); }
                 if (data != null) { Array.Clear(data, 0, data.Length); }
+                if (buffer != null) { Array.Clear(buffer, 0, buffer.Length); }
             }
         }
 
