@@ -58,7 +58,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
         private static readonly Encoding Utf8Encoding = new UTF8Encoding(false);
         private static readonly RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
-        private byte[] RawHistoricalPasswordDataEntropy = new byte[16];
+        private readonly byte[] RawHistoricalPasswordDataEntropy = new byte[16];
 
         private byte[] _rawHistoricalPasswordData = null;
         /// <summary>

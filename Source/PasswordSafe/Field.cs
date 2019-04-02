@@ -172,8 +172,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        private static RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
-        private byte[] RawDataEntropy = new byte[16];
+        private static readonly RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
+        private readonly byte[] RawDataEntropy = new byte[16];
 
 
         private byte[] _rawData = null;

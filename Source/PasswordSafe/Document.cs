@@ -515,8 +515,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
         #region Passphrase
 
-        private static RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
-        private byte[] PassphraseEntropy = new byte[16];
+        private static readonly RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
+        private readonly byte[] PassphraseEntropy = new byte[16];
 
         private byte[] _passphraseBuffer;
 
