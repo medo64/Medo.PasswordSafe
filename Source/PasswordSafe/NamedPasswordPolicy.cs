@@ -193,7 +193,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="obj">Other object.</param>
         public override bool Equals(object obj) {
             if (obj is NamedPasswordPolicy other) {
-                return string.Equals(ToString(), obj.ToString(), StringComparison.Ordinal);
+                return string.Equals(ToString(), other.ToString(), StringComparison.Ordinal);
             }
             return false;
         }

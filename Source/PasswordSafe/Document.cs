@@ -717,15 +717,10 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         public bool TrackModify { get; set; }
 
-
-        private bool _hasChanged;
         /// <summary>
         /// Gets is document has been changed since last save.
         /// </summary>
-        public bool HasChanged {
-            get { return _hasChanged; }
-            private set { _hasChanged = value; }
-        }
+        public bool HasChanged { get; private set; }
 
         internal void MarkAsChanged() {
             HasChanged = true;
