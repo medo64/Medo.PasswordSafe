@@ -13,8 +13,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public Entry()
             : this(new Record[] {
                 new Record(RecordType.Uuid, Guid.NewGuid().ToByteArray()),
-                new Record(RecordType.Title, new byte[0]),
-                new Record(RecordType.Password, new byte[0])
+                new Record(RecordType.Title, Array.Empty<byte>()),
+                new Record(RecordType.Password, Array.Empty<byte>())
             }) {
         }
 
@@ -146,7 +146,6 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <summary>
         /// Gets/sets URL.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1056:UriPropertiesShouldNotBeStrings", Justification = "Password Safe file format doesn't require this URL to follow URL format.")]
         public string Url {
             get { return Records.Contains(RecordType.Url) ? Records[RecordType.Url].Text : ""; }
             set { Records[RecordType.Url].Text = value; }
@@ -166,9 +165,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets/sets two factor key.
         /// Should be encoded as base 32.
         /// </summary>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Performance", "CA1819:PropertiesShouldNotReturnArrays", Justification = "Property returns copy of the array (in Field.GetBytes() and Field.SetBytes()).")]
         public byte[] TwoFactorKey {
-            get { return Records.Contains(RecordType.TwoFactorKey) ? Records[RecordType.TwoFactorKey].GetBytes() : new byte[0]; }
+            get { return Records.Contains(RecordType.TwoFactorKey) ? Records[RecordType.TwoFactorKey].GetBytes() : Array.Empty<byte>(); }
             set { Records[RecordType.TwoFactorKey].SetBytes(value); }
         }
 

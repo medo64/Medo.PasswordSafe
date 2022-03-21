@@ -129,10 +129,11 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets/sets desired number of iterations.
         /// Cannot be less than 2048.
         /// </summary>
+        /// <exception cref="ArgumentOutOfRangeException">Value cannot be less than 2048.</exception>
         public int Iterations {
             get { return _iterations; }
             set {
-                if (value < 2048) { value = 2048; }
+                if (value < 2048) { throw new ArgumentOutOfRangeException(nameof(value), "Value cannot be less than 2048."); }
                 _iterations = value;
             }
         }
@@ -168,14 +169,11 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="passphrase">Password.</param>
         /// <exception cref="ArgumentNullException">File name cannot be null. -or- Passphrase cannot be null.</exception>
         /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
         public static Document Load(String fileName, string passphrase) {
             if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
-            if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
 
-            using (var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read)) {
-                return Load(stream, passphrase);
-            }
+            using var stream = new FileStream(fileName, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return Load(stream, passphrase);
         }
 
         /// <summary>
@@ -185,9 +183,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="passphrase">Password.</param>
         /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
         /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
         public static Document Load(Stream stream, string passphrase) {
-            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
             if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
 
             var passphraseBytes = Utf8Encoding.GetBytes(passphrase);
@@ -205,9 +201,21 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
         /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
         /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
         public static Document Load(Stream stream, byte[] passphraseBuffer) {
-            return Load(stream, passphraseBuffer, null);
+            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
+            return InternalLoad(stream, passphraseBuffer, null);
+        }
+
+        /// <summary>
+        /// Loads data from a file.
+        /// </summary>
+        /// <param name="stream">Stream.</param>
+        /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Keys must be 64 bytes long.</exception>
+        /// <exception cref="FormatException">Unrecognized file format. -or- Authentication mismatch.</exception>
+        public static Document LoadWithKey(Stream stream, byte[] keyBuffer) {
+            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
+            return InternalLoad(stream, null, keyBuffer);
         }
 
         /// <summary>
@@ -220,9 +228,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
         /// <exception cref="ArgumentOutOfRangeException">Keys must be 64 bytes long.</exception>
         /// <exception cref="FormatException">Unrecognized file format. -or- Password mismatch. -or- Authentication mismatch.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Reliability", "CA2000:Dispose objects before losing scope", Justification = "It is up to a caller to Dispose newly created document.")]
-        internal static Document Load(Stream stream, byte[] passphraseBuffer, byte[] keyBuffer) {
-            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
+        internal static Document InternalLoad(Stream stream, byte[]? passphraseBuffer, byte[]? keyBuffer) {
             if ((passphraseBuffer == null) && (keyBuffer == null)) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
             if ((passphraseBuffer == null) && (keyBuffer != null) && (keyBuffer.Length != 64)) { throw new ArgumentOutOfRangeException(nameof(keyBuffer), "Keys must be 64 bytes long."); }
 
@@ -249,7 +255,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
             var iter = BitConverter.ToUInt32(buffer, 36);
 
-            byte[] stretchedKey = null, keyK = null, keyL = null, data = null;
+            byte[]? stretchedKey = null, keyK = null, keyL = null, data = null;
             try {
                 if (passphraseBuffer != null) {
                     stretchedKey = GetStretchedKey(passphraseBuffer, salt, iter);
@@ -270,62 +276,61 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
                 data = DecryptData(keyK, iv, buffer, 152, buffer.Length - 200);
 
-                using (var dataHash = new HMACSHA256(keyL)) {
-                    var dataOffset = 0;
+                using var dataHash = new HMACSHA256(keyL);
+                var dataOffset = 0;
 
-                    var headerFields = new List<Header>();
-                    while (dataOffset < data.Length) {
-                        var fieldLength = BitConverter.ToInt32(data, dataOffset + 0);
-                        var fieldLengthFull = ((fieldLength + 5 - 1) / 16 + 1) * 16;
-                        var fieldType = (HeaderType)data[dataOffset + 4];
-                        var fieldData = new byte[fieldLength];
-                        try {
-                            Buffer.BlockCopy(data, dataOffset + 5, fieldData, 0, fieldLength);
-                            dataOffset += fieldLengthFull; //there is ALWAYS some random bytes added, thus extra block if 16 bytes
+                var headerFields = new List<Header>();
+                while (dataOffset < data.Length) {
+                    var fieldLength = BitConverter.ToInt32(data, dataOffset + 0);
+                    var fieldLengthFull = ((fieldLength + 5 - 1) / 16 + 1) * 16;
+                    var fieldType = (HeaderType)data[dataOffset + 4];
+                    var fieldData = new byte[fieldLength];
+                    try {
+                        Buffer.BlockCopy(data, dataOffset + 5, fieldData, 0, fieldLength);
+                        dataOffset += fieldLengthFull; //there is ALWAYS some random bytes added, thus extra block if 16 bytes
 
-                            dataHash.TransformBlock(fieldData, 0, fieldData.Length, null, 0); //not hashing length nor type - wtf?
-                            if (fieldType == HeaderType.EndOfEntry) { break; }
+                        dataHash.TransformBlock(fieldData, 0, fieldData.Length, null, 0); //not hashing length nor type - wtf?
+                        if (fieldType == HeaderType.EndOfEntry) { break; }
 
-                            headerFields.Add(new Header(fieldType, fieldData));
-                        } finally {
-                            Array.Clear(fieldData, 0, fieldData.Length);
-                        }
+                        headerFields.Add(new Header(fieldType, fieldData));
+                    } finally {
+                        Array.Clear(fieldData, 0, fieldData.Length);
                     }
-
-                    if ((headerFields.Count == 0) || (headerFields[0].Version < 0x0300)) { throw new FormatException("Unrecognized file format version."); }
-
-                    var recordFields = new List<List<Record>>();
-                    List<Record> records = null;
-                    while (dataOffset < data.Length) {
-                        var fieldLength = BitConverter.ToInt32(data, dataOffset + 0);
-                        var fieldLengthFull = ((fieldLength + 5 - 1) / 16 + 1) * 16;
-                        var fieldType = (RecordType)data[dataOffset + 4];
-                        var fieldData = new byte[fieldLength];
-                        try {
-                            Buffer.BlockCopy(data, dataOffset + 5, fieldData, 0, fieldLength);
-                            dataOffset += fieldLengthFull; //there is ALWAYS some random bytes added, thus extra block if 16 bytes
-
-                            dataHash.TransformBlock(fieldData, 0, fieldData.Length, null, 0); //not hashing length nor type - wtf?
-                            if (fieldType == RecordType.EndOfEntry) { records = null; continue; }
-
-                            if (records == null) {
-                                records = new List<Record>();
-                                recordFields.Add(records);
-                            }
-                            records.Add(new Record(fieldType, fieldData));
-                        } finally {
-                            Array.Clear(fieldData, 0, fieldData.Length);
-                        }
-                    }
-
-                    dataHash.TransformFinalBlock(new byte[] { }, 0, 0);
-
-                    if (!AreBytesTheSame(dataHash.Hash, buffer, buffer.Length - 32)) {
-                        throw new CryptographicException("Authentication mismatch.");
-                    }
-
-                    return new Document(passphraseBuffer, (int)iter, headerFields, recordFields.ToArray());
                 }
+
+                if ((headerFields.Count == 0) || (headerFields[0].Version < 0x0300)) { throw new FormatException("Unrecognized file format version."); }
+
+                var recordFields = new List<List<Record>>();
+                List<Record> records = null;
+                while (dataOffset < data.Length) {
+                    var fieldLength = BitConverter.ToInt32(data, dataOffset + 0);
+                    var fieldLengthFull = ((fieldLength + 5 - 1) / 16 + 1) * 16;
+                    var fieldType = (RecordType)data[dataOffset + 4];
+                    var fieldData = new byte[fieldLength];
+                    try {
+                        Buffer.BlockCopy(data, dataOffset + 5, fieldData, 0, fieldLength);
+                        dataOffset += fieldLengthFull; //there is ALWAYS some random bytes added, thus extra block if 16 bytes
+
+                        dataHash.TransformBlock(fieldData, 0, fieldData.Length, null, 0); //not hashing length nor type - wtf?
+                        if (fieldType == RecordType.EndOfEntry) { records = null; continue; }
+
+                        if (records == null) {
+                            records = new List<Record>();
+                            recordFields.Add(records);
+                        }
+                        records.Add(new Record(fieldType, fieldData));
+                    } finally {
+                        Array.Clear(fieldData, 0, fieldData.Length);
+                    }
+                }
+
+                dataHash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+
+                if (!AreBytesTheSame(dataHash.Hash, buffer, buffer.Length - 32)) {
+                    throw new CryptographicException("Authentication mismatch.");
+                }
+
+                return new Document(passphraseBuffer, (int)iter, headerFields, recordFields.ToArray());
             } catch (CryptographicException ex) {
                 throw new FormatException(ex.Message, ex);
             } finally { //best effort to sanitize memory
@@ -347,9 +352,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public void Save(string fileName) {
             if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
 
-            using (var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
-                Save(stream);
-            }
+            using var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            Save(stream);
         }
 
         /// <summary>
@@ -359,8 +363,6 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <exception cref="ArgumentNullException">Stream cannot be null.</exception>
         /// <exception cref="NotSupportedException">Missing passphrase.</exception>
         public void Save(Stream stream) {
-            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
-
             var passphraseBytes = GetPassphrase();
             if (passphraseBytes == null) { throw new NotSupportedException("Missing passphrase."); }
             try {
@@ -378,11 +380,9 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <exception cref="ArgumentNullException">File name cannot be null. -or- Passphrase cannot be null.</exception>
         public void Save(string fileName, string passphrase) {
             if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
-            if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
 
-            using (var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write)) {
-                Save(stream, passphrase);
-            }
+            using var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
+            Save(stream, passphrase);
         }
 
         /// <summary>
@@ -409,9 +409,20 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         /// <param name="stream">Stream.</param>
         /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Medo.Security.Cryptography.PasswordSafe.Field.set_Text(System.String)", Justification = "String is not exposed to the end user.")]
         public void Save(Stream stream, byte[] passphraseBuffer) {
-            Save(stream, passphraseBuffer, null);
+            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
+            InternalSave(stream, passphraseBuffer, null);
+        }
+
+        /// <summary>
+        /// Save document.
+        /// </summary>
+        /// <param name="stream">Stream.</param>
+        /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+        /// <exception cref="ArgumentOutOfRangeException">Keys must be 64 bytes long.</exception>
+        public void SaveWithKey(Stream stream, byte[] keyBuffer) {
+            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
+            InternalSave(stream, null, keyBuffer);
         }
 
         /// <summary>
@@ -422,9 +433,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="stream">Stream.</param>
         /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
         /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Globalization", "CA1303:Do not pass literals as localized parameters", MessageId = "Medo.Security.Cryptography.PasswordSafe.Field.set_Text(System.String)", Justification = "String is not exposed to the end user.")]
-        internal void Save(Stream stream, byte[] passphraseBuffer, byte[] keyBuffer) {
-            if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
+        internal void InternalSave(Stream stream, byte[]? passphraseBuffer, byte[]? keyBuffer) {
             if (passphraseBuffer == null) { passphraseBuffer = GetPassphrase(); } //first try old passphrase
             if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
             if ((keyBuffer != null) && (keyBuffer.Length != 64)) { throw new ArgumentOutOfRangeException(nameof(keyBuffer), "Keys must be 64 bytes long."); }
@@ -449,7 +458,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 Rnd.GetBytes(salt);
                 stream.Write(salt, 0, salt.Length);
 
-                Iterations = Iterations; //to force minimum iteration count
+                if (Iterations < 2048) { Iterations = 2048; }  // to force minimum iteration count
                 var iter = (uint)Iterations;
                 stream.Write(BitConverter.GetBytes(iter), 0, 4);
 
@@ -473,37 +482,36 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 Rnd.GetBytes(iv);
                 stream.Write(iv, 0, iv.Length);
 
-                using (var dataHash = new HMACSHA256(keyL))
-                using (var twofish = new TwofishManaged()) {
-                    twofish.Mode = CipherMode.CBC;
-                    twofish.Padding = PaddingMode.None;
-                    twofish.KeySize = 256;
-                    twofish.Key = keyK;
-                    twofish.IV = iv;
-                    using (var dataEncryptor = twofish.CreateEncryptor()) {
-                        foreach (var field in Headers) {
-                            WriteBlock(stream, dataHash, dataEncryptor, (byte)field.HeaderType, field.RawData);
-                        }
-                        WriteBlock(stream, dataHash, dataEncryptor, (byte)HeaderType.EndOfEntry, new byte[] { });
-
-                        foreach (var entry in Entries) {
-                            foreach (var field in entry.Records) {
-                                WriteBlock(stream, dataHash, dataEncryptor, (byte)field.RecordType, field.RawData);
-                            }
-                            WriteBlock(stream, dataHash, dataEncryptor, (byte)RecordType.EndOfEntry, new byte[] { });
-                        }
+                using var dataHash = new HMACSHA256(keyL);
+                using var twofish = new TwofishManaged();
+                twofish.Mode = CipherMode.CBC;
+                twofish.Padding = PaddingMode.None;
+                twofish.KeySize = 256;
+                twofish.Key = keyK;
+                twofish.IV = iv;
+                using (var dataEncryptor = twofish.CreateEncryptor()) {
+                    foreach (var field in Headers) {
+                        WriteBlock(stream, dataHash, dataEncryptor, (byte)field.HeaderType, field.RawData);
                     }
+                    WriteBlock(stream, dataHash, dataEncryptor, (byte)HeaderType.EndOfEntry, Array.Empty<byte>());
 
-                    dataHash.TransformFinalBlock(new byte[] { }, 0, 0);
-
-                    stream.Write(BitConverter.GetBytes(Tag), 0, 4);
-                    stream.Write(BitConverter.GetBytes(TagEof), 0, 4);
-                    stream.Write(BitConverter.GetBytes(Tag), 0, 4);
-                    stream.Write(BitConverter.GetBytes(TagEof), 0, 4);
-
-                    stream.Write(dataHash.Hash, 0, dataHash.Hash.Length);
-                    HasChanged = false;
+                    foreach (var entry in Entries) {
+                        foreach (var field in entry.Records) {
+                            WriteBlock(stream, dataHash, dataEncryptor, (byte)field.RecordType, field.RawData);
+                        }
+                        WriteBlock(stream, dataHash, dataEncryptor, (byte)RecordType.EndOfEntry, Array.Empty<byte>());
+                    }
                 }
+
+                dataHash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+
+                stream.Write(BitConverter.GetBytes(Tag), 0, 4);
+                stream.Write(BitConverter.GetBytes(TagEof), 0, 4);
+                stream.Write(BitConverter.GetBytes(Tag), 0, 4);
+                stream.Write(BitConverter.GetBytes(TagEof), 0, 4);
+
+                stream.Write(dataHash.Hash, 0, dataHash.Hash.Length);
+                HasChanged = false;
             } finally {
                 if (stretchedKey != null) { Array.Clear(stretchedKey, 0, stretchedKey.Length); }
                 if (keyK != null) { Array.Clear(keyK, 0, keyK.Length); }
@@ -518,14 +526,15 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         private static readonly RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
         private readonly byte[] PassphraseEntropy = new byte[16];
 
-        private byte[] _passphraseBuffer;
+        private byte[]? _passphraseBuffer;  // to remember passphrase for save
 
         /// <summary>
         /// Returns passphrase used to open a file.
         /// Bytes are kept encrypted in memory until accessed.
         /// It's caller responsibility to dispose of returned bytes.
+        /// Returns null if no passphrase was used.
         /// </summary>
-        public byte[] GetPassphrase() {
+        public byte[]? GetPassphrase() {
             return (_passphraseBuffer != null) ? UnprotectData(_passphraseBuffer, PassphraseEntropy) : null;
         }
 
@@ -730,40 +739,37 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         #region Utility functions
 
         private static byte[] DecryptKey(byte[] stretchedKey, byte[] buffer, int offset) {
-            using (var twofish = new TwofishManaged()) {
-                twofish.Mode = CipherMode.ECB;
-                twofish.Padding = PaddingMode.None;
-                twofish.KeySize = 256;
-                twofish.Key = stretchedKey;
-                using (var transform = twofish.CreateDecryptor()) {
-                    return transform.TransformFinalBlock(buffer, offset, 32);
-                }
-            }
+            using var twofish = new TwofishManaged();
+            twofish.Mode = CipherMode.ECB;
+            twofish.Padding = PaddingMode.None;
+            twofish.KeySize = 256;
+            twofish.Key = stretchedKey;
+
+            using var transform = twofish.CreateDecryptor();
+            return transform.TransformFinalBlock(buffer, offset, 32);
         }
 
         private static byte[] EncryptKey(byte[] stretchedKey, byte[] buffer, int offset) {
-            using (var twofish = new TwofishManaged()) {
-                twofish.Mode = CipherMode.ECB;
-                twofish.Padding = PaddingMode.None;
-                twofish.KeySize = 256;
-                twofish.Key = stretchedKey;
-                using (var transform = twofish.CreateEncryptor()) {
-                    return transform.TransformFinalBlock(buffer, offset, 32);
-                }
-            }
+            using var twofish = new TwofishManaged();
+            twofish.Mode = CipherMode.ECB;
+            twofish.Padding = PaddingMode.None;
+            twofish.KeySize = 256;
+            twofish.Key = stretchedKey;
+
+            using var transform = twofish.CreateEncryptor();
+            return transform.TransformFinalBlock(buffer, offset, 32);
         }
 
         private static byte[] DecryptData(byte[] key, byte[] iv, byte[] buffer, int offset, int length) {
-            using (var twofish = new TwofishManaged()) {
-                twofish.Mode = CipherMode.CBC;
-                twofish.Padding = PaddingMode.None;
-                twofish.KeySize = 256;
-                twofish.Key = key;
-                twofish.IV = iv;
-                using (var dataDecryptor = twofish.CreateDecryptor()) {
-                    return dataDecryptor.TransformFinalBlock(buffer, offset, length);
-                }
-            }
+            using var twofish = new TwofishManaged();
+            twofish.Mode = CipherMode.CBC;
+            twofish.Padding = PaddingMode.None;
+            twofish.KeySize = 256;
+            twofish.Key = key;
+            twofish.IV = iv;
+
+            using var dataDecryptor = twofish.CreateDecryptor();
+            return dataDecryptor.TransformFinalBlock(buffer, offset, length);
         }
 
         private static byte[] GetStretchedKey(byte[] passphrase, byte[] salt, uint iterations) {
@@ -775,13 +781,12 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
         private static byte[] GetSha256Hash(params byte[][] buffers) {
-            using (var hash = new SHA256Managed()) {
-                foreach (var buffer in buffers) {
-                    hash.TransformBlock(buffer, 0, buffer.Length, buffer, 0);
-                }
-                hash.TransformFinalBlock(new byte[] { }, 0, 0);
-                return hash.Hash;
+            using var hash = SHA256.Create();
+            foreach (var buffer in buffers) {
+                hash.TransformBlock(buffer, 0, buffer.Length, buffer, 0);
             }
+            hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            return hash.Hash;
         }
 
         private static bool AreBytesTheSame(byte[] buffer1, byte[] buffer2, int buffer2Offset) {

@@ -96,7 +96,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        private static readonly DateTime TimeMin = new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        private static readonly DateTime TimeMin = new(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         private static readonly DateTime TimeMax = TimeMin.AddSeconds(uint.MaxValue);
 
         /// <summary>
@@ -151,8 +151,16 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <summary>
         /// Returns data as bytes without marking the field as accessed.
         /// </summary>
-        internal byte[] GetBytesSilently() {
+        public byte[] GetBytesSilently() {
             return RawDataDirect;
+            //var data = RawDataDirect;
+            //try {
+            //    var dataCopy = new byte[data.Length];
+            //    Buffer.BlockCopy(data, 0, dataCopy, 0, dataCopy.Length);
+            //    return dataCopy;
+            //} finally {
+            //    Array.Clear(data, 0, data.Length);
+            //}
         }
 
         /// <summary>
@@ -218,7 +226,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         protected byte[] RawDataDirect {
             get {
-                if (_rawData == null) { return new byte[0]; } //return empty array if no value has been set so far
+                if (_rawData == null) { return Array.Empty<byte>(); } //return empty array if no value has been set so far
                 return UnprotectData(_rawData, RawDataEntropy);
             }
         }
@@ -279,13 +287,13 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Returns a string representation of an object.
         /// </summary>
         public override string ToString() {
-            switch (DataType) {
-                case PasswordSafeFieldDataType.Version: return Version.ToString("X4", CultureInfo.InvariantCulture);
-                case PasswordSafeFieldDataType.Uuid: return Uuid.ToString();
-                case PasswordSafeFieldDataType.Text: return Text;
-                case PasswordSafeFieldDataType.Time: return Time.ToLocalTime().ToString("yyyy'-'MM'-'dd HH':'mm':'ss K", CultureInfo.InvariantCulture);
-                default: return "0x" + BitConverter.ToString(RawData).Replace("-", "");
-            }
+            return DataType switch {
+                PasswordSafeFieldDataType.Version => Version.ToString("X4", CultureInfo.InvariantCulture),
+                PasswordSafeFieldDataType.Uuid => Uuid.ToString(),
+                PasswordSafeFieldDataType.Text => Text,
+                PasswordSafeFieldDataType.Time => Time.ToLocalTime().ToString("yyyy'-'MM'-'dd HH':'mm':'ss K", CultureInfo.InvariantCulture),
+                _ => "0x" + BitConverter.ToString(RawData).Replace("-", ""),
+            };
         }
 
     }

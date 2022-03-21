@@ -152,7 +152,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        private char[] _specialSymbolSet = new char[] { };
+        private char[] _specialSymbolSet = Array.Empty<char>();
         /// <summary>
         /// Returns special symbols that are allowed in the password.
         /// </summary>
@@ -172,7 +172,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             var symbols = new List<char>(specialSymbols);
             if (symbols.Count > 1) {
                 symbols.Sort();
-                var prevCh = symbols[symbols.Count - 1];
+                var prevCh = symbols[^1];
                 for (var i = symbols.Count - 2; i >= 0; i--) {
                     var currCh = symbols[i];
                     if (currCh == prevCh) {
