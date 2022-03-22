@@ -24,7 +24,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         public int Version {
             get {
-                if ((DataType == PasswordSafeFieldDataType.Version) || (DataType == PasswordSafeFieldDataType.Unknown)) {
+                if (DataType is PasswordSafeFieldDataType.Version or PasswordSafeFieldDataType.Unknown) {
                     var data = RawData;
                     try {
                         if (data.Length == 2) {
@@ -37,8 +37,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 return -1; //unknown version
             }
             set {
-                if ((DataType != PasswordSafeFieldDataType.Version) && (DataType != PasswordSafeFieldDataType.Unknown)) { throw new FormatException("Field type mismatch."); }
-                if ((value < 0) || (value > ushort.MaxValue)) { throw new ArgumentOutOfRangeException(nameof(value), "Value outside of range."); }
+                if (DataType is not PasswordSafeFieldDataType.Version and not PasswordSafeFieldDataType.Unknown) { throw new FormatException("Field type mismatch."); }
+                if (value is < 0 or > ushort.MaxValue) { throw new ArgumentOutOfRangeException(nameof(value), "Value outside of range."); }
                 RawData = BitConverter.GetBytes((ushort)value);
             }
         }
@@ -50,7 +50,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         public Guid Uuid {
             get {
-                if ((DataType == PasswordSafeFieldDataType.Uuid) || (DataType == PasswordSafeFieldDataType.Unknown)) {
+                if (DataType is PasswordSafeFieldDataType.Uuid or PasswordSafeFieldDataType.Unknown) {
                     var data = RawData;
                     try {
                         if (data.Length == 16) {
@@ -63,7 +63,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 return Guid.Empty; //unknown guid
             }
             set {
-                if ((DataType != PasswordSafeFieldDataType.Uuid) && (DataType != PasswordSafeFieldDataType.Unknown)) { throw new FormatException("Field type mismatch."); }
+                if (DataType is not PasswordSafeFieldDataType.Uuid and not PasswordSafeFieldDataType.Unknown) { throw new FormatException("Field type mismatch."); }
                 RawData = value.ToByteArray();
             }
         }
@@ -78,7 +78,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         public virtual string Text {
             get {
-                if ((DataType == PasswordSafeFieldDataType.Text) || (DataType == PasswordSafeFieldDataType.Unknown)) {
+                if (DataType is PasswordSafeFieldDataType.Text or PasswordSafeFieldDataType.Unknown) {
                     var data = RawData;
                     try {
                         return Utf8Encoding.GetString(data);
@@ -89,7 +89,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 return null;
             }
             set {
-                if ((DataType != PasswordSafeFieldDataType.Text) && (DataType != PasswordSafeFieldDataType.Unknown)) { throw new FormatException("Field type mismatch."); }
+                if (DataType is not PasswordSafeFieldDataType.Text and not PasswordSafeFieldDataType.Unknown) { throw new FormatException("Field type mismatch."); }
                 if (value == null) { throw new ArgumentNullException(nameof(value), "Value cannot be null."); }
                 RawData = Utf8Encoding.GetBytes(value);
             }
@@ -106,7 +106,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         public DateTime Time {
             get {
-                if ((DataType == PasswordSafeFieldDataType.Time) || (DataType == PasswordSafeFieldDataType.Unknown)) {
+                if (DataType is PasswordSafeFieldDataType.Time or PasswordSafeFieldDataType.Unknown) {
                     var data = RawData;
                     try {
                         if (data.Length == 4) {
@@ -126,7 +126,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 return DateTime.MinValue;
             }
             set {
-                if ((DataType != PasswordSafeFieldDataType.Time) && (DataType != PasswordSafeFieldDataType.Unknown)) { throw new FormatException("Field type mismatch."); }
+                if (DataType is not PasswordSafeFieldDataType.Time and not PasswordSafeFieldDataType.Unknown) { throw new FormatException("Field type mismatch."); }
                 if ((value < TimeMin) || (value > TimeMax)) { throw new ArgumentNullException(nameof(value), "Time outside of allowable range."); }
                 var seconds = (uint)((value.ToUniversalTime() - TimeMin).TotalSeconds);
                 RawData = BitConverter.GetBytes(seconds);

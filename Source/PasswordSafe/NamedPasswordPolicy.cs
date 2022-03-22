@@ -88,7 +88,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public int TotalPasswordLength {
             get { return _totalPasswordLength; }
             set {
-                if ((value < 1) || (value > 4095)) { throw new ArgumentOutOfRangeException(nameof(value), "Length must be between 1 and 4095."); }
+                if (value is < 1 or > 4095) { throw new ArgumentOutOfRangeException(nameof(value), "Length must be between 1 and 4095."); }
                 _totalPasswordLength = value;
                 MarkAsChanged();
             }
@@ -102,7 +102,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public int MinimumLowercaseCount {
             get { return _minimumLowercaseCount; }
             set {
-                if ((value < 0) || (value > 4095)) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
+                if (value is < 0 or > 4095) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
                 _minimumLowercaseCount = value;
                 MarkAsChanged();
             }
@@ -116,7 +116,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public int MinimumUppercaseCount {
             get { return _minimumUppercaseCount; }
             set {
-                if ((value < 0) || (value > 4095)) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
+                if (value is < 0 or > 4095) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
                 _minimumUppercaseCount = value;
                 MarkAsChanged();
             }
@@ -130,7 +130,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public int MinimumDigitCount {
             get { return _minimumDigitCount; }
             set {
-                if ((value < 0) || (value > 4095)) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
+                if (value is < 0 or > 4095) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
                 _minimumDigitCount = value;
                 MarkAsChanged();
             }
@@ -144,7 +144,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         public int MinimumSymbolCount {
             get { return _minimumSymbolCount; }
             set {
-                if ((value < 0) || (value > 4095)) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
+                if (value is < 0 or > 4095) { throw new ArgumentOutOfRangeException(nameof(value), "Count must be between 0 and 4095."); }
                 _minimumSymbolCount = value;
                 MarkAsChanged();
             }

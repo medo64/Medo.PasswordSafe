@@ -83,7 +83,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private readonly List<Record> BaseCollection = new List<Record>();
+        private readonly List<Record> BaseCollection = new();
 
 
         #region ICollection

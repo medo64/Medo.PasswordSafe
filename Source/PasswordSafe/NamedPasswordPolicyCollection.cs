@@ -65,7 +65,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        private readonly List<NamedPasswordPolicy> BaseCollection = new List<NamedPasswordPolicy>();
+        private readonly List<NamedPasswordPolicy> BaseCollection = new();
 
 
         /// <summary>

@@ -46,7 +46,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private readonly List<Header> BaseCollection = new List<Header>();
+        private readonly List<Header> BaseCollection = new();
 
 
         #region ICollection

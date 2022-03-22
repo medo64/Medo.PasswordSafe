@@ -29,7 +29,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
 
         [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-        private readonly List<Entry> BaseCollection = new List<Entry>();
+        private readonly List<Entry> BaseCollection = new();
 
 
         #region ICollection
@@ -303,7 +303,6 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="title">Title.</param>
         /// <exception cref="ArgumentOutOfRangeException">Only null value is supported.</exception>
         /// <exception cref="NotSupportedException">Collection is read-only.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1023:IndexersShouldNotBeMultidimensional", Justification = "Done intentionally for the ease of use.")]
         public Entry this[GroupPath group, string title] {
             get {
                 foreach (var entry in BaseCollection) {
@@ -347,7 +346,6 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="type">Record type.</param>
         /// <exception cref="ArgumentOutOfRangeException">Only null value is supported.</exception>
         /// <exception cref="NotSupportedException">Collection is read-only.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1023:IndexersShouldNotBeMultidimensional", Justification = "Type represents a logical data store.")]
         public Record this[string title, RecordType type] {
             get {
                 var entry = this[title];
@@ -383,7 +381,6 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// <param name="type">Record type.</param>
         /// <exception cref="ArgumentOutOfRangeException">Only null value is supported.</exception>
         /// <exception cref="NotSupportedException">Collection is read-only.</exception>
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1023:IndexersShouldNotBeMultidimensional", Justification = "Type represents a logical data store.")]
         public Record this[GroupPath group, string title, RecordType type] {
             get {
                 var entry = this[group, title];

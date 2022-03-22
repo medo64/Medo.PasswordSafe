@@ -19,7 +19,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
         internal Record(RecordType type, byte[] rawData) : base() {
-            if ((type < 0) || (type >= RecordType.EndOfEntry)) { throw new ArgumentOutOfRangeException(nameof(type), "Type not supported."); }
+            if (type is < 0 or >= RecordType.EndOfEntry) { throw new ArgumentOutOfRangeException(nameof(type), "Type not supported."); }
             RecordType = type;
             RawData = rawData;
         }
