@@ -46,7 +46,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        internal Document(byte[] passphraseBuffer, int iterations, ICollection<Header> headers, params ICollection<Record>[] records) {
+        internal Document(byte[]? passphraseBuffer, int iterations, ICollection<Header> headers, params ICollection<Record>[] records) {
             Headers = new HeaderCollection(this, headers);
             NamedPasswordPolicies = new NamedPasswordPolicyCollection(this);
             Entries = new EntryCollection(this, records);
@@ -264,11 +264,13 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                     }
                     keyK = DecryptKey(stretchedKey, buffer, 72);
                     keyL = DecryptKey(stretchedKey, buffer, 104);
-                } else {
+                } else if (keyBuffer != null) {
                     keyK = new byte[32];
                     keyL = new byte[32];
                     Buffer.BlockCopy(keyBuffer, 0, keyK, 0, keyK.Length);
                     Buffer.BlockCopy(keyBuffer, 32, keyL, 0, keyL.Length);
+                } else {
+                    throw new InvalidOperationException("No passphrase or key buffer.");
                 }
 
                 var iv = new byte[16];
@@ -301,7 +303,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 if ((headerFields.Count == 0) || (headerFields[0].Version < 0x0300)) { throw new FormatException("Unrecognized file format version."); }
 
                 var recordFields = new List<List<Record>>();
-                List<Record> records = null;
+                List<Record>? records = null;
                 while (dataOffset < data.Length) {
                     var fieldLength = BitConverter.ToInt32(data, dataOffset + 0);
                     var fieldLengthFull = ((fieldLength + 5 - 1) / 16 + 1) * 16;
@@ -442,15 +444,15 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 Headers[HeaderType.TimestampOfLastSave].Time = DateTime.UtcNow;
 
                 var assemblyName = Assembly.GetExecutingAssembly().GetName();
-                Headers[HeaderType.WhatPerformedLastSave].Text = string.Format(CultureInfo.InvariantCulture, "{0} V{1}.{2:00}", assemblyName.Name, assemblyName.Version.Major, assemblyName.Version.Minor);
+                Headers[HeaderType.WhatPerformedLastSave].Text = string.Format(CultureInfo.InvariantCulture, "{0} V{1}.{2:00}", assemblyName.Name, assemblyName.Version?.Major ?? 0, assemblyName.Version?.Minor ?? 0);
 
                 Headers[HeaderType.LastSavedByUser].Text = Environment.UserName;
                 Headers[HeaderType.LastSavedOnHost].Text = Environment.MachineName;
             }
 
-            byte[] stretchedKey = null;
-            byte[] keyK = null;
-            byte[] keyL = null;
+            byte[]? stretchedKey = null;
+            byte[]? keyK = null;
+            byte[]? keyL = null;
             try {
                 stream.Write(BitConverter.GetBytes(Tag), 0, 4);
 
@@ -510,6 +512,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 stream.Write(BitConverter.GetBytes(Tag), 0, 4);
                 stream.Write(BitConverter.GetBytes(TagEof), 0, 4);
 
+                if (dataHash.Hash == null) { throw new InvalidOperationException("Cannot compute hash."); }  // newer happens actually
                 stream.Write(dataHash.Hash, 0, dataHash.Hash.Length);
                 HasChanged = false;
             } finally {
@@ -634,7 +637,9 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 }
                 return true;
             } finally {
-                Array.Clear(currPassphraseBuffer, 0, currPassphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+                if (currPassphraseBuffer != null) {
+                    Array.Clear(currPassphraseBuffer, 0, currPassphraseBuffer.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
+                }
             }
         }
 
@@ -659,7 +664,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         private static void WriteBlock(Stream stream, HashAlgorithm dataHash, ICryptoTransform dataEncryptor, byte type, byte[] fieldData) {
             dataHash.TransformBlock(fieldData, 0, fieldData.Length, null, 0);
 
-            byte[] fieldBlock = null;
+            byte[]? fieldBlock = null;
             try {
                 var fieldLengthPadded = ((fieldData.Length + 5 - 1) / 16 + 1) * 16;
                 fieldBlock = new byte[fieldLengthPadded];
@@ -786,10 +791,11 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 hash.TransformBlock(buffer, 0, buffer.Length, buffer, 0);
             }
             hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-            return hash.Hash;
+            return hash.Hash ?? Array.Empty<byte>();
         }
 
-        private static bool AreBytesTheSame(byte[] buffer1, byte[] buffer2, int buffer2Offset) {
+        private static bool AreBytesTheSame(byte[]? buffer1, byte[]? buffer2, int buffer2Offset) {
+            if ((buffer1 == null) || (buffer2 == null)) { return false; }  // always different if null
             if (buffer1.Length == 0) { return false; }
             if (buffer2Offset + buffer1.Length > buffer2.Length) { return false; }
             for (var i = 0; i < buffer1.Length; i++) {

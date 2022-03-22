@@ -33,7 +33,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             Owner = owner;
         }
 
-        private readonly NamedPasswordPolicyCollection Owner;
+        private readonly NamedPasswordPolicyCollection? Owner;
 
 
         /// <summary>
@@ -151,7 +151,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        private char[] _specialSymbolSet = new char[] { };
+        private char[] _specialSymbolSet = Array.Empty<char>();
         /// <summary>
         /// Returns special symbols that are allowed in the password.
         /// </summary>
@@ -171,7 +171,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             var symbols = new List<char>(specialSymbols);
             if (symbols.Count > 1) {
                 symbols.Sort();
-                var prevCh = symbols[symbols.Count - 1];
+                var prevCh = symbols[^1];
                 for (var i = symbols.Count - 2; i >= 0; i--) {
                     var currCh = symbols[i];
                     if (currCh == prevCh) {
@@ -191,7 +191,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Returns true if objects are equal.
         /// </summary>
         /// <param name="obj">Other object.</param>
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is NamedPasswordPolicy other) {
                 return string.Equals(ToString(), other.ToString(), StringComparison.Ordinal);
             }

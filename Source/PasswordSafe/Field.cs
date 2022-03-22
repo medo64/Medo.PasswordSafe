@@ -152,15 +152,15 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Returns data as bytes without marking the field as accessed.
         /// </summary>
         public byte[] GetBytesSilently() {
-            return RawDataDirect;
-            //var data = RawDataDirect;
-            //try {
-            //    var dataCopy = new byte[data.Length];
-            //    Buffer.BlockCopy(data, 0, dataCopy, 0, dataCopy.Length);
-            //    return dataCopy;
-            //} finally {
-            //    Array.Clear(data, 0, data.Length);
-            //}
+            //return RawDataDirect;
+            var data = RawDataDirect;
+            try {
+               var dataCopy = new byte[data.Length];
+               Buffer.BlockCopy(data, 0, dataCopy, 0, dataCopy.Length);
+               return dataCopy;
+            } finally {
+               Array.Clear(data, 0, data.Length);
+            }
         }
 
         /// <summary>

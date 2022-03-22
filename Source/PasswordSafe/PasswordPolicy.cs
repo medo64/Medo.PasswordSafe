@@ -32,7 +32,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             Records = records;
         }
 
-        private readonly RecordCollection Records;
+        private readonly RecordCollection? Records;
 
 
         /// <summary>
@@ -192,7 +192,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Returns true if objects are equal.
         /// </summary>
         /// <param name="obj">Other object.</param>
-        public override bool Equals(object obj) {
+        public override bool Equals(object? obj) {
             if (obj is NamedPasswordPolicy other) {
                 return string.Equals(ToString(), other.ToString(), StringComparison.Ordinal);
             }
