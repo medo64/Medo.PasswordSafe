@@ -15,7 +15,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             Owner = owner;
             TimeFirstUsed = firstTimeUsed;
 
-            byte[] historicalPasswordBytes = null;
+            byte[]? historicalPasswordBytes = null;
             try {
                 historicalPasswordBytes = Utf8Encoding.GetBytes(historicalPassword);
                 RawHistoricalPasswordData = historicalPasswordBytes;
@@ -60,7 +60,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         private static readonly RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
         private readonly byte[] RawHistoricalPasswordDataEntropy = new byte[16];
 
-        private byte[] _rawHistoricalPasswordData = null;
+        private byte[]? _rawHistoricalPasswordData = null;
         /// <summary>
         /// Gets/sets raw data.
         /// Bytes are kept encrypted in memory until accessed.

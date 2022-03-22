@@ -390,7 +390,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
                 if (value != null) { throw new ArgumentOutOfRangeException(nameof(value), "Only null value is supported."); }
 
-                Entry entryToModify = null;
+                Entry? entryToModify = null;
                 foreach (var entry in BaseCollection) {
                     if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) {
                         entryToModify = entry;

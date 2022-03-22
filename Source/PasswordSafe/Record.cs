@@ -43,7 +43,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Null will be returned if conversion cannot be performed.
         /// For unknown field types, conversion will always be attempted.
         /// </summary>
-        public override string Text {
+        public override string? Text {
             get { return base.Text; }
             set {
                 if (RecordType == RecordType.Password) { //only for password change update history

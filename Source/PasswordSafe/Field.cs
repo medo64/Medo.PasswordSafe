@@ -76,7 +76,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Null will be returned if conversion cannot be performed.
         /// For unknown field types, conversion will always be attempted.
         /// </summary>
-        public virtual string Text {
+        public virtual string? Text {
             get {
                 if (DataType is PasswordSafeFieldDataType.Text or PasswordSafeFieldDataType.Unknown) {
                     var data = RawData;
@@ -155,11 +155,11 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             //return RawDataDirect;
             var data = RawDataDirect;
             try {
-               var dataCopy = new byte[data.Length];
-               Buffer.BlockCopy(data, 0, dataCopy, 0, dataCopy.Length);
-               return dataCopy;
+                var dataCopy = new byte[data.Length];
+                Buffer.BlockCopy(data, 0, dataCopy, 0, dataCopy.Length);
+                return dataCopy;
             } finally {
-               Array.Clear(data, 0, data.Length);
+                Array.Clear(data, 0, data.Length);
             }
         }
 
@@ -184,7 +184,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         private readonly byte[] RawDataEntropy = new byte[16];
 
 
-        private byte[] _rawData = null;
+        private byte[]? _rawData = null;
         /// <summary>
         /// Gets/sets raw data.
         /// Bytes are kept encrypted in memory until accessed.
@@ -290,7 +290,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             return DataType switch {
                 PasswordSafeFieldDataType.Version => Version.ToString("X4", CultureInfo.InvariantCulture),
                 PasswordSafeFieldDataType.Uuid => Uuid.ToString(),
-                PasswordSafeFieldDataType.Text => Text,
+                PasswordSafeFieldDataType.Text => Text ?? String.Empty,
                 PasswordSafeFieldDataType.Time => Time.ToLocalTime().ToString("yyyy'-'MM'-'dd HH':'mm':'ss K", CultureInfo.InvariantCulture),
                 _ => "0x" + BitConverter.ToString(RawData).Replace("-", ""),
             };

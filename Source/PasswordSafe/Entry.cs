@@ -42,7 +42,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         }
 
 
-        internal EntryCollection Owner { get; set; }
+        internal EntryCollection? Owner { get; set; }
 
         /// <summary>
         /// Used to mark document as changed.
