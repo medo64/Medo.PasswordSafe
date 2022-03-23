@@ -291,7 +291,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
                 if (value != null) { throw new ArgumentOutOfRangeException(nameof(value), "Only null value is supported."); }
 
-                Header fieldToRemove = null;
+                Header? fieldToRemove = null;
                 foreach (var field in BaseCollection) {
                     if (field.HeaderType == type) {
                         fieldToRemove = field;

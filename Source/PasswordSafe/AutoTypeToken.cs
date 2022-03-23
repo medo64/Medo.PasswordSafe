@@ -55,7 +55,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 yield return new AutotypeToken("{Enter}");
             } else {
                 var state = AutoTypeState.Default;
-                string command = null;
+                string? command = null;
                 var sbCommandArguments = new StringBuilder();
                 foreach (var ch in autotypeText) {
                     switch (state) {

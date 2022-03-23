@@ -17,7 +17,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
             if (Records.Contains(RecordType.PasswordHistory)) {
                 var text = Records[RecordType.PasswordHistory].Text;
-                if (text.Length >= 5) {
+                if ((text != null) && (text.Length >= 5)) {
                     _enabled = (text[0] != '0');
                     if (!int.TryParse(text.AsSpan(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _maximumCount)) {
                         _maximumCount = DefaultMaximumCount;

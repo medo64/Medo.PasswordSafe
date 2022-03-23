@@ -87,7 +87,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets/sets last save application.
         /// </summary>
         public string LastSaveApplication {
-            get { return Headers.Contains(HeaderType.WhatPerformedLastSave) ? Headers[HeaderType.WhatPerformedLastSave].Text : ""; }
+            get { return Headers.Contains(HeaderType.WhatPerformedLastSave) ? Headers[HeaderType.WhatPerformedLastSave].Text ?? "" : ""; }
             set { Headers[HeaderType.WhatPerformedLastSave].Text = value; }
         }
 
@@ -95,7 +95,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets/sets last save user.
         /// </summary>
         public string LastSaveUser {
-            get { return Headers.Contains(HeaderType.LastSavedByUser) ? Headers[HeaderType.LastSavedByUser].Text : ""; }
+            get { return Headers.Contains(HeaderType.LastSavedByUser) ? Headers[HeaderType.LastSavedByUser].Text ?? "" : ""; }
             set { Headers[HeaderType.LastSavedByUser].Text = value; }
         }
 
@@ -103,7 +103,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets/sets last save computer.
         /// </summary>
         public string LastSaveHost {
-            get { return Headers.Contains(HeaderType.LastSavedOnHost) ? Headers[HeaderType.LastSavedOnHost].Text : ""; }
+            get { return Headers.Contains(HeaderType.LastSavedOnHost) ? Headers[HeaderType.LastSavedOnHost].Text ?? "" : ""; }
             set { Headers[HeaderType.LastSavedOnHost].Text = value; }
         }
 
@@ -111,7 +111,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets/sets database name.
         /// </summary>
         public string Name {
-            get { return Headers.Contains(HeaderType.DatabaseName) ? Headers[HeaderType.DatabaseName].Text : ""; }
+            get { return Headers.Contains(HeaderType.DatabaseName) ? Headers[HeaderType.DatabaseName].Text ?? "" : ""; }
             set { Headers[HeaderType.DatabaseName].Text = value; }
         }
 
@@ -119,7 +119,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets/sets database description.
         /// </summary>
         public string Description {
-            get { return Headers.Contains(HeaderType.DatabaseDescription) ? Headers[HeaderType.DatabaseDescription].Text : ""; }
+            get { return Headers.Contains(HeaderType.DatabaseDescription) ? Headers[HeaderType.DatabaseDescription].Text ?? "" : ""; }
             set { Headers[HeaderType.DatabaseDescription].Text = value; }
         }
 

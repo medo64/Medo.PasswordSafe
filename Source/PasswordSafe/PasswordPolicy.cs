@@ -26,7 +26,9 @@ namespace Medo.Security.Cryptography.PasswordSafe {
 
             if (records.Contains(RecordType.OwnSymbolsForPassword)) {
                 var text = records[RecordType.OwnSymbolsForPassword].Text;
-                SetSpecialSymbolSet(text.ToCharArray());
+                if (text != null) {
+                    SetSpecialSymbolSet(text.ToCharArray());
+                }
             }
 
             Records = records;

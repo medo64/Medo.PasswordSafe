@@ -16,6 +16,8 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// </summary>
         /// <param name="name">Policy name.</param>
         /// <param name="passwordLength">Password length.</param>
+        /// <exception cref="ArgumentNullException">Name cannot be null.</exception>
+        /// <exception cref="ArgumentOutOfRangeException">Name cannot be empty. -or- Name cannot be longer than 255 characters.</exception>
         public NamedPasswordPolicy(string name, int passwordLength) {
             Name = name;
             TotalPasswordLength = passwordLength;

@@ -49,7 +49,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                 if (RecordType == RecordType.Password) { //only for password change update history
                     if ((Owner != null) && Owner.Contains(RecordType.PasswordHistory) && Owner.Contains(RecordType.Password)) {
                         var history = new PasswordHistoryCollection(Owner);
-                        if (history.Enabled) {
+                        if (history.Enabled && (Text != null)) {
                             var time = Owner.Contains(RecordType.PasswordModificationTime) ? Owner[RecordType.PasswordModificationTime].Time : DateTime.UtcNow;
                             history.AddPasswordToHistory(time, Text); //save current password
                         }
