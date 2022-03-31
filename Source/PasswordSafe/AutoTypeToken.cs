@@ -161,7 +161,7 @@ namespace Medo.Security.Cryptography.PasswordSafe {
                             if (char.IsDigit(ch) && (sbCommandArguments.Length < 3)) {
                                 sbCommandArguments.Append(ch);
                             } else {
-                                yield return GetCommandToken(command, sbCommandArguments.ToString());
+                                yield return GetCommandToken(command!, sbCommandArguments.ToString());
                                 command = null; sbCommandArguments.Length = 0;
                                 if (ch == '\\') {
                                     state = AutoTypeState.Escape;
