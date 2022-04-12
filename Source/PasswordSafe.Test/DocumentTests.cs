@@ -327,8 +327,8 @@ namespace PasswordSafe.Test {
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
                 doc.TrackAccess = false;
 
-                doc.Headers[PwSafe.HeaderType.NonDefaultPreferences] = null;
-                doc.Headers[PwSafe.HeaderType.RecentlyUsedEntries] = null;
+                doc.Headers.Remove(PwSafe.HeaderType.NonDefaultPreferences);
+                doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
                 var x = doc.Entries[0].Password; //just access
                 doc.Entries["B"].Notes = "Notes";
 
@@ -378,8 +378,8 @@ namespace PasswordSafe.Test {
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
                 doc.TrackModify = false;
 
-                doc.Headers[PwSafe.HeaderType.NonDefaultPreferences] = null;
-                doc.Headers[PwSafe.HeaderType.RecentlyUsedEntries] = null;
+                doc.Headers.Remove(PwSafe.HeaderType.NonDefaultPreferences);
+                doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
                 var x = doc.Entries[0].Records[PwSafe.RecordType.Password].GetBytes(); //just access
 
                 Assert.True(doc.HasChanged);
@@ -426,8 +426,8 @@ namespace PasswordSafe.Test {
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
                 doc.TrackModify = false;
 
-                doc.Headers[PwSafe.HeaderType.NonDefaultPreferences] = null;
-                doc.Headers[PwSafe.HeaderType.RecentlyUsedEntries] = null;
+                doc.Headers.Remove(PwSafe.HeaderType.NonDefaultPreferences);
+                doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
                 var x = doc.Entries[0].Records[PwSafe.RecordType.Password].GetBytesSilently(); //just access
 
                 Assert.True(doc.HasChanged);
@@ -473,8 +473,8 @@ namespace PasswordSafe.Test {
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
                 doc.TrackModify = false;
 
-                doc.Headers[PwSafe.HeaderType.NonDefaultPreferences] = null;
-                doc.Headers[PwSafe.HeaderType.RecentlyUsedEntries] = null;
+                doc.Headers.Remove(PwSafe.HeaderType.NonDefaultPreferences);
+                doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
                 var x = doc.Entries[0].Password; //just access
                 doc.Entries["B"].Notes = "Notes";
 
@@ -521,8 +521,8 @@ namespace PasswordSafe.Test {
         public void Document_Simple_TrackAccessAndModify() {
             var msSave = new MemoryStream();
             using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
-                doc.Headers[PwSafe.HeaderType.NonDefaultPreferences] = null;
-                doc.Headers[PwSafe.HeaderType.RecentlyUsedEntries] = null;
+                doc.Headers.Remove(PwSafe.HeaderType.NonDefaultPreferences);
+                doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
                 var x = doc.Entries[0].Password; //just access
                 doc.Entries["B"].Notes = "Notes";
 

@@ -281,25 +281,32 @@ namespace Medo.Security.Cryptography.PasswordSafe {
         /// Gets field based on a type.
         /// If multiple elements exist with the same field type, the first one is returned.
         /// If type does not exist, it is created.
-        /// 
-        /// If value is set to null, field is removed.
         /// </summary>
-        /// <param name="type">Type.</param>
-        /// <exception cref="ArgumentOutOfRangeException">Only null value is supported.</exception>
+        /// <param name="type">Record type.</param>
         public Record this[RecordType type] {
             get { return Records[type]; }
-            set { Records[type] = value; }
+            [Obsolete("Use Remove(type) instead.", error: true)]
+            set { }
         }
 
-        #endregion
-
-
-        #region Clone
-
         /// <summary>
-        /// Returns the exact copy of the entry.
+        /// Removes the item from the collection.
+        /// If multiple elements exist with the same field type, the first one is returned.
         /// </summary>
-        public Entry Clone() {
+        /// <param name="type">Record type.</param>
+        public bool Remove(RecordType type) {
+            return Records.Remove(type);
+        }
+
+            #endregion
+
+
+            #region Clone
+
+            /// <summary>
+            /// Returns the exact copy of the entry.
+            /// </summary>
+            public Entry Clone() {
             var records = new List<Record>();
             foreach (var record in Records) {
                 records.Add(record.Clone());
