@@ -310,7 +310,6 @@ namespace Medo.Security.Cryptography.PasswordSafe {
             EscapeNumber,
         }
 
-        [System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Maintainability", "CA1502:AvoidExcessiveComplexity", Justification = "Code is straightforward list of returns.")]
         private static AutotypeToken GetCommandToken(string command, string? argument) {
             return command switch {
                 "u" => new AutotypeToken("UserName", AutotypeTokenKind.Command),
