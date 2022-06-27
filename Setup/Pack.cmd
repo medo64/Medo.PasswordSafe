@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 
-SET TOOLS_MSBUILD="%PROGRAMFILES(X86)%\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64\msbuild.exe"
+SET TOOLS_MSBUILD="%PROGRAMFILES%\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\msbuild.exe"
 SET   TOOLS_NUGET="%USERPROFILE%\Downloads\nuget.exe"
 
 
@@ -44,6 +44,7 @@ IF NOT [%TOOL_NUGET%]==[] (
 
     ECHO Set API key if needed
     ECHO %TOOL_NUGET% SetApiKey ^<key^>
+    ECHO %TOOL_NUGET% SetApiKey ^<key^> -source https://nuget.smbsrc.net/
     ECHO:
     IF EXIST ".\Temp\*.0.0.0.nupkg" (
         ECHO "Not pushing unversioned package."
