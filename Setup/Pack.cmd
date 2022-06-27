@@ -1,7 +1,7 @@
 @ECHO OFF
 SETLOCAL EnableDelayedExpansion
 
-SET TOOLS_MSBUILD="%PROGRAMFILES(X86)%\Microsoft Visual Studio\2017\Community\MSBuild\15.0\Bin\amd64\msbuild.exe"
+SET TOOLS_MSBUILD="%PROGRAMFILES%\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\amd64\msbuild.exe"
 SET   TOOLS_NUGET="%USERPROFILE%\Downloads\nuget.exe"
 
 
