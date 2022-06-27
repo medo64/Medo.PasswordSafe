@@ -44,6 +44,7 @@ IF NOT [%TOOL_NUGET%]==[] (
 
     ECHO Set API key if needed
     ECHO %TOOL_NUGET% SetApiKey ^<key^>
+    ECHO %TOOL_NUGET% SetApiKey ^<key^> -source https://nuget.smbsrc.net/
     ECHO:
     IF EXIST ".\Temp\*.0.0.0.nupkg" (
         ECHO "Not pushing unversioned package."
