@@ -41,7 +41,7 @@ public class NamedPasswordPolicy {
     /// Used to mark document as changed.
     /// </summary>
     protected void MarkAsChanged() {
-        if (Owner != null) { Owner.MarkAsChanged(); }
+        Owner?.MarkAsChanged();
     }
 
 
@@ -203,7 +203,7 @@ public class NamedPasswordPolicy {
     /// Returns hash code.
     /// </summary>
     public override int GetHashCode() {
-        return Name.GetHashCode() ^ Style.GetHashCode();
+        return HashCode.Combine(Name.GetHashCode(StringComparison.Ordinal), Style.GetHashCode());
     }
 
     /// <summary>

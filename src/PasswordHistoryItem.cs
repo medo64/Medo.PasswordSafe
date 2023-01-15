@@ -33,7 +33,7 @@ public class PasswordHistoryItem {
     /// Used to mark document as changed.
     /// </summary>
     protected void MarkAsChanged() {
-        if (Owner != null) { Owner.MarkAsChanged(); }
+        Owner?.MarkAsChanged();
     }
 
 
@@ -61,7 +61,7 @@ public class PasswordHistoryItem {
     private static readonly RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
     private readonly byte[] RawHistoricalPasswordDataEntropy = new byte[16];
 
-    private byte[]? _rawHistoricalPasswordData = null;
+    private byte[]? _rawHistoricalPasswordData;
     /// <summary>
     /// Gets/sets raw data.
     /// Bytes are kept encrypted in memory until accessed.

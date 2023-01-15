@@ -36,7 +36,7 @@ public class RecordCollection : IList<Record> {
 
         if (Count == 0) { return; } //don't track times if there is no other elements
 
-        if (!IsReadOnly && (Owner != null) && (this?.Owner?.Owner?.Owner?.TrackModify ?? false)) {
+        if (!IsReadOnly && (Owner != null) && (Owner.Owner?.Owner?.TrackModify ?? false)) {
 
             switch (type) {
                 case RecordType.CreationTime:
@@ -61,7 +61,7 @@ public class RecordCollection : IList<Record> {
     }
 
     internal void MarkAsAccessed(RecordType type = 0) {
-        if (!IsReadOnly && (Owner != null) && (this?.Owner?.Owner?.Owner?.TrackAccess ?? false)) {
+        if (!IsReadOnly && (Owner != null) && (Owner.Owner?.Owner?.TrackAccess ?? false)) {
 
             switch (type) {
                 case RecordType.Uuid:

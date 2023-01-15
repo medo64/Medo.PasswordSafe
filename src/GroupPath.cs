@@ -120,7 +120,7 @@ public class GroupPath {
     /// A hash code for the current object.
     /// </summary>
     public override int GetHashCode() {
-        return Group.GetHashCode();
+        return Group.GetHashCode(StringComparison.OrdinalIgnoreCase);
     }
 
     /// <summary>

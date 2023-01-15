@@ -293,7 +293,7 @@ public abstract class Field {
             PasswordSafeFieldDataType.Uuid => Uuid.ToString(),
             PasswordSafeFieldDataType.Text => Text ?? String.Empty,
             PasswordSafeFieldDataType.Time => Time.ToLocalTime().ToString("yyyy'-'MM'-'dd HH':'mm':'ss K", CultureInfo.InvariantCulture),
-            _ => "0x" + BitConverter.ToString(RawData).Replace("-", ""),
+            _ => "0x" + BitConverter.ToString(RawData).Replace("-", "", StringComparison.Ordinal),
         };
     }
 
