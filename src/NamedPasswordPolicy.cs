@@ -45,7 +45,7 @@ public class NamedPasswordPolicy {
     }
 
 
-    private string _name;
+    private string _name = string.Empty;  // just to make CS8618 shut up
     /// <summary>
     /// Gets/sets name of the policy.
     /// </summary>
