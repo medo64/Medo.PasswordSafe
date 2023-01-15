@@ -486,7 +486,7 @@ public class Document : IDisposable {
             stream.Write(iv, 0, iv.Length);
 
             using var dataHash = new HMACSHA256(keyL);
-            using var twofish = new TwofishManaged();
+            using var twofish = new Twofish();
             twofish.Mode = CipherMode.CBC;
             twofish.Padding = PaddingMode.None;
             twofish.KeySize = 256;
@@ -745,7 +745,7 @@ public class Document : IDisposable {
     #region Utility functions
 
     private static byte[] DecryptKey(byte[] stretchedKey, byte[] buffer, int offset) {
-        using var twofish = new TwofishManaged();
+        using var twofish = new Twofish();
         twofish.Mode = CipherMode.ECB;
         twofish.Padding = PaddingMode.None;
         twofish.KeySize = 256;
@@ -756,7 +756,7 @@ public class Document : IDisposable {
     }
 
     private static byte[] EncryptKey(byte[] stretchedKey, byte[] buffer, int offset) {
-        using var twofish = new TwofishManaged();
+        using var twofish = new Twofish();
         twofish.Mode = CipherMode.ECB;
         twofish.Padding = PaddingMode.None;
         twofish.KeySize = 256;
@@ -767,7 +767,7 @@ public class Document : IDisposable {
     }
 
     private static byte[] DecryptData(byte[] key, byte[] iv, byte[] buffer, int offset, int length) {
-        using var twofish = new TwofishManaged();
+        using var twofish = new Twofish();
         twofish.Mode = CipherMode.CBC;
         twofish.Padding = PaddingMode.None;
         twofish.KeySize = 256;
