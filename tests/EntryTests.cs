@@ -3,7 +3,8 @@ using System.IO;
 using Xunit;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
-namespace PasswordSafe.Test {
+namespace Tests {
+
     public class EntryTests {
 
         [Fact(DisplayName = "PasswordSafe: Entry: New")]

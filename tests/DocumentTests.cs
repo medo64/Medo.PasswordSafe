@@ -1,10 +1,12 @@
 using System;
 using System.IO;
-using System.Reflection;
 using Xunit;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
-namespace PasswordSafe.Test {
+using static Tests.Helpers;
+
+namespace Tests {
+
     public class DocumentTests {
 
         [Fact(DisplayName = "PasswordSafe: Document: Load Empty.psafe3")]
@@ -1581,18 +1583,6 @@ namespace PasswordSafe.Test {
                 Assert.Equal("", new string(policy.GetSpecialSymbolSet()));
             }
         }
-
-
-        #region Utils
-
-        private static MemoryStream GetResourceStream(string fileName) {
-            var resStream = Assembly.GetExecutingAssembly().GetManifestResourceStream("PasswordSafe.Test.Resources." + fileName);
-            var buffer = new byte[(int)resStream.Length];
-            resStream.Read(buffer, 0, buffer.Length);
-            return new MemoryStream(buffer) { Position = 0 };
-        }
-
-        #endregion
 
     }
 

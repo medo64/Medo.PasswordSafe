@@ -2,7 +2,8 @@ using System;
 using Xunit;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
-namespace PasswordSafe.Test {
+namespace Tests {
+
     public class EntryCollectionTests {
 
         [Fact(DisplayName = "PasswordSafe: EntryCollection: Add")]

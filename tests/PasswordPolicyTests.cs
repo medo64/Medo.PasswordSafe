@@ -1,7 +1,8 @@
 using Xunit;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
-namespace PasswordSafe.Test {
+namespace Tests {
+
     public class PasswordPolicyTests {
 
         [Fact(DisplayName = "PasswordSafe: PasswordPolicy: New")]
