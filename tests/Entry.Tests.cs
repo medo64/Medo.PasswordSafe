@@ -7,7 +7,7 @@ using static Tests.Helpers;
 
 namespace Tests;
 
-public class EntryTests {
+public class Entry_Tests {
 
     [Fact(DisplayName = "PasswordSafe: Entry: New")]
     public void Entry_New() {

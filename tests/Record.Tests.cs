@@ -4,7 +4,7 @@ using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace Tests;
 
-public class RecordTests {
+public class Record_Tests {
 
     [Fact(DisplayName = "PasswordSafe: Record: New")]
     public void Record_New() {

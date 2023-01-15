@@ -4,7 +4,7 @@ using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace Tests;
 
-public class HeaderTests {
+public class Header_Tests {
 
     [Fact(DisplayName = "PasswordSafe: Header: New")]
     public void Header_New() {

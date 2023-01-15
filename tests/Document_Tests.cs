@@ -7,7 +7,7 @@ using static Tests.Helpers;
 
 namespace Tests;
 
-public class DocumentTests {
+public class Document_Tests {
 
     [Fact(DisplayName = "PasswordSafe: Document: Load Empty.psafe3")]
     public void Document_Empty() {

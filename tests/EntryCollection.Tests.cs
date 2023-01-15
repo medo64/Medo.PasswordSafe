@@ -4,7 +4,7 @@ using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace Tests;
 
-public class EntryCollectionTests {
+public class EntryCollection_Tests {
 
     [Fact(DisplayName = "PasswordSafe: EntryCollection: Add")]
     public void EntryCollection_New() {

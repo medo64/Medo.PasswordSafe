@@ -3,7 +3,7 @@ using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace Tests;
 
-public class GroupPathTests {
+public class GroupPath_Tests {
 
     [Fact(DisplayName = "PasswordSafe: GroupPath: New")]
     public void GroupPath_New() {
