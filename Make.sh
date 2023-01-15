@@ -122,7 +122,6 @@ function package() {
                 --configuration "Release" \
                 --force \
                 --include-source \
-                -p:SymbolPackageFormat=snupkg \
                 --output "$BASE_DIRECTORY/build/package/" \
                 --verbosity "minimal" \
                 || return 1
