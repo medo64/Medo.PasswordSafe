@@ -1,6 +1,6 @@
 This library allows for reading and writing Password Safe version 3 files.
 
-For example usage do check [Bimil](https://www.medo64.com/bimil).
+For example usage do check [Bimil][bimil].
 
 
 
@@ -33,3 +33,6 @@ characters are supported:
     \W###   Wait in seconds.
     \z      Invokes the alternative SendKeys method.
             All other text is typed as-is. 
+
+
+[bimil]: https://www.medo64.com/bimil

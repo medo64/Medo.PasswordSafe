@@ -118,7 +118,7 @@ function release() {
 function package() {
     mkdir -p "$BASE_DIRECTORY/build/package/"
     echo ".NET `dotnet --version`"
-    dotnet pack "$BASE_DIRECTORY/src/PasswordSafe.csproj" \
+    dotnet pack "$BASE_DIRECTORY/src/Medo.PasswordSafe.csproj" \
                 --configuration "Release" \
                 --force \
                 --include-source \
@@ -151,7 +151,7 @@ function nuget() {  # (api_key)
 function test() {
     mkdir -p "$BASE_DIRECTORY/build/test/"
     echo ".NET `dotnet --version`"
-    dotnet test "$BASE_DIRECTORY/src/PasswordSafe.sln" \
+    dotnet test "$BASE_DIRECTORY/src/Medo.PasswordSafe.sln" \
                 --configuration "Debug" \
                 --output "$BASE_DIRECTORY/build/test/" \
                 --verbosity "minimal" \
@@ -159,8 +159,8 @@ function test() {
 }
 
 
-PACKAGE_ID=`cat "$BASE_DIRECTORY/src/PasswordSafe.csproj" | grep "<PackageId>" | sed 's^</\?PackageId>^^g' | xargs`
-PACKAGE_VERSION=`cat "$BASE_DIRECTORY/src/PasswordSafe.csproj" | grep "<Version>" | sed 's^</\?Version>^^g' | xargs`
+PACKAGE_ID=`cat "$BASE_DIRECTORY/src/Medo.PasswordSafe.csproj" | grep "<PackageId>" | sed 's^</\?PackageId>^^g' | xargs`
+PACKAGE_VERSION=`cat "$BASE_DIRECTORY/src/Medo.PasswordSafe.csproj" | grep "<Version>" | sed 's^</\?Version>^^g' | xargs`
 
 while [ $# -gt 0 ]; do
     OPERATION="$1"
