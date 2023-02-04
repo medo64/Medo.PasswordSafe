@@ -2,6 +2,11 @@ This library allows for reading and writing Password Safe version 3 files.
 
 For example usage do check [Bimil][bimil].
 
+You can find packaged library at [NuGet][nuget] and add it you your application
+using the following command:
+
+    dotnet add package PasswordSafe
+
 
 
 #### Auto-type ####
@@ -36,3 +41,4 @@ characters are supported:
 
 
 [bimil]: https://www.medo64.com/bimil
+[nuget]: https://www.nuget.org/packages/PasswordSafe
