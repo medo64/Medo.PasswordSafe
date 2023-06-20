@@ -1,5 +1,11 @@
 # Changelog
 
+## [6.2.0] - 2023-06-19
+
+- Changed NuGet package name to Medo.PasswordSafe
+- Obsoleted NuGet package PasswordSafe
+
+
 ## [6.1.0] - 2023-01-15
 
 - .NET 7
@@ -23,7 +29,8 @@
 
 
 
-[unreleased]: https://github.com/medo64/PasswordSafe/
+[unreleased]: https://github.com/medo64/Medo.PasswordSafe/
+[6.2.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.2.0
 [6.1.0]: https://www.nuget.org/packages/PasswordSafe/6.1.0
 [6.0.0]: https://www.nuget.org/packages/PasswordSafe/6.0.0
 [1.10.0]: https://www.nuget.org/packages/PasswordSafe/1.10.0
