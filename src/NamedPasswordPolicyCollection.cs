@@ -63,10 +63,67 @@ public sealed class NamedPasswordPolicyCollection : IEnumerable<NamedPasswordPol
     /// Removes all passwords currently stored.
     /// </summary>
     public void Clear() {
+        if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
+
+        foreach (var item in BaseCollection) {
+            item.Owner = null;
+        }
+
         BaseCollection.Clear();
+
         MarkAsChanged();
     }
 
+    /// <summary>
+    /// Adds a password policy to the collection.
+    /// </summary>
+    /// <param name="policy">The named password policy to add.</param>
+    public void Add(NamedPasswordPolicy policy) {
+        if (policy == null) { throw new ArgumentNullException(nameof(policy), "Policy cannot be null."); }
+        if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
+
+        if (BaseCollection.Exists(item => item.Name == policy.Name)) {
+            throw new ArgumentException($"Password policy with the name '{policy.Name}' already existed in collection.", nameof(policy));
+        }
+
+        BaseCollection.Add(policy);
+        policy.Owner = this;
+        MarkAsChanged();
+    }
+
+    /// <summary>
+    /// Adds a range of password policies to the collection.
+    /// </summary>
+    /// <param name="policies"></param>
+    public void AddRange(IEnumerable<NamedPasswordPolicy> policies) {
+        if (policies == null) { throw new ArgumentNullException(nameof(policies), "Policies cannot be null."); }
+        if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
+
+        foreach (var policy in policies) {
+            if (BaseCollection.Exists(item => item.Name == policy.Name)) {
+                throw new ArgumentException($"Password policy with the name '{policy.Name}' already existed in collection.", nameof(policies));
+            }
+        }
+
+        BaseCollection.AddRange(policies);
+        foreach (var policy in policies) {
+            policy.Owner = this;
+        }
+        MarkAsChanged();
+    }
+
+    /// <summary>
+    /// Removes a password policy from the collection.
+    /// </summary>
+    /// <param name="policy">The named password policy to remove.</param>
+    public void Remove(NamedPasswordPolicy policy) {
+        if (policy == null) { throw new ArgumentNullException(nameof(policy), "Policy cannot be null."); }
+        if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
+
+        BaseCollection.Remove(policy);
+        policy.Owner = null;
+        MarkAsChanged();
+    }
 
     private readonly List<NamedPasswordPolicy> BaseCollection = new();
 
@@ -85,6 +142,13 @@ public sealed class NamedPasswordPolicyCollection : IEnumerable<NamedPasswordPol
     /// <exception cref="ArgumentOutOfRangeException">Index is less than 0. -or- Index is equal to or greater than collection count. -or- Duplicate name in collection.</exception>
     public NamedPasswordPolicy this[int index] {
         get { return BaseCollection[index]; }
+    }
+
+    /// <summary>
+    /// Gets a value indicating whether the collection is read-only.
+    /// </summary>
+    public bool IsReadOnly {
+        get { return Owner?.IsReadOnly ?? false; }
     }
 
     #region IEnumerable

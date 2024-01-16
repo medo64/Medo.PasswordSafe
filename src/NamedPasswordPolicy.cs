@@ -34,7 +34,7 @@ public class NamedPasswordPolicy {
         Owner = owner;
     }
 
-    private readonly NamedPasswordPolicyCollection? Owner;
+    internal NamedPasswordPolicyCollection? Owner;
 
 
     /// <summary>
