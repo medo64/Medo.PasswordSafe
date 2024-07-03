@@ -232,7 +232,7 @@ public class EntryCollection : IList<Entry> {
     /// <param name="title">Title.</param>
     public bool Contains(string title) {
         foreach (var entry in BaseCollection) {
-            if (entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) { return true; }
+            if (entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) { return true; }
         }
         return false;
     }
@@ -245,7 +245,7 @@ public class EntryCollection : IList<Entry> {
     /// <param name="title">Title.</param>
     public bool Contains(GroupPath group, string title) {
         foreach (var entry in BaseCollection) {
-            if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) { return true; }
+            if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) { return true; }
         }
         return false;
     }
@@ -261,7 +261,7 @@ public class EntryCollection : IList<Entry> {
     public Entry this[string title] {
         get {
             foreach (var entry in BaseCollection) {
-                if (entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) {
+                if (entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) {
                     return entry;
                 }
             }
@@ -287,7 +287,7 @@ public class EntryCollection : IList<Entry> {
     public Entry this[GroupPath group, string title] {
         get {
             foreach (var entry in BaseCollection) {
-                if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) {
+                if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) {
                     return entry;
                 }
             }
@@ -344,11 +344,11 @@ public class EntryCollection : IList<Entry> {
     /// </summary>
     public void Sort() {
         BaseCollection.Sort((Entry item1, Entry item2) => {
-            var groupValue = string.Compare(item1.Group, item2.Group, StringComparison.CurrentCultureIgnoreCase);
+            var groupValue = string.Compare(item1.Group, item2.Group, StringComparison.OrdinalIgnoreCase);
             if (groupValue != 0) {
                 return groupValue;
             } else {
-                return string.Compare(item1.Title, item2.Title, StringComparison.CurrentCultureIgnoreCase);
+                return string.Compare(item1.Title, item2.Title, StringComparison.OrdinalIgnoreCase);
             }
         });
     }
@@ -368,7 +368,7 @@ public class EntryCollection : IList<Entry> {
 
         Entry? entryToRemove = null;
         foreach (var entry in BaseCollection) {
-            if (entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) {
+            if (entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) {
                 entryToRemove = entry;
                 break;
             }
@@ -394,7 +394,7 @@ public class EntryCollection : IList<Entry> {
 
         Entry? entryToRemove = null;
         foreach (var entry in BaseCollection) {
-            if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) {
+            if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) {
                 entryToRemove = entry;
                 break;
             }
@@ -420,7 +420,7 @@ public class EntryCollection : IList<Entry> {
 
         Entry? entryToModify = null;
         foreach (var entry in BaseCollection) {
-            if (entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) {
+            if (entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) {
                 entryToModify = entry;
                 break;
             }
@@ -448,7 +448,7 @@ public class EntryCollection : IList<Entry> {
 
         Entry? entryToModify = null;
         foreach (var entry in BaseCollection) {
-            if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.CurrentCultureIgnoreCase)) {
+            if (entry.Group.Equals(group) && entry.Title.Equals(title, StringComparison.OrdinalIgnoreCase)) {
                 entryToModify = entry;
                 break;
             }
