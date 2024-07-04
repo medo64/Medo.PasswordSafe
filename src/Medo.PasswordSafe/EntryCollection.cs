@@ -30,7 +30,7 @@ public class EntryCollection : IList<Entry> {
 
 
     [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-    private readonly List<Entry> BaseCollection = new();
+    private readonly List<Entry> BaseCollection = [];
 
 
     #region ICollection
