@@ -15,10 +15,10 @@ namespace Medo.Security.Cryptography.PasswordSafe;
 public class Document : IDisposable {
 
     private Document() {
-        Headers = new HeaderCollection(this, new Header[] {
+        Headers = new HeaderCollection(this, [
             new Header(HeaderType.Version, BitConverter.GetBytes(Header.DefaultVersion)),
             new Header(HeaderType.Uuid,Guid.NewGuid().ToByteArray()),
-        });
+        ]);
         Entries = new EntryCollection(this);
         NamedPasswordPolicies = new NamedPasswordPolicyCollection(this);
 
@@ -318,7 +318,7 @@ public class Document : IDisposable {
                     if (fieldType == RecordType.EndOfEntry) { records = null; continue; }
 
                     if (records == null) {
-                        records = new List<Record>();
+                        records = [];
                         recordFields.Add(records);
                     }
                     records.Add(new Record(fieldType, fieldData));
@@ -327,7 +327,7 @@ public class Document : IDisposable {
                 }
             }
 
-            dataHash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            dataHash.TransformFinalBlock([], 0, 0);
 
             if (!AreBytesTheSame(dataHash.Hash, buffer, buffer.Length - 32)) {
                 throw new CryptographicException("Authentication mismatch.");
@@ -496,17 +496,17 @@ public class Document : IDisposable {
                 foreach (var field in Headers) {
                     WriteBlock(stream, dataHash, dataEncryptor, (byte)field.HeaderType, field.RawData);
                 }
-                WriteBlock(stream, dataHash, dataEncryptor, (byte)HeaderType.EndOfEntry, Array.Empty<byte>());
+                WriteBlock(stream, dataHash, dataEncryptor, (byte)HeaderType.EndOfEntry, []);
 
                 foreach (var entry in Entries) {
                     foreach (var field in entry.Records) {
                         WriteBlock(stream, dataHash, dataEncryptor, (byte)field.RecordType, field.RawData);
                     }
-                    WriteBlock(stream, dataHash, dataEncryptor, (byte)RecordType.EndOfEntry, Array.Empty<byte>());
+                    WriteBlock(stream, dataHash, dataEncryptor, (byte)RecordType.EndOfEntry, []);
                 }
             }
 
-            dataHash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
+            dataHash.TransformFinalBlock([], 0, 0);
 
             stream.Write(BitConverter.GetBytes(Tag), 0, 4);
             stream.Write(BitConverter.GetBytes(TagEof), 0, 4);
@@ -791,8 +791,8 @@ public class Document : IDisposable {
         foreach (var buffer in buffers) {
             hash.TransformBlock(buffer, 0, buffer.Length, buffer, 0);
         }
-        hash.TransformFinalBlock(Array.Empty<byte>(), 0, 0);
-        return hash.Hash ?? Array.Empty<byte>();
+        hash.TransformFinalBlock([], 0, 0);
+        return hash.Hash ?? [];
     }
 
     private static bool AreBytesTheSame(byte[]? buffer1, byte[]? buffer2, int buffer2Offset) {

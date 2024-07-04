@@ -228,7 +228,7 @@ public class AutotypeToken {
                     case "Email": foreach (var key in AutotypeToken.GetAutotypeTokensFromText(entry.Email)) { yield return key; } break;
 
                     case "Notes":
-                        var noteLines = entry.Notes.Split(new string[] { "\r\n", "\n", "\r" }, StringSplitOptions.None);
+                        var noteLines = entry.Notes.Split(EofSeparators, StringSplitOptions.None);
                         if (string.IsNullOrEmpty(argument)) {
                             foreach (var key in AutotypeToken.GetAutotypeTokensFromText(string.Join("\n", noteLines))) {
                                 yield return key;
@@ -301,6 +301,8 @@ public class AutotypeToken {
         }
     }
 
+
+    private static readonly string[] EofSeparators = ["\r\n", "\n", "\r"];
 
     private enum AutoTypeState {
         Default,
