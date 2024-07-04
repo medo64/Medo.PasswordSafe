@@ -333,7 +333,7 @@ public class Document : IDisposable {
                 throw new CryptographicException("Authentication mismatch.");
             }
 
-            return new Document(passphraseBuffer, (int)iter, headerFields, recordFields.ToArray());
+            return new Document(passphraseBuffer, (int)iter, headerFields, [.. recordFields]);
         } catch (CryptographicException ex) {
             throw new FormatException(ex.Message, ex);
         } finally { //best effort to sanitize memory
@@ -366,8 +366,7 @@ public class Document : IDisposable {
     /// <exception cref="ArgumentNullException">Stream cannot be null.</exception>
     /// <exception cref="NotSupportedException">Missing passphrase.</exception>
     public void Save(Stream stream) {
-        var passphraseBytes = GetPassphrase();
-        if (passphraseBytes == null) { throw new NotSupportedException("Missing passphrase."); }
+        var passphraseBytes = GetPassphrase() ?? throw new NotSupportedException("Missing passphrase.");
         try {
             Save(stream, passphraseBytes);
         } finally {
@@ -437,7 +436,7 @@ public class Document : IDisposable {
     /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
     /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
     internal void InternalSave(Stream stream, byte[]? passphraseBuffer, byte[]? keyBuffer) {
-        if (passphraseBuffer == null) { passphraseBuffer = GetPassphrase(); } //first try old passphrase
+        passphraseBuffer ??= GetPassphrase(); //first try old passphrase
         if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
         if ((keyBuffer != null) && (keyBuffer.Length != 64)) { throw new ArgumentOutOfRangeException(nameof(keyBuffer), "Keys must be 64 bytes long."); }
 
