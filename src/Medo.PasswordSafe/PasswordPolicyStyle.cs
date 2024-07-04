@@ -1,8 +1,10 @@
 namespace Medo.Security.Cryptography.PasswordSafe;
+using System;
 
 /// <summary>
 /// Password policy flags.
 /// </summary>
+[Flags]
 public enum PasswordPolicyStyle {
     /// <summary>
     /// Lowercase characters are to be used.
