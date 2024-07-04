@@ -451,12 +451,12 @@ public class Document : IDisposable {
         }
 
         byte[]? stretchedKey = null;
-        byte[]? keyK = null;
-        byte[]? keyL = null;
+        var keyK = new byte[32];
+        var keyL = new byte[32];
+        var salt = new byte[32];
         try {
             stream.Write(BitConverter.GetBytes(Tag), 0, 4);
 
-            var salt = new byte[32];
             Rnd.GetBytes(salt);
             stream.Write(salt, 0, salt.Length);
 
@@ -467,8 +467,6 @@ public class Document : IDisposable {
             stretchedKey = GetStretchedKey(passphraseBuffer, salt, iter);
             stream.Write(GetSha256Hash(stretchedKey), 0, 32);
 
-            keyK = new byte[32];
-            keyL = new byte[32];
             if (keyBuffer == null) {
                 Rnd.GetBytes(keyK);
                 Rnd.GetBytes(keyL);
@@ -517,8 +515,9 @@ public class Document : IDisposable {
             HasChanged = false;
         } finally {
             if (stretchedKey != null) { Array.Clear(stretchedKey, 0, stretchedKey.Length); }
-            if (keyK != null) { Array.Clear(keyK, 0, keyK.Length); }
-            if (keyL != null) { Array.Clear(keyL, 0, keyL.Length); }
+            Array.Clear(keyK, 0, keyK.Length);
+            Array.Clear(keyL, 0, keyL.Length);
+            Array.Clear(salt, 0, salt.Length);
             //if (data != null) { Array.Clear(data, 0, data.Length); }
         }
     }
