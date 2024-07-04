@@ -12,11 +12,11 @@ public class Entry {
     /// Creates a new instance.
     /// </summary>
     public Entry()
-        : this(new Record[] {
+        : this([
                 new Record(RecordType.Uuid, Guid.NewGuid().ToByteArray()),
-                new Record(RecordType.Title, Array.Empty<byte>()),
-                new Record(RecordType.Password, Array.Empty<byte>())
-        }) {
+                new Record(RecordType.Title, []),
+                new Record(RecordType.Password, [])
+        ]) {
     }
 
     /// <summary>
@@ -167,7 +167,7 @@ public class Entry {
     /// Should be encoded as base 32.
     /// </summary>
     public byte[] TwoFactorKey {
-        get { return Records.Contains(RecordType.TwoFactorKey) ? Records[RecordType.TwoFactorKey].GetBytes() : Array.Empty<byte>(); }
+        get { return Records.Contains(RecordType.TwoFactorKey) ? Records[RecordType.TwoFactorKey].GetBytes() : []; }
         set { Records[RecordType.TwoFactorKey].SetBytes(value); }
     }
 

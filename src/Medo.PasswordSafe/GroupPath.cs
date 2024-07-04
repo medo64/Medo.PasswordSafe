@@ -21,7 +21,7 @@ public class GroupPath {
             foreach (var component in segments) {
                 if (!string.IsNullOrEmpty(component)) {
                     if (sb.Length > 0) { sb.Append('.'); }
-                    sb.Append(component.Replace(".", @"\."));
+                    sb.Append(component.Replace(".", @"\.", StringComparison.Ordinal));
                 }
             }
         }
@@ -58,7 +58,7 @@ public class GroupPath {
             }
         }
         segmentList.Add(segment.ToString());
-        return segmentList.ToArray();
+        return [.. segmentList];
     }
 
 

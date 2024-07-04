@@ -227,7 +227,7 @@ public abstract class Field {
     /// </summary>
     protected byte[] RawDataDirect {
         get {
-            if (_rawData == null) { return Array.Empty<byte>(); } //return empty array if no value has been set so far
+            if (_rawData == null) { return []; } //return empty array if no value has been set so far
             return UnprotectData(_rawData, RawDataEntropy);
         }
     }

@@ -84,7 +84,7 @@ public class RecordCollection : IList<Record> {
 
 
     [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-    private readonly List<Record> BaseCollection = new();
+    private readonly List<Record> BaseCollection = [];
 
 
     #region ICollection
