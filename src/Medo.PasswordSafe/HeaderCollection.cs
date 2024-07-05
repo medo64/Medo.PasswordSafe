@@ -47,7 +47,7 @@ public class HeaderCollection : IList<Header> {
 
 
     [DebuggerBrowsable(DebuggerBrowsableState.RootHidden)]
-    private readonly List<Header> BaseCollection = new();
+    private readonly List<Header> BaseCollection = [];
 
 
     #region ICollection

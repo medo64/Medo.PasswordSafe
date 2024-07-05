@@ -49,7 +49,7 @@ public class Entry {
     /// Used to mark document as changed.
     /// </summary>
     protected void MarkAsChanged() {
-        if (Owner != null) { Owner.MarkAsChanged(); }
+        Owner?.MarkAsChanged();
     }
 
 

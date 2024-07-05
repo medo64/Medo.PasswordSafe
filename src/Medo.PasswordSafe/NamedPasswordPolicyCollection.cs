@@ -125,7 +125,7 @@ public sealed class NamedPasswordPolicyCollection : IEnumerable<NamedPasswordPol
         MarkAsChanged();
     }
 
-    private readonly List<NamedPasswordPolicy> BaseCollection = new();
+    private readonly List<NamedPasswordPolicy> BaseCollection = [];
 
 
     /// <summary>

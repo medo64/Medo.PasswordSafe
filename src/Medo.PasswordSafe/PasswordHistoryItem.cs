@@ -68,7 +68,7 @@ public class PasswordHistoryItem {
     /// </summary>
     private byte[] RawHistoricalPasswordData {
         get {
-            if (_rawHistoricalPasswordData == null) { return Array.Empty<byte>(); } //return empty array if no value has been set so far
+            if (_rawHistoricalPasswordData == null) { return []; } //return empty array if no value has been set so far
             return UnprotectData(_rawHistoricalPasswordData, RawHistoricalPasswordDataEntropy);
         }
         set {

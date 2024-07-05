@@ -185,7 +185,7 @@ public abstract class Field {
     private readonly byte[] RawDataEntropy = new byte[16];
 
 
-    private byte[]? _rawData = null;
+    private byte[]? _rawData;
     /// <summary>
     /// Gets/sets raw data.
     /// Bytes are kept encrypted in memory until accessed.

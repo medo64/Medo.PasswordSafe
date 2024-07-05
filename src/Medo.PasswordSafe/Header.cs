@@ -39,7 +39,7 @@ public class Header : Field {
     /// Used to mark document as changed.
     /// </summary>
     protected override void MarkAsChanged() {
-        if (Owner != null) { Owner.MarkAsChanged(); }
+        Owner?.MarkAsChanged();
     }
 
     /// <summary>

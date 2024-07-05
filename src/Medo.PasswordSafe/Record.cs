@@ -65,14 +65,14 @@ public class Record : Field {
     /// Used to mark document as changed.
     /// </summary>
     protected override void MarkAsChanged() {
-        if (Owner != null) { Owner.MarkAsChanged(RecordType); }
+        Owner?.MarkAsChanged(RecordType);
     }
 
     /// <summary>
     /// Used to mark document as accessed.
     /// </summary>
     protected override void MarkAsAccessed() {
-        if (Owner != null) { Owner.MarkAsAccessed(RecordType); }
+        Owner?.MarkAsAccessed(RecordType);
     }
 
     /// <summary>

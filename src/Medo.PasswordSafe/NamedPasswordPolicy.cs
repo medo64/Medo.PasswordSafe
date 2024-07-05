@@ -152,7 +152,7 @@ public class NamedPasswordPolicy {
     }
 
 
-    private char[] _specialSymbolSet = Array.Empty<char>();
+    private char[] _specialSymbolSet = [];
     /// <summary>
     /// Returns special symbols that are allowed in the password.
     /// </summary>
@@ -183,7 +183,7 @@ public class NamedPasswordPolicy {
             }
         }
 
-        _specialSymbolSet = symbols.ToArray();
+        _specialSymbolSet = [.. symbols];
         MarkAsChanged();
     }
 

@@ -136,7 +136,7 @@ public sealed class PasswordHistoryCollection : IEnumerable<PasswordHistoryItem>
     }
 
 
-    private readonly List<PasswordHistoryItem> BaseCollection = new();
+    private readonly List<PasswordHistoryItem> BaseCollection = [];
 
 
     /// <summary>
