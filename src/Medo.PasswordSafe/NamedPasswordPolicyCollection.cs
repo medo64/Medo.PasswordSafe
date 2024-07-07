@@ -99,16 +99,19 @@ public sealed class NamedPasswordPolicyCollection : IEnumerable<NamedPasswordPol
         if (policies == null) { throw new ArgumentNullException(nameof(policies), "Policies cannot be null."); }
         if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
 
+        var duplicateName = default(string?);
         foreach (var policy in policies) {
             if (BaseCollection.Exists(item => item.Name == policy.Name)) {
-                throw new ArgumentException($"Password policy with the name '{policy.Name}' already existed in collection.", nameof(policies));
+                duplicateName = policy.Name;
+            } else {
+                policy.Owner = this;
             }
+        }
+        if (duplicateName != null) {  // only report the first duplicate
+            throw new ArgumentException($"Password policy with the name '{duplicateName}' already existed in collection.", nameof(policies));
         }
 
         BaseCollection.AddRange(policies);
-        foreach (var policy in policies) {
-            policy.Owner = this;
-        }
         MarkAsChanged();
     }
 

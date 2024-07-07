@@ -61,15 +61,15 @@ public class EntryCollection : IList<Entry> {
     /// <exception cref="NotSupportedException">Collection is read-only.</exception>
     public void AddRange(IEnumerable<Entry> items) {
         if (items == null) { throw new ArgumentNullException(nameof(items), "Item cannot be null."); }
-        foreach (var item in items) {
-            if (item.Owner != null) { throw new ArgumentOutOfRangeException(nameof(items), "Item cannot be in other collection."); }
-        }
         if (IsReadOnly) { throw new NotSupportedException("Collection is read-only."); }
 
-        BaseCollection.AddRange(items);
+        var hadOwner = false;
         foreach (var item in items) {
-            item.Owner = this;
+            if (item.Owner == null) { item.Owner = this; } else { hadOwner = true; }
         }
+        if (hadOwner) { throw new ArgumentOutOfRangeException(nameof(items), "Item cannot be in other collection."); }
+
+        BaseCollection.AddRange(items);
         MarkAsChanged();
     }
 
