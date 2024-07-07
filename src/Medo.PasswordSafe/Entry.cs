@@ -147,7 +147,9 @@ public class Entry {
     /// <summary>
     /// Gets/sets URL.
     /// </summary>
+#pragma warning disable CA1056 // URI-like properties should not be strings
     public string Url {
+#pragma warning restore CA1056 // URI-like properties should not be strings
         get { return Records.Contains(RecordType.Url) ? Records[RecordType.Url].Text ?? "" : ""; }
         set { Records[RecordType.Url].Text = value; }
     }
@@ -164,11 +166,29 @@ public class Entry {
 
     /// <summary>
     /// Gets/sets two factor key.
-    /// Should be encoded as base 32.
     /// </summary>
+    [Obsolete("Use GetTwoFactorKey/SetTwoFactorKey")]
+#pragma warning disable CA1819 // Properties should not return arrays
     public byte[] TwoFactorKey {
-        get { return Records.Contains(RecordType.TwoFactorKey) ? Records[RecordType.TwoFactorKey].GetBytes() : []; }
-        set { Records[RecordType.TwoFactorKey].SetBytes(value); }
+#pragma warning restore CA1819 // Properties should not return arrays
+        get { return GetTwoFactorKey(); }
+        set { SetTwoFactorKey(value); }
+    }
+
+    /// <summary>
+    /// Gets/sets two factor key.
+    /// </summary>
+    public byte[] GetTwoFactorKey() {
+        return Records.Contains(RecordType.TwoFactorKey)
+               ? Records[RecordType.TwoFactorKey].GetBytes()
+               : [];
+    }
+
+    /// <summary>
+    /// Sets two factor key.
+    /// </summary>
+    public void SetTwoFactorKey(byte[] bytes) {
+        Records[RecordType.TwoFactorKey].SetBytes(bytes);
     }
 
 

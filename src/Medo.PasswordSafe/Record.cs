@@ -126,7 +126,7 @@ public class Record : Field {
     /// Returns the exact copy of the record.
     /// </summary>
     public Record Clone() {
-        return new Record(RecordType, base.RawDataDirect);
+        return new Record(RecordType, base.GetRawDataDirect());
     }
 
     #endregion

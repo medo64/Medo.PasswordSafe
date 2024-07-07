@@ -112,7 +112,7 @@ public class Entry_Tests {
         entry.LastModificationTime = new DateTime(2005, 1, 1, 0, 0, 0, DateTimeKind.Utc);
         entry.Url = "http://example.com";
         entry.Email = "example@example.com";
-        entry.TwoFactorKey = new byte[] { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+        entry.SetTwoFactorKey([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
         entry.CreditCardNumber = "1234 5678 9012 3456";
         entry.CreditCardExpiration = "Title";
         entry.CreditCardVerificationValue = "0987";

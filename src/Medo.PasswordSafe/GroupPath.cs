@@ -154,6 +154,13 @@ public class GroupPath {
         return new GroupPath(group ?? "");
     }
 
+    /// <summary>
+    /// Returns path based on Group.
+    /// </summary>
+    public GroupPath ToGroupPath() {
+        return new GroupPath(Group ?? "");
+    }
+
     #endregion
 
 }

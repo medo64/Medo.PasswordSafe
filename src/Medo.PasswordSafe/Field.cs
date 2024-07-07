@@ -154,7 +154,7 @@ public abstract class Field {
     /// </summary>
     public byte[] GetBytesSilently() {
         //return RawDataDirect;
-        var data = RawDataDirect;
+        var data = GetRawDataDirect();
         try {
             var dataCopy = new byte[data.Length];
             Buffer.BlockCopy(data, 0, dataCopy, 0, dataCopy.Length);
@@ -193,12 +193,12 @@ public abstract class Field {
     internal byte[] RawData {
         get {
             MarkAsAccessed();
-            return RawDataDirect;
+            return GetRawDataDirect();
         }
         set {
             if (IsReadOnly) { throw new NotSupportedException("Object is read-only."); }
 
-            var oldValue = RawDataDirect;
+            var oldValue = GetRawDataDirect();
             try {
                 if (oldValue.Length == value.Length) { //skip writing the same value (to avoid marking document changed without reason)
                     var areSame = true;
@@ -221,16 +221,25 @@ public abstract class Field {
             MarkAsChanged();
         }
     }
+
     /// <summary>
     /// Gets raw data without marking the field as accessed.
     /// Bytes are kept encrypted in memory until accessed.
     /// </summary>
-    protected byte[] RawDataDirect {
-        get {
-            if (_rawData == null) { return []; } //return empty array if no value has been set so far
-            return UnprotectData(_rawData, RawDataEntropy);
-        }
+    [Obsolete("Use GetRawDataDirect")]
+#pragma warning disable CA1819 // Properties should not return arrays
+    protected byte[] RawDataDirect => GetRawDataDirect();
+#pragma warning restore CA1819 // Properties should not return arrays
+
+    /// <summary>
+    /// Gets raw data without marking the field as accessed.
+    /// Bytes are kept encrypted in memory until accessed.
+    /// </summary>
+    protected byte[] GetRawDataDirect() {
+        if (_rawData == null) { return []; } //return empty array if no value has been set so far
+        return UnprotectData(_rawData, RawDataEntropy);
     }
+
 
     /// <summary>
     /// Used to mark document as changed.
