@@ -1,109 +1,108 @@
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace Tests;
 
+[TestClass]
 public class GroupPath_Tests {
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: New")]
+    [TestMethod]  // GroupPath: New
     public void GroupPath_New() {
         PwSafe.GroupPath path = "A";
-        Assert.Equal("A", path.ToString());
-
+        Assert.AreEqual("A", path.ToString());
         var segments = path.GetSegments();
-        Assert.Single(segments);
-        Assert.Equal("A", segments[0]);
+        Assert.AreEqual(1, segments.Length);
+        Assert.AreEqual("A", segments[0]);
     }
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: New (via components)")]
+    [TestMethod]  // GroupPath: New (via components)
     public void GroupPath_NewViaComponents() {
         var path = new PwSafe.GroupPath("A", "B");
-        Assert.Equal("A.B", path.ToString());
-
+        Assert.AreEqual("A.B", path.ToString());
         var segments = path.GetSegments();
-        Assert.Equal(2, segments.Length);
-        Assert.Equal("A", segments[0]);
-        Assert.Equal("B", segments[1]);
+        Assert.AreEqual(2, segments.Length);
+        Assert.AreEqual("A", segments[0]);
+        Assert.AreEqual("B", segments[1]);
     }
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: New (via escaped components)")]
+    [TestMethod]  // GroupPath: New (via escaped components)
     public void GroupPath_NewViaComponentsEscaped() {
         var path = new PwSafe.GroupPath("A", "B.com");
-        Assert.Equal(@"A.B\.com", path.ToString());
+        Assert.AreEqual(@"A.B\.com", path.ToString());
 
         var segments = path.GetSegments();
-        Assert.Equal(2, segments.Length);
-        Assert.Equal("A", segments[0]);
-        Assert.Equal("B.com", segments[1]);
+        Assert.AreEqual(2, segments.Length);
+        Assert.AreEqual("A", segments[0]);
+        Assert.AreEqual("B.com", segments[1]);
     }
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: New (via escaped components 1)")]
+    [TestMethod]  // GroupPath: New (via escaped components 1)
     public void GroupPath_NewViaComponentsEscaped2() {
         var path = new PwSafe.GroupPath("A", @"B\.com");
-        Assert.Equal(@"A.B\\.com", path.ToString());
+        Assert.AreEqual(@"A.B\\.com", path.ToString());
 
         var segments = path.GetSegments();
-        Assert.Equal(2, segments.Length);
-        Assert.Equal("A", segments[0]);
-        Assert.Equal(@"B\.com", segments[1]);
+        Assert.AreEqual(2, segments.Length);
+        Assert.AreEqual("A", segments[0]);
+        Assert.AreEqual(@"B\.com", segments[1]);
     }
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: New (null)")]
+    [TestMethod]  // GroupPath: New (null)
     public void GroupPath_NewNull() {
         PwSafe.GroupPath path = default(string);
-        Assert.Equal("", path.ToString());
+        Assert.AreEqual("", path.ToString());
 
         var segments = path.GetSegments();
-        Assert.Single(segments);
-        Assert.Equal("", segments[0]);
+        Assert.AreEqual(1, segments.Length);
+        Assert.AreEqual("", segments[0]);
     }
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: New tree")]
+    [TestMethod]  // GroupPath: New tree
     public void GroupPath_NewTree() {
         PwSafe.GroupPath path = "A.B";
-        Assert.Equal("A.B", path.ToString());
+        Assert.AreEqual("A.B", path.ToString());
 
         var segments = path.GetSegments();
-        Assert.Equal(2, segments.Length);
-        Assert.Equal("A", segments[0]);
-        Assert.Equal("B", segments[1]);
+        Assert.AreEqual(2, segments.Length);
+        Assert.AreEqual("A", segments[0]);
+        Assert.AreEqual("B", segments[1]);
     }
 
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: Up")]
+    [TestMethod]  // GroupPath: Up
     public void GroupPath_Up() {
         PwSafe.GroupPath path = @"A.B.C\.d";
 
-        Assert.Equal(@"A.B.C\.d", path.ToString());
-        Assert.Equal("A.B", path.Up().ToString());
-        Assert.Equal("A", path.Up().Up().ToString());
-        Assert.Equal("", path.Up().Up().Up().ToString());
-        Assert.Equal("", path.Up().Up().Up().Up().ToString());
+        Assert.AreEqual(@"A.B.C\.d", path.ToString());
+        Assert.AreEqual("A.B", path.Up().ToString());
+        Assert.AreEqual("A", path.Up().Up().ToString());
+        Assert.AreEqual("", path.Up().Up().Up().ToString());
+        Assert.AreEqual("", path.Up().Up().Up().Up().ToString());
     }
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: Append")]
+    [TestMethod]  // GroupPath: Append
     public void GroupPath_Append() {
         PwSafe.GroupPath path = "";
 
-        Assert.Equal("", path.ToString());
-        Assert.Equal("", path.Append(null).ToString());
-        Assert.Equal("", path.Append("").ToString());
-        Assert.Equal("A", path.Append("A").ToString());
-        Assert.Equal("A.B", path.Append("A").Append("B").ToString());
-        Assert.Equal(@"A.B.C\.d", path.Append("A").Append("B").Append("C.d").ToString());
-        Assert.Equal(@"A.B.C\.d", path.Append("A").Append("B").Append("").Append("C.d").Append("").ToString()); //Empty elements are not appended.
+        Assert.AreEqual("", path.ToString());
+        Assert.AreEqual("", path.Append(null).ToString());
+        Assert.AreEqual("", path.Append("").ToString());
+        Assert.AreEqual("A", path.Append("A").ToString());
+        Assert.AreEqual("A.B", path.Append("A").Append("B").ToString());
+        Assert.AreEqual(@"A.B.C\.d", path.Append("A").Append("B").Append("C.d").ToString());
+        Assert.AreEqual(@"A.B.C\.d", path.Append("A").Append("B").Append("").Append("C.d").Append("").ToString()); //Empty elements are not appended.
     }
 
 
-    [Fact(DisplayName = "PasswordSafe: GroupPath: Indexer Get")]
+    [TestMethod]  // GroupPath: Indexer Get
     public void GroupPath_Indexed() {
         PwSafe.GroupPath path = @"A.B.C\.d";
 
-        Assert.Null(path[-1]);
-        Assert.Equal("A", path[0]);
-        Assert.Equal("B", path[1]);
-        Assert.Equal("C.d", path[2]);
-        Assert.Null(path[3]);
+        Assert.IsNull(path[-1]);
+        Assert.AreEqual("A", path[0]);
+        Assert.AreEqual("B", path[1]);
+        Assert.AreEqual("C.d", path[2]);
+        Assert.IsNull(path[3]);
     }
 
 }

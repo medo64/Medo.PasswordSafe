@@ -1,24 +1,24 @@
 using System;
-using Xunit;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 namespace Tests;
 
+[TestClass]
 public class RecordCollection_Tests {
 
-    [Fact(DisplayName = "PasswordSafe: RecordCollection: Add")]
+    [TestMethod]  // RecordCollection: Add
     public void RecordCollection_New() {
         var doc = new PwSafe.Document("Password");
         doc.Entries.Add(new PwSafe.Entry());
         doc.Entries[0].Records.Add(new PwSafe.Record(PwSafe.RecordType.Group) { Text = "Test" });
-
-        Assert.True(string.Equals("Test", doc.Entries[0].Group, StringComparison.Ordinal));
+        Assert.IsTrue(string.Equals("Test", doc.Entries[0].Group, StringComparison.Ordinal));
     }
 
 
-    [Fact(DisplayName = "PasswordSafe: RecordCollection: Add (read-only document)")]
+    [TestMethod]  // RecordCollection: Add (read-only document)
     public void RecordCollection_ReadOnly() {
-        Assert.Throws<NotSupportedException>(() => {
+        Assert.ThrowsException<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry());
             doc.IsReadOnly = true;
@@ -26,17 +26,17 @@ public class RecordCollection_Tests {
         });
     }
 
-    [Fact(DisplayName = "PasswordSafe: RecordCollection: Indexer Get")]
+    [TestMethod]  // RecordCollection: Indexer Get
     public void RecordCollection_ReadOnly_IndexerRead() {
         var doc = new PwSafe.Document("Password");
         doc.Entries.Add(new PwSafe.Entry());
         doc.IsReadOnly = true;
-        Assert.Equal("", doc.Entries[0].Records[PwSafe.RecordType.Title].Text);
+        Assert.AreEqual("", doc.Entries[0].Records[PwSafe.RecordType.Title].Text);
     }
 
-    [Fact(DisplayName = "PasswordSafe: RecordCollection: Indexer Set")]
+    [TestMethod]  // RecordCollection: Indexer Set
     public void RecordCollection_ReadOnly_IndexerWrite() {
-        Assert.Throws<NotSupportedException>(() => {
+        Assert.ThrowsException<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry());
             doc.IsReadOnly = true;
