@@ -303,7 +303,7 @@ public abstract class Field {
             PasswordSafeFieldDataType.Text => Text ?? String.Empty,
             PasswordSafeFieldDataType.Time => Time.ToLocalTime().ToString("yyyy'-'MM'-'dd HH':'mm':'ss K", CultureInfo.InvariantCulture),
 #if NET6_0_OR_GREATER
-            _ => "0x" + BitConverter.ToString(RawData).Replace("-", "", StringComparison.Ordinal),
+            _ => "0x" + Convert.ToHexString(RawData),
 #else
             _ => "0x" + BitConverter.ToString(RawData).Replace("-", ""),
 #endif

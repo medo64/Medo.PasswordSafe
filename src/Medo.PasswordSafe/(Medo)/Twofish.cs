@@ -86,8 +86,7 @@ internal sealed class Twofish : SymmetricAlgorithm {
 #if NET6_0_OR_GREATER
         IVValue = RandomNumberGenerator.GetBytes(FeedbackSizeValue / 8);
 #else
-        IVValue = new byte[FeedbackSizeValue / 8];
-        Rnd.GetBytes(IVValue);
+        IVValue = Rng.GetBytes(FeedbackSizeValue / 8);
 #endif
     }
 
@@ -96,8 +95,7 @@ internal sealed class Twofish : SymmetricAlgorithm {
 #if NET6_0_OR_GREATER
         KeyValue = RandomNumberGenerator.GetBytes(KeySizeValue / 8);
 #else
-        KeyValue = new byte[KeySizeValue / 8];
-        Rnd.GetBytes(KeyValue);
+        KeyValue = Rng.GetBytes(KeySizeValue / 8);
 #endif
     }
 
@@ -145,11 +143,6 @@ internal sealed class Twofish : SymmetricAlgorithm {
     private const int BlockSizeInBits = 128;
 
     #endregion Constants
-
-#if !NET6_0_OR_GREATER
-    private RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
-#endif
-
 }
 
 
@@ -360,7 +353,7 @@ file sealed class TwofishTransform : ICryptoTransform {
 #if NET6_0_OR_GREATER
                     RandomNumberGenerator.Fill(paddedInputBuffer.AsSpan(inputCount));
 #else
-                    Rnd.GetBytes(paddedInputBuffer, inputCount, paddedInputBuffer.Length - inputCount);
+                    Rng.Fill(paddedInputBuffer, inputCount, paddedInputBuffer.Length - inputCount);
 #endif
                     paddedInputOffset = 0;
                     Buffer.BlockCopy(inputBuffer, inputOffset, paddedInputBuffer, 0, inputCount);
@@ -918,8 +911,22 @@ file sealed class TwofishTransform : ICryptoTransform {
 
     #endregion Implementation
 
-#if !NET6_0_OR_GREATER
-    private RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
-#endif
-
 }
+
+
+#if !NET6_0_OR_GREATER
+
+file static class Rng {
+    private static RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
+
+    public static byte[] GetBytes(int length) {
+        var bytes = new byte[length];
+        Rnd.GetBytes(bytes);
+        return bytes;
+    }
+    public static void Fill(byte[] bytes, int offset, int count) {
+        Rnd.GetBytes(bytes, offset, count);
+    }
+}
+
+#endif
