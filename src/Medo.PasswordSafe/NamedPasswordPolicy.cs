@@ -172,7 +172,7 @@ public class NamedPasswordPolicy {
         var symbols = new List<char>(specialSymbols);
         if (symbols.Count > 1) {
             symbols.Sort();
-#if NET7_0_OR_GREATER
+#if NET6_0_OR_GREATER
             var prevCh = symbols[^1];
 #else
             var prevCh = symbols[symbols.Count - 1];
@@ -207,7 +207,7 @@ public class NamedPasswordPolicy {
     /// Returns hash code.
     /// </summary>
     public override int GetHashCode() {
-#if NET7_0_OR_GREATER
+#if NET6_0_OR_GREATER
         return HashCode.Combine(Name.GetHashCode(StringComparison.Ordinal), Style.GetHashCode());
 #else
         return Name.GetHashCode() ^ Style.GetHashCode();  // not exactly the same, but good enough
