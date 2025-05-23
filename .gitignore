@@ -1,11 +1,18 @@
-/bin/
-/build/
-/dist/
-/research/
+#~ .NET Project
 
-**/bin
-**/obj
-**/.vs
+bin/
+build/
+dist/
+research/
+
+**/bin/
+**/obj/
+**/.idea/
+**/.vs/
 **/*.csproj.user
+**/*.DotSettings.user
+**/BenchmarkDotNet.Artifacts
 
+TODO.md
+.meta.private
 .nuget.key

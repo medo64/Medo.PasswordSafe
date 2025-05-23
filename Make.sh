@@ -137,7 +137,7 @@ function debug() {
 
 function release() {
     echo
-    if [[ `shell git status -s 2>/dev/null | wc -l` -gt 0 ]]; then
+    if [[ `git status -s 2>/dev/null | wc -l` -gt 0 ]]; then
         echo "${ANSI_YELLOW}Uncommited changes present.${ANSI_RESET}" >&2
     fi
     mkdir -p "$BASE_DIRECTORY/bin/"
@@ -197,19 +197,17 @@ function test() {
     echo "${ANSI_GREEN}Testing completed${ANSI_RESET}"
 }
 
+function benchmark() {
+    echo
+    pushd $BASE_DIRECTORY/tests/Medo.Uuid7.Benchmark/ >/dev/null || return 1
+    dotnet run --configuration "Release" \
+        || return 1
+    popd >/dev/null || return 1
+}
+
 function package() {
     echo
     mkdir -p "$BASE_DIRECTORY/build/package/"
-
-    RELEASE_NOTES=$(cat CHANGELOG.md)
-    if [[ "$RELEASE_NOTES" == "" ]]; then
-        if [[ "$PACKAGE_VERSION" == "0.0.0" ]]; then  # allow creating package; won't be pushed anyhow
-            echo "${ANSI_YELLOW}No changelog!${ANSI_RESET}" >&2
-        else
-            echo "${ANSI_RED}No changelog!${ANSI_RESET}" >&2
-            return 1
-        fi
-    fi
 
     for PROJECT_FILE in $(find $BASE_DIRECTORY/src/MultiFramework -name "*.csproj" | sort); do
         PACKAGE_VERSION=`cat "$PROJECT_FILE" | grep "<Version>" | sed 's^</\?Version>^^g' | xargs`
@@ -226,7 +224,6 @@ function package() {
 
         rm -r $BASE_DIRECTORY/src/bin 2>/dev/null
         dotnet pack "$PROJECT_FILE" \
-                    -p:PackageReleaseNotes="$RELEASE_NOTES" \
                     --configuration "Release" \
                     --force \
                     --include-source \
@@ -290,6 +287,7 @@ while [ $# -gt 0 ]; do
         debug)      clean && debug || break ;;
         release)    clean && release || break ;;
         test)       test || break ;;
+        benchmark)  benchmark || break ;;
         package)    clean && test && package || break ;;
         nuget)      clean && test && package && nuget || break ;;
 
