@@ -83,12 +83,22 @@ internal sealed class Twofish : SymmetricAlgorithm {
 
     /// <inheritdoc />
     public override void GenerateIV() {
+#if NET7_0_OR_GREATER
         IVValue = RandomNumberGenerator.GetBytes(FeedbackSizeValue / 8);
+#else
+        IVValue = new byte[FeedbackSizeValue / 8];
+        Rnd.GetBytes(IVValue);
+#endif
     }
 
     /// <inheritdoc />
     public override void GenerateKey() {
+#if NET7_0_OR_GREATER
         KeyValue = RandomNumberGenerator.GetBytes(KeySizeValue / 8);
+#else
+        KeyValue = new byte[KeySizeValue / 8];
+        Rnd.GetBytes(KeyValue);
+#endif
     }
 
     #endregion SymmetricAlgorithm
@@ -136,6 +146,10 @@ internal sealed class Twofish : SymmetricAlgorithm {
 
     #endregion Constants
 
+#if !NET7_0_OR_GREATER
+    private RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
+#endif
+
 }
 
 
@@ -158,23 +172,39 @@ file sealed class TwofishTransform : ICryptoTransform {
         TransformMode = transformMode;
         PaddingMode = paddingMode;
 
+#if NET7_0_OR_GREATER
         DecryptionBuffer = GC.AllocateArray<byte>(16, pinned: true);
-
         Key = GC.AllocateArray<DWord>(rgbKey.Length / 4, pinned: true);
         SBoxKeys = GC.AllocateArray<DWord>(MaxKeyBits / 64, pinned: true);  // key bits used for S-boxes
         SubKeys = GC.AllocateArray<DWord>(TotalSubkeys, pinned: true);  // round subkeys, input/output whitening bits
+#else
+        DecryptionBuffer = new byte[16];
+        Key = new DWord[rgbKey.Length / 4];
+        SBoxKeys = new DWord[MaxKeyBits / 64];
+        SubKeys = new DWord[TotalSubkeys];
+#endif
 
+#if NET7_0_OR_GREATER
         var key32 = GC.AllocateArray<uint>(Key.Length, pinned: true);
+#else
+        var key32 = new uint[Key.Length];
+#endif
+
         Buffer.BlockCopy(rgbKey, 0, key32, 0, rgbKey.Length);
         for (var i = 0; i < Key.Length; i++) { Key[i] = (DWord)key32[i]; }
-        Array.Clear(key32);
+        Array.Clear(key32, 0, key32.Length);
 
         if (rgbIV != null) {
+#if NET7_0_OR_GREATER
             IV = GC.AllocateArray<DWord>(rgbIV.Length / 4, pinned: true);
             var iv32 = GC.AllocateArray<uint>(IV.Length, pinned: true);
+#else
+            IV = new DWord[rgbIV.Length / 4];
+            var iv32 = new uint[IV.Length];
+#endif
             Buffer.BlockCopy(rgbIV, 0, iv32, 0, rgbIV.Length);
             for (var i = 0; i < IV.Length; i++) { IV[i] = (DWord)iv32[i]; }
-            Array.Clear(iv32);
+            Array.Clear(iv32, 0, iv32.Length);
         }
 
         ReKey();
@@ -215,11 +245,11 @@ file sealed class TwofishTransform : ICryptoTransform {
 
     private void Dispose(bool disposing) {
         if (disposing) {
-            Array.Clear(Key);
-            if (IV != null) { Array.Clear(IV); }
-            Array.Clear(SBoxKeys);
-            Array.Clear(SubKeys);
-            Array.Clear(DecryptionBuffer);
+            Array.Clear(Key, 0, Key.Length);
+            if (IV != null) { Array.Clear(IV, 0, IV.Length); }
+            Array.Clear(SBoxKeys, 0, SBoxKeys.Length);
+            Array.Clear(SubKeys, 0, SubKeys.Length);
+            Array.Clear(DecryptionBuffer, 0, DecryptionBuffer.Length);
         }
     }
 
@@ -317,16 +347,28 @@ file sealed class TwofishTransform : ICryptoTransform {
                     paddedInputBuffer = new byte[paddedLength];
                     paddedInputOffset = 0;
                     Buffer.BlockCopy(inputBuffer, inputOffset, paddedInputBuffer, 0, inputCount);
+#if NET7_0_OR_GREATER
                     paddedInputBuffer[^1] = (byte)(paddedLength - inputCount);
+#else
+                    paddedInputBuffer[paddedInputBuffer.Length - 1] = (byte)(paddedLength - inputCount);
+#endif
                     break;
 
                 case PaddingMode.ISO10126:
                     paddedLength = inputCount / 16 * 16 + 16; //to round to next whole block
                     paddedInputBuffer = new byte[paddedLength];
+#if NET7_0_OR_GREATER
                     RandomNumberGenerator.Fill(paddedInputBuffer.AsSpan(inputCount));
+#else
+                    Rnd.GetBytes(paddedInputBuffer, inputCount, paddedInputBuffer.Length - inputCount);
+#endif
                     paddedInputOffset = 0;
                     Buffer.BlockCopy(inputBuffer, inputOffset, paddedInputBuffer, 0, inputCount);
+#if NET7_0_OR_GREATER
                     paddedInputBuffer[^1] = (byte)(paddedLength - inputCount);
+#else
+                    paddedInputBuffer[paddedInputBuffer.Length - 1] = (byte)(paddedLength - inputCount);
+#endif
                     break;
 
                 default: throw new CryptographicException("Unsupported padding mode.");
@@ -376,7 +418,11 @@ file sealed class TwofishTransform : ICryptoTransform {
 
     private static byte[] RemovePadding(byte[] outputBuffer, PaddingMode paddingMode) {
         if (paddingMode == PaddingMode.PKCS7) {
+#if NET7_0_OR_GREATER
             var padding = outputBuffer[^1];
+#else
+            var padding = outputBuffer[outputBuffer.Length - 1];
+#endif
             if (padding is < 1 or > 16) { throw new CryptographicException("Invalid padding."); }
             for (var i = outputBuffer.Length - padding; i < outputBuffer.Length; i++) {
                 if (outputBuffer[i] != padding) { throw new CryptographicException("Invalid padding."); }
@@ -400,7 +446,11 @@ file sealed class TwofishTransform : ICryptoTransform {
                 return newOutputBuffer;
             }
         } else if (paddingMode == PaddingMode.ANSIX923) {
+#if NET7_0_OR_GREATER
             var padding = outputBuffer[^1];
+#else
+            var padding = outputBuffer[outputBuffer.Length - 1];
+#endif
             if (padding is < 1 or > 16) { throw new CryptographicException("Invalid padding."); }
             for (var i = outputBuffer.Length - padding; i < outputBuffer.Length - 1; i++) {
                 if (outputBuffer[i] != 0) { throw new CryptographicException("Invalid padding."); }
@@ -409,7 +459,11 @@ file sealed class TwofishTransform : ICryptoTransform {
             Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
             return newOutputBuffer;
         } else if (paddingMode == PaddingMode.ISO10126) {
+#if NET7_0_OR_GREATER
             var padding = outputBuffer[^1];
+#else
+            var padding = outputBuffer[outputBuffer.Length - 1];
+#endif
             if (padding is < 1 or > 16) { throw new CryptographicException("Invalid padding."); }
             var newOutputBuffer = new byte[outputBuffer.Length - padding];
             Buffer.BlockCopy(outputBuffer, 0, newOutputBuffer, 0, newOutputBuffer.Length);
@@ -734,7 +788,7 @@ file sealed class TwofishTransform : ICryptoTransform {
         var r = new DWord();
         for (var i = 0; i < 2; i++) {
             r ^= (i > 0) ? k0 : k1; //merge in 32 more key bits
-            for (var j = 0; j < 4; j++) { //shift one byte at a time 
+            for (var j = 0; j < 4; j++) { //shift one byte at a time
                 var b = (byte)(r >> 24);
                 var g2 = (byte)((b << 1) ^ (((b & 0x80) > 0) ? RS_GF_FDBK : 0));
                 var g3 = (byte)(((b >> 1) & 0x7F) ^ (((b & 1) > 0) ? RS_GF_FDBK >> 1 : 0) ^ g2);
@@ -863,5 +917,9 @@ file sealed class TwofishTransform : ICryptoTransform {
     }
 
     #endregion Implementation
+
+#if !NET7_0_OR_GREATER
+    private RandomNumberGenerator Rnd = RandomNumberGenerator.Create();
+#endif
 
 }

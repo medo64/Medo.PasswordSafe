@@ -302,7 +302,11 @@ public abstract class Field {
             PasswordSafeFieldDataType.Uuid => Uuid.ToString(),
             PasswordSafeFieldDataType.Text => Text ?? String.Empty,
             PasswordSafeFieldDataType.Time => Time.ToLocalTime().ToString("yyyy'-'MM'-'dd HH':'mm':'ss K", CultureInfo.InvariantCulture),
+#if NET7_0_OR_GREATER
             _ => "0x" + BitConverter.ToString(RawData).Replace("-", "", StringComparison.Ordinal),
+#else
+            _ => "0x" + BitConverter.ToString(RawData).Replace("-", ""),
+#endif
         };
     }
 

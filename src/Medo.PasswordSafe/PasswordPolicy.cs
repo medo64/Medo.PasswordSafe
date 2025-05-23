@@ -174,7 +174,11 @@ public class PasswordPolicy {
         var symbols = new List<char>(specialSymbols);
         if (symbols.Count > 1) {
             symbols.Sort();
+#if NET7_0_OR_GREATER
             var prevCh = symbols[^1];
+#else
+            var prevCh = symbols[symbols.Count - 1];
+#endif
             for (var i = symbols.Count - 2; i >= 0; i--) {
                 var currCh = symbols[i];
                 if (currCh == prevCh) {

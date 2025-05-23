@@ -21,7 +21,11 @@ public class GroupPath {
             foreach (var component in segments) {
                 if (!string.IsNullOrEmpty(component)) {
                     if (sb.Length > 0) { sb.Append('.'); }
+#if NET7_0_OR_GREATER
                     sb.Append(component.Replace(".", @"\.", StringComparison.Ordinal));
+#else
+                    sb.Append(component.Replace(".", @"\."));
+#endif
                 }
             }
         }
@@ -46,7 +50,11 @@ public class GroupPath {
         foreach (var ch in Group) {
             if (ch == '.') {
                 if (escaped) {
+#if NET7_0_OR_GREATER
                     segment[^1] = '.';
+#else
+                    segment[segment.Length - 1] = '.';
+#endif
                     escaped = false;
                 } else {
                     segmentList.Add(segment.ToString());
@@ -73,7 +81,11 @@ public class GroupPath {
         var segments = GetSegments();
         var newSegments = new string[segments.Length + 1];
         Array.Copy(segments, 0, newSegments, 0, segments.Length);
+#if NET7_0_OR_GREATER
         newSegments[^1] = segment;
+#else
+        newSegments[newSegments.Length - 1] = segment;
+#endif
         return new GroupPath(newSegments);
     }
 
@@ -120,7 +132,11 @@ public class GroupPath {
     /// A hash code for the current object.
     /// </summary>
     public override int GetHashCode() {
+#if NET7_0_OR_GREATER
         return Group.GetHashCode(StringComparison.OrdinalIgnoreCase);
+#else
+        return Group.GetHashCode();  // not really equivalent but good enough
+#endif
     }
 
     /// <summary>

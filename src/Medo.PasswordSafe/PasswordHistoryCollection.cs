@@ -20,16 +20,29 @@ public sealed class PasswordHistoryCollection : IEnumerable<PasswordHistoryItem>
             var text = Records[RecordType.PasswordHistory].Text;
             if ((text != null) && (text.Length >= 5)) {
                 _enabled = (text[0] != '0');
+#if NET7_0_OR_GREATER
                 if (!int.TryParse(text.AsSpan(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _maximumCount)) {
+#else
+                if (!int.TryParse(text.Substring(1, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out _maximumCount)) {
+#endif
                     _maximumCount = DefaultMaximumCount;
                 }
 
+#if NET7_0_OR_GREATER
                 if (int.TryParse(text.AsSpan(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var count)) {
+#else
+                if (int.TryParse(text.Substring(3, 2), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var count)) {
+#endif
                     var j = 5; //where parsing starts
                     for (var i = 0; i < count; i++) {
                         if (text.Length >= j + 12) {
+#if NET7_0_OR_GREATER
                             if (int.TryParse(text.AsSpan(j, 8), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var time)
                                 && int.TryParse(text.AsSpan(j + 8, 4), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var length)) {
+#else
+                            if (int.TryParse(text.Substring(j, 8), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var time)
+                                && int.TryParse(text.Substring(j + 8, 4), NumberStyles.HexNumber, CultureInfo.InvariantCulture, out var length)) {
+#endif
                                 j += 12; //skip time and length
                                 if (text.Length >= j + length) {
                                     var item = new PasswordHistoryItem(this, UnixEpoch.AddSeconds(time), text.Substring(j, length));
