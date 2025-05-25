@@ -722,7 +722,11 @@ file sealed class TwofishTransform : ICryptoTransform {
 
     private static readonly DWord[][] MdsTable = new DWord[4][] { new DWord[256], new DWord[256], new DWord[256], new DWord[256] };
     private static bool MdsTableBuilt;
+#if NET9_0_OR_GREATER
+    private static readonly System.Threading.Lock SyncRootBuildMds = new();
+#else
     private static readonly object SyncRootBuildMds = new();
+#endif
 
     private static void BuildMds() {
         lock (SyncRootBuildMds) {
