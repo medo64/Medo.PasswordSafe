@@ -1,5 +1,13 @@
 # Changelog
 
+## [6.3.0] - 2025-05-25
+
+- added support for .NET Standard 2.0
+- added .NET 9.0 compile target
+- removed .NET 7.0 compile target
+- minor fixes and refactorings
+
+
 ## [6.2.1] - 2024-01-21
 
 - adding/removing password policies - courtesy of [Qiao Wang](https://github.com/nodew)
