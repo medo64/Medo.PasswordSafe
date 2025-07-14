@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.3.1] - 2025-07-13
+
+- added Record.Caption
+
+
 ## [6.3.0] - 2025-05-25
 
 - added support for .NET Standard 2.0
