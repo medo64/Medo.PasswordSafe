@@ -40,6 +40,43 @@ public class Record : Field {
     public RecordType RecordType { get; set; }
 
     /// <summary>
+    /// Gets caption.
+    /// Caption is not localized.
+    /// </summary>
+    public string? Caption {
+        get {
+            return RecordType switch {
+                RecordType.Uuid => "UUID",
+                RecordType.Group => "Group",
+                RecordType.Title => "Title",
+                RecordType.UserName => "User name",
+                RecordType.Notes => "Notes",
+                RecordType.Password => "Password",
+                RecordType.Url => "URL",
+                RecordType.Autotype => "Auto-type",
+                RecordType.PasswordHistory => "Password history",
+                RecordType.PasswordPolicy => "Password policy",
+                RecordType.RunCommand => "Run command",
+                RecordType.EmailAddress => "Email address",
+                RecordType.OwnSymbolsForPassword => "Own symbols for password",
+                RecordType.PasswordPolicyName => "Password policy name",
+                RecordType.CreditCardNumber => "Card number",
+                RecordType.CreditCardExpiration => "Card expiration",
+                RecordType.CreditCardVerificationValue => "Card verification code",
+                RecordType.CreditCardPin => "Card pin",
+                RecordType.QRCode => "QR code",
+                RecordType.CreationTime => "Cration time",
+                RecordType.PasswordModificationTime => "Password modification time",
+                RecordType.LastAccessTime => "Last access time",
+                RecordType.PasswordExpiryTime => "Password expiry time",
+                RecordType.LastModificationTime => "Last modification time",
+                RecordType.TwoFactorKey => "Two-factor key",
+                _ => null,
+            };
+        }
+    }
+
+    /// <summary>
     /// Gets/sets text data.
     /// Null will be returned if conversion cannot be performed.
     /// For unknown field types, conversion will always be attempted.
