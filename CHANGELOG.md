@@ -1,5 +1,10 @@
 # Changelog
 
+## [6.4.0] - 2025-11-27
+
+- added support for .NET Standard 2.0
+
+
 ## [6.3.0] - 2025-05-25
 
 - added support for .NET Standard 2.0
@@ -43,6 +48,8 @@
 
 
 [unreleased]: https://github.com/medo64/Medo.PasswordSafe/
+[6.4.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.4.0
+[6.3.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.3.0
 [6.2.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.2.0
 [6.1.0]: https://www.nuget.org/packages/PasswordSafe/6.1.0
 [6.0.0]: https://www.nuget.org/packages/PasswordSafe/6.0.0
