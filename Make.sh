@@ -242,7 +242,7 @@ if [ "$PACKAGE_NUGET" != "" ]; then
 
     PACKAGE_NUGET_VERSION=`cat "$PACKAGE_NUGET_ENTRYPOINT" | grep "<Version>" | sed 's^</\?Version>^^g' | xargs`
     if [ "$PACKAGE_NUGET_VERSION" = "" ]; then
-        PACKAGE_NUGET_VERSION=$ASSEMBLY_VERSION_TEXT
+        PACKAGE_NUGET_VERSION=$GIT_VERSION
     fi
     echo "${ANSI_PURPLE}NuGET package version: ${ANSI_MAGENTA}$PACKAGE_NUGET_VERSION${ANSI_RESET}"
 
@@ -298,12 +298,10 @@ prereq_package() {
             exit 113
         fi
         if ! [ -e "$SCRIPT_DIR/packaging/linux-deb/usr/share/applications"/*.desktop ]; then
-            echo "${ANSI_RED}Missing desktip file${ANSI_RESET}" >&2
-            exit 113
+            echo "${ANSI_YELLOW}Missing desktop file${ANSI_RESET}" >&2
         fi
         if ! [ -e "$SCRIPT_DIR/packaging/linux-deb/usr/share/icons/hicolor/128x128/apps"/*.png ]; then
-            echo "${ANSI_RED}Missing icon files${ANSI_RESET}" >&2
-            exit 113
+            echo "${ANSI_YELLOW}Missing icon files${ANSI_RESET}" >&2
         fi
         if ! command -v dpkg-deb >/dev/null; then
             echo "${ANSI_RED}Missing dpkg-deb command (dpkg-deb package)${ANSI_RESET}" >&2
@@ -361,9 +359,17 @@ make_run() {
     echo "${ANSI_MAGENTA}$(basename $PROJECT_ENTRYPOINT)${ANSI_RESET}"
     if [ "$PROJECT_OUTPUTTYPE" = "exe" ] || [ "$PROJECT_OUTPUTTYPE" = "winexe" ]; then
         cd $( dirname "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" )
-        dotnet run                                       \
-            -p:EnableNETAnalyzers=false                  \
-            --project "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"
+
+        RUN_USE_SUDO=$( cat "$SCRIPT_DIR/.meta" | grep -E "^RUN_USE_SUDO:" | sed  -n 1p | cut -d: -sf2- | xargs )
+        if [ "$RUN_USE_SUDO" = "true" ]; then
+            sudo $(which dotnet) run                         \
+                -p:EnableNETAnalyzers=false                  \
+                --project "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"
+        else
+            dotnet run                                       \
+                -p:EnableNETAnalyzers=false                  \
+                --project "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"
+        fi
     else
         echo "${ANSI_RED}Nothing to run${ANSI_RESET}" >&2
         exit 113
@@ -395,9 +401,9 @@ make_test() {
         dotnet test                                \
             -p:TestingPlatformCaptureOutput=false  \
             -p:EnableNETAnalyzers=false            \
-            -l "console;verbosity=detailed"        \
-            --verbosity detailed                   \
-            "$PROJECT_FILE"                       || exit 113
+            --verbosity minimal                    \
+            "$PROJECT_FILE" || exit 113
+
         echo
     done
 
@@ -672,7 +678,9 @@ make_package() {
             sed -i "s/<DEB_VERSION>/$DEB_VERSION/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN/control" || exit 113
             sed -i "s/<DEB_ARCHITECTURE>/amd64/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/DEBIAN/control" || exit 113
 
-            rsync -a "$SCRIPT_DIR/packaging/linux-deb/usr/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/usr/" || exit 113
+            if [ -e "$SCRIPT_DIR/packaging/linux-deb/usr/" ]; then
+                rsync -a "$SCRIPT_DIR/packaging/linux-deb/usr/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/usr/" || exit 113
+            fi
 
             mkdir -p  "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/$PROJECT_NAME/"
             rsync -a "$SCRIPT_DIR/bin/linux-x64/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/$PROJECT_NAME/" || exit 113
@@ -751,8 +759,8 @@ make_package() {
         echo
         cp "$SCRIPT_DIR/build/nuget/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.nupkg"  "$SCRIPT_DIR/dist/" || return 1
         echo "${ANSI_CYAN}dist/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.nupkg${ANSI_RESET}"
-        cp "$SCRIPT_DIR/build/nuget/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.symbols.nupkg" "$SCRIPT_DIR/dist/" || return 1
-        echo "${ANSI_CYAN}dist/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.symbols.nupkg${ANSI_RESET}"
+        cp "$SCRIPT_DIR/build/nuget/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.snupkg" "$SCRIPT_DIR/dist/" || return 1
+        echo "${ANSI_CYAN}dist/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.snupkg${ANSI_RESET}"
         echo
     fi
 
