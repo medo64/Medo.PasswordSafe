@@ -443,7 +443,7 @@ public class Document : IDisposable {
         if (!IsReadOnly && TrackModify) {
             Headers[HeaderType.TimestampOfLastSave].Time = DateTime.UtcNow;
 
-            var assemblyName = Assembly.GetExecutingAssembly().GetName();
+            var assemblyName = GetApplicationAssemblyName();
             Headers[HeaderType.WhatPerformedLastSave].Text = string.Format(CultureInfo.InvariantCulture, "{0} V{1}.{2:00}", assemblyName.Name, assemblyName.Version?.Major ?? 0, assemblyName.Version?.Minor ?? 0);
 
             Headers[HeaderType.LastSavedByUser].Text = Environment.UserName;
@@ -744,6 +744,10 @@ public class Document : IDisposable {
     internal void MarkAsChanged() {
         HasChanged = true;
         Changed?.Invoke(this, EventArgs.Empty);
+    }
+
+    private static AssemblyName GetApplicationAssemblyName() {
+        return (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()).GetName();
     }
 
 
