@@ -20,7 +20,7 @@
 
 ## [6.2.1] - 2024-01-21
 
-- adding/removing password policies - courtesy of [Qiao Wang](https://github.com/nodew)
+- adding/removing password policies - courtesy of Qiao Wang
 
 
 ## [6.2.0] - 2023-06-19
