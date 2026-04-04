@@ -1,7 +1,7 @@
 PasswordSafe database format description version 3.31
 -----------------------------------------------------
 
-Copyright (c) 2003-2024 Rony Shapiro <ronys@pwsafe.org>.
+Copyright (c) 2003-2026 Rony Shapiro <ronys@pwsafe.org>.
 All rights reserved. Use of the code is allowed under the Artistic
 License terms, as specified in the LICENSE file distributed with this
 code, or available from
@@ -51,11 +51,13 @@ version 3 file. This tag has no cryptographic value.
 2.3 P' is the "stretched key" generated from the user's passphrase and
 the SALT, as defined by the hash-function-based key stretching
 algorithm in [KEYSTRETCH] (Section 4.1), with SHA-256 [SHA256] as the
-hash function, and ITER iterations (at least 2048, i.e., t = 11).
+hash function, and ITER iterations.
 
 2.4 ITER is the number of iterations on the hash function to calculate P',
 stored as a 32 bit little-endian value. This value is stored here in order
 to future-proof the file format against increases in processing power.
+The original minimum was 2,048.  As of file format 0x030F, the minimum is
+262,144. Older databases are silently upgraded to this vaule when saved.
 
 2.5 H(P') is SHA-256(P'), and is used to verify that the user has the
 correct passphrase.
@@ -135,6 +137,31 @@ representation.
  Note that future versions of this format may allow time to be
  specified in 64 bits as well.
 
+3.1.4 Password Expiration
+ There are four possible combinations of the password expiry fields.
+ When an entry is read, the type of expiration setting is inferred
+ from which fields are recorded in the record.
+
+ Password Expiry Time        0x0a
+ Password Expiry Interval    0x11
+
+Setting                       Time (0x0a)  Interval (0x11)  Comments
+--------------------------------------------------------------------
+Never
+Specific Date                      X                           [1]
+Date with recurring interval       X             X             [2]  
+Special Case                                     X             [3] 
+
+[1] If the user sets a non-recurring interval, it is recorded as a
+specific date.
+
+[2] If the user sets a recurring interval, the interval and the
+next expiration date are both recorded.
+
+[3] This case is interpreted as "Never" and the interval will be
+ignored.  This case is not currently written to the file, but exists
+in some older files.
+
 3.2 Field types for the PasswordSafe database header:
                                                  Currently
 Name                        Value        Type    Implemented      Comments
@@ -157,13 +184,13 @@ Reserved                    0x0e        -                            [13]
 Recently Used Entries       0x0f        Text                         [14]
 Named Password Policies     0x10        Text                         [15]
 Empty Groups                0x11        Text                         [16]
-Yubico                      0x12        Text                         [13]
+Yubico                      0x12        Text                         [18]
 Timestamp of last master
 password change             0x13        time_t        Y              [5]
 End of Entry                0xff        [empty]       Y              [17]
 
 [1] The version number of the database format. For example, the value
-0x0310 is stored in little-endian format, that is, 0x10, 0x03.
+0x0311 is stored in little-endian format, that is, 0x11, 0x03.
 PasswordSafe V3.01 introduced Format 0x0300
 PasswordSafe V3.03 introduced Format 0x0301
 PasswordSafe V3.09 introduced Format 0x0302
@@ -179,6 +206,8 @@ PasswordSafe V3.29 introduced Format 0x030B
 PasswordSafe V3.29Y introduced Format 0x030C
 PasswordSafe V3.30 introduced Format 0x030D
 PasswordSafe V3.47 introduced Format 0x030E
+PasswordSafe V3.68 introduced Format 0x030F
+PasswordSafe V3.69 introduced Format 0x0310
 
 [2] A universally unique identifier is needed in order to synchronize
 databases across different machine. Representation is described in
@@ -305,6 +334,9 @@ This field was introduced in format version 0x030B.
 [17] An explicit end of entry field is useful for supporting new fields
 without breaking backwards compatability.
 
+[18] YubiKey secret key, saved so that it can be used to initialize
+additional YubiKeys.  20 bytes.  Introduced in format version 0x030C.
+
 3.3 Field types for database Records:
                                                  Currently
 Name                        Value        Type    Implemented      Comments
@@ -345,6 +377,18 @@ TOTP Config                 0x21        1 byte        N              [29]
 TOTP Length                 0x22        1 byte        N              [29]
 TOTP Time Step              0x23        1 byte        N              [29]
 TOTP Start Time             0x24        time_t        N              [29]
+Att Title                   0x25        Text          Y              [30]
+Att MediaType               0x26        Text          Y              [30]
+Att FileName                0x27        Text          Y              [30]
+Att Modification Time       0x28        time_t        Y              [30]
+Att Content                 0x29        Binary        Y              [30]
+Passkey Credential ID       0x2a        Binary        Y              [31]
+Passkey Relying Party ID    0x2b        Text          Y              [31]
+Passkey User Handle         0x2c        Binary        Y              [31]
+Passkey Algorithm ID        0x2d        4 bytes       Y              [31]
+Passkey Private Key         0x2e        Binary        Y              [31]
+Passkey Sign Count          0x2f        4 bytes       Y              [31]
+Custom Text Field           0x30        Text          N              [32]
 Unknown (testing)           0xdf        -             N              [26]
 Implementation-specific     0xe0-0xfe   -             N              [27]
 End of Entry                0xff        [empty]       Y              [28]
@@ -562,6 +606,107 @@ These TOTP parameters fields have the following format:
                       start counting time steps. If not specified, the
                       default is 0. The format is that of a 40 bit (5 byte)
                       Password Safe time_t value as specified in Section 3.1.3.
+
+[30] The attachment parameters fields are listed below. If an entry contains
+an attachment the field Att MediaType must be present and non-empty,
+the others are optional (default to empty/zero).
+
+    Att Title = User-friendly name for the attachment
+
+    Att MediaType = MIME type - text string describing Media Type, per
+      http://www.iana.org/assignments/media-types
+
+    Att FileName = Original file name - kept mainly for the extension, to support
+      applications that require this for proper viewing.
+
+    Att Modification Time = Modification time associated with the attachment file
+      at the time of attachment. Application may try to restore this when exporting
+      the attachment. Representation is as described in Section 3.1.3.
+
+    Att Content = The binary representation of the attachment.
+      Note that this is limited to 4GB (2^32 bytes), which should suffice.
+      Interpretation of this field's value is per the media type specified
+      in Att MediaType (0x26)
+      Absence of this field implies a zero-sized attachment.
+
+These parameters were introduced in version 0x030F (PasswordSafe V3.68).
+
+Although the Att Content field is theoretically limited to 4GB, attaching large
+files will impact performance and synchronization times, and could make the database
+inaccessible on mobile platforms. It is advised to keep the total database size
+below 100MB.
+
+[31] The passkey parameters fields are listed below. If an entry contains
+a passkey, all fields must be present and non-empty. Below are references
+to the official specification documenting each field, including requirements
+of the contents.
+
+    Passkey Credential ID
+    https://www.w3.org/TR/webauthn-2/#credential-id
+
+    Passkey Relying Party ID
+    https://www.w3.org/TR/webauthn-2/#relying-party-identifier
+
+    Passkey User Handle
+    https://www.w3.org/TR/webauthn-2/#user-handle
+
+    Passkey Algorithm ID = IANA COSE Algorithm Identifier
+    https://www.w3.org/TR/webauthn-2/#sctn-alg-identifier
+    Encode as signed (!) 32 bit little-endian value, example for ES256:
+    0xf9 0xff 0xff 0xff
+    To enhance platform compatability, the application should prefer to
+    create passkeys using ES256 (if supported by the Relying Party).
+
+    Passkey Private Key
+    https://www.w3.org/TR/webauthn-2/#credential-private-key
+    For maximum platform compatability, the private key must be encoded
+    in DER format.
+
+    Passkey Sign Count, encoded as unsigned 32 bit little-endian value
+    https://www.w3.org/TR/webauthn-2/#sctn-sign-counter
+    The value stored in the database is the last-used value, so the next
+    assertion must first increment it and use the incremented value.
+
+These parameters were introduced in version 0x0310 (PasswordSafe V3.69).
+
+[32] Custom fields consist of property entries stored in the following format:
+    PLVPLV...PLV S PLVPLV...PLV ... S PLVPLV...PLV
+where:
+    P = 2 hexadecimal digits indicating property ID; P = 00 is not allowed
+    L = 4 hexadecimal digits value length in bytes
+    V = value of the property whose interpretation depends on the P; content
+        must be a valid UTF-8
+    S = 6 hexadecimal digits 000000 that serve as a separator between different
+        custom fields
+
+These custom fields repeat as many times as there are properties. Separator at
+the end is allowed but not required.
+
+Currently defined property IDs are
+    00 = reserved for separator
+    01 = name: property value is interpreted as a UTF-8 string; in application
+         this can be considered to be a title of a given value
+    02 = value: property value is interpreted as a UTF-8 string; in application
+         this can be considered to be a value displayed to the user
+    03 = sensitivity flag: property value is interpreted as a boolean {0,1} with
+         '0' (0x30) being false and '1' (0x31) being true true; in application
+         this might change how value is displayed (e.g., sensitive value could
+         have its characters masked); length of this property must be 1
+
+At minimum, each custom field must contain property name (01) and property value
+(02). For a given custom text field, all property names must be unique and cannot
+be empty.
+
+Any unknown property ID must be ignored and left unchanged for forward
+compatibility. Duplicate property IDs are not allowed within one property entry.
+
+For example, to encode the following custom fields:
+* WiFi SSID: Test
+* WiFi Password: bobsyouruncle (sensitive field)
+One would use
+    010009WiFi SSID020004Test00000001000DWiFi Password02000Cbobsyouruncle0300011
+
+This field was introduced in format version 0x0311
 
 4. Extensibility
 
