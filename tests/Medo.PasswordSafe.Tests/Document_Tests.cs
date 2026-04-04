@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
@@ -566,6 +567,34 @@ public class Document_Tests {
             Assert.AreEqual("Notes", doc.Entries[1].Notes);
 
             Assert.IsFalse(doc.HasChanged);
+        }
+    }
+
+    [TestMethod]  // Document: Save uses host application name
+    public void Document_Save_UsesEntryAssemblyName() {
+        var msSave = new MemoryStream();
+        using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
+            doc.TrackAccess = false;
+            doc.Headers.Remove(PwSafe.HeaderType.NonDefaultPreferences);
+            doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
+            doc.Entries["B"].Notes = "Notes";
+
+            doc.Save(msSave);
+        }
+
+        msSave.Position = 0;
+
+        using (var doc = PwSafe.Document.Load(msSave, "123")) {
+            var entryAssembly = Assembly.GetEntryAssembly();
+            Assert.IsNotNull(entryAssembly);
+
+            var assemblyName = entryAssembly.GetName();
+            var expected = string.Format("{0} V{1}.{2:00}", assemblyName.Name, assemblyName.Version?.Major ?? 0, assemblyName.Version?.Minor ?? 0);
+            var libraryAssemblyName = typeof(PwSafe.Document).Assembly.GetName();
+            var unexpected = string.Format("{0} V{1}.{2:00}", libraryAssemblyName.Name, libraryAssemblyName.Version?.Major ?? 0, libraryAssemblyName.Version?.Minor ?? 0);
+
+            Assert.AreEqual(expected, doc.LastSaveApplication);
+            Assert.AreNotEqual(unexpected, doc.LastSaveApplication);
         }
     }
 
