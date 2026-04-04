@@ -15,7 +15,7 @@ public class Record_Tests {
 
     [TestMethod]  // Record: New (wrong type
     public void Record_New_WrongType() {
-        Assert.ThrowsException<FormatException>(() => {
+        Assert.Throws<FormatException>(() => {
             var field = new PwSafe.Record(PwSafe.RecordType.Title) { Time = DateTime.Now };
         });
     }
@@ -29,7 +29,7 @@ public class Record_Tests {
 
     [TestMethod]  // Record: Change (read-only document)
     public void Record_ReadOnly() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries["Test"].Password = "Old";
 
@@ -48,7 +48,7 @@ public class Record_Tests {
 
     [TestMethod]  // Record: SetBytes (null)
     public void Record_SetBytes_Null() {
-        Assert.ThrowsException<ArgumentNullException>(() => {
+        Assert.Throws<ArgumentNullException>(() => {
             var field = new PwSafe.Record(PwSafe.RecordType.Title);
             field.SetBytes(null);
         });

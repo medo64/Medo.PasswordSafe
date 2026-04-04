@@ -28,7 +28,7 @@ public class Document_Tests {
 
     [TestMethod]  // Document: Load Empty.psafe3 (password mismatch)
     public void Document_Empty_PasswordMismatch() {
-        Assert.ThrowsException<FormatException>(() => {
+        Assert.Throws<FormatException>(() => {
             using var doc = PwSafe.Document.Load(GetResourceStream("Empty.psafe3"), "XXX");
         });
     }
@@ -207,7 +207,7 @@ public class Document_Tests {
             Assert.AreEqual(new DateTime(2015, 12, 28, 8, 36, 59, DateTimeKind.Utc), doc.Entries[1].Records[PwSafe.RecordType.CreationTime].Time);
 
             Assert.IsFalse(doc.HasChanged);
-            Assert.ThrowsException<NotSupportedException>(() => {
+            Assert.Throws<NotSupportedException>(() => {
                 doc.Save(msSave);
             });
 
@@ -644,7 +644,7 @@ public class Document_Tests {
 
     [TestMethod]  // Document: Load/Save Simple.psafe3 read-only (try modify)
     public void Document_Simple_Readonly_TryModify() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var msSave = new MemoryStream();
             using var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123");
             doc.IsReadOnly = true;

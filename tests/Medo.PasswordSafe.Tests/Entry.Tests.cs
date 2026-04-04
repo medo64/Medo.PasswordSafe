@@ -69,7 +69,7 @@ public class Entry_Tests {
 
     [TestMethod]  // Entry: Change (read-only)
     public void Entry_ReadOnly() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries["Test"].Password = "Old";
 

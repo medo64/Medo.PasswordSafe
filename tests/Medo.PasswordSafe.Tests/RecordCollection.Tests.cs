@@ -18,7 +18,7 @@ public class RecordCollection_Tests {
 
     [TestMethod]  // RecordCollection: Add (read-only document)
     public void RecordCollection_ReadOnly() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry());
             doc.IsReadOnly = true;
@@ -36,7 +36,7 @@ public class RecordCollection_Tests {
 
     [TestMethod]  // RecordCollection: Indexer Set
     public void RecordCollection_ReadOnly_IndexerWrite() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry());
             doc.IsReadOnly = true;

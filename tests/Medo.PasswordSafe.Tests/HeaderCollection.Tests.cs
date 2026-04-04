@@ -17,7 +17,7 @@ public class HeaderCollection_Tests {
 
     [TestMethod]  // HeaderCollection: Add (read-only document)
     public void HeaderCollection_ReadOnly() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password") { IsReadOnly = true };
             doc.Headers.Add(new PwSafe.Header(PwSafe.HeaderType.DatabaseName) { Text = "Test" });
         });
@@ -32,7 +32,7 @@ public class HeaderCollection_Tests {
 
     [TestMethod]  // HeaderCollection: Indexer Set
     public void HeaderCollection_ReadOnly_IndexerWrite() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password") { IsReadOnly = true };
             doc.Headers.Remove(PwSafe.HeaderType.DatabaseName);
         });

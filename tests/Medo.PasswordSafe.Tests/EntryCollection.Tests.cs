@@ -17,7 +17,7 @@ public class EntryCollection_Tests {
 
     [TestMethod]  // EntryCollection: Add (read-only document")]
     public void EntryCollection_ReadOnly() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password") { IsReadOnly = true };
             doc.Entries.Add(new PwSafe.Entry());
         });
@@ -34,7 +34,7 @@ public class EntryCollection_Tests {
 
     [TestMethod]  // EntryCollection: Indexer Set 2 (read-only document)")]
     public void EntryCollection_ReadOnly_IndexerWrite2() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry("A"));
             doc.IsReadOnly = true;
@@ -44,7 +44,7 @@ public class EntryCollection_Tests {
 
     [TestMethod]  // EntryCollection: Indexer Set 3 (read-only document)")]
     public void EntryCollection_ReadOnly_IndexerWrite3() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry("A"));
             doc.IsReadOnly = true;
@@ -54,7 +54,7 @@ public class EntryCollection_Tests {
 
     [TestMethod]  // EntryCollection: Indexer Set 4 (read-only document)")]
     public void EntryCollection_ReadOnly_IndexerWrite4() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Entries.Add(new PwSafe.Entry("X.Y", "A"));
             doc.IsReadOnly = true;

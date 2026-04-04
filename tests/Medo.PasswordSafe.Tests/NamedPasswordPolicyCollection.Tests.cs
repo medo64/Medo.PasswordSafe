@@ -77,7 +77,7 @@ public class NamedPasswordPolicyCollection_Tests {
         PwSafe.NamedPasswordPolicyCollection passwordPolicies = new PwSafe.NamedPasswordPolicyCollection(doc);
         Assert.AreEqual(1, passwordPolicies.Count);
 
-        Exception ex = Assert.ThrowsException<ArgumentException>(() => {
+        Exception ex = Assert.Throws<ArgumentException>(() => {
             NamedPasswordPolicy policy = new PwSafe.NamedPasswordPolicy("Test", 10);
             passwordPolicies.Add(policy);
         });
@@ -115,7 +115,7 @@ public class NamedPasswordPolicyCollection_Tests {
         PwSafe.NamedPasswordPolicyCollection passwordPolicies = new PwSafe.NamedPasswordPolicyCollection(doc);
         Assert.AreEqual(1, passwordPolicies.Count);
 
-        Exception ex = Assert.ThrowsException<ArgumentException>(() => {
+        Exception ex = Assert.Throws<ArgumentException>(() => {
             NamedPasswordPolicy policy = new PwSafe.NamedPasswordPolicy("Test", 10);
             passwordPolicies.AddRange(new List<NamedPasswordPolicy>() { policy });
         });

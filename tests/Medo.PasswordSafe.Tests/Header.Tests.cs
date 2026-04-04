@@ -15,7 +15,7 @@ public class Header_Tests {
 
     [TestMethod]  // Header: New (wrong type)
     public void Header_New_WrongType() {
-        Assert.ThrowsException<FormatException>(() => {
+        Assert.Throws<FormatException>(() => {
             var field = new PwSafe.Header(PwSafe.HeaderType.DatabaseName) { Uuid = new Guid() };
         });
     }
@@ -23,7 +23,7 @@ public class Header_Tests {
 
     [TestMethod]  // Header: Add (read-only document)
     public void Header_ReadOnly() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password");
             doc.Headers.Add(new PwSafe.Header(PwSafe.HeaderType.DatabaseName) { Text = "Test" });
 
@@ -41,7 +41,7 @@ public class Header_Tests {
 
     [TestMethod]  // Header: Indexer Set
     public void Header_ReadOnly_IndexerWrite() {
-        Assert.ThrowsException<NotSupportedException>(() => {
+        Assert.Throws<NotSupportedException>(() => {
             var doc = new PwSafe.Document("Password") { IsReadOnly = true };
             doc.Headers.Remove(PwSafe.HeaderType.DatabaseName);
         });
