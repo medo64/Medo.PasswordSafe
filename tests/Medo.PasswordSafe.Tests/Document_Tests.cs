@@ -570,6 +570,27 @@ public class Document_Tests {
         }
     }
 
+    [TestMethod]  // Document: Save uses library name by default
+    public void Document_Save_UsesLibraryName() {
+        var msSave = new MemoryStream();
+        using (var doc = PwSafe.Document.Load(GetResourceStream("Simple.psafe3"), "123")) {
+            doc.TrackAccess = false;
+            doc.Headers.Remove(PwSafe.HeaderType.NonDefaultPreferences);
+            doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
+            doc.Entries["B"].Notes = "Notes";
+
+            doc.Save(msSave);
+        }
+
+        msSave.Position = 0;
+
+        using (var doc = PwSafe.Document.Load(msSave, "123")) {
+            var assemblyName = typeof(PwSafe.Document).Assembly.GetName();
+            var expected = $"{assemblyName.Name} V{assemblyName.Version?.Major ?? 0:0}.{assemblyName.Version?.Minor ?? 0:00}";
+            Assert.AreEqual(expected, doc.LastSaveApplication);
+        }
+    }
+
     [TestMethod]  // Document: Save uses host application name
     public void Document_Save_UsesEntryAssemblyName() {
         var msSave = new MemoryStream();
@@ -579,7 +600,7 @@ public class Document_Tests {
             doc.Headers.Remove(PwSafe.HeaderType.RecentlyUsedEntries);
             doc.Entries["B"].Notes = "Notes";
 
-            doc.Save(msSave);
+            doc.Save(msSave, useEntryAssembly: true);
         }
 
         msSave.Position = 0;

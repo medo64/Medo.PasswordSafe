@@ -355,10 +355,21 @@ public class Document : IDisposable {
     /// <exception cref="ArgumentNullException">File name cannot be null.</exception>
     /// <exception cref="NotSupportedException">Missing passphrase.</exception>
     public void Save(string fileName) {
+        Save(fileName, useEntryAssembly: false);
+    }
+
+    /// <summary>
+    /// Save document using the same password as for Load.
+    /// </summary>
+    /// <param name="fileName">File name.</param>
+    /// <param name="useEntryAssembly">If true, the entry assembly will be used to determine assembly name instead of the executing assembly.</param>
+    /// <exception cref="ArgumentNullException">File name cannot be null.</exception>
+    /// <exception cref="NotSupportedException">Missing passphrase.</exception>
+    public void Save(string fileName, bool useEntryAssembly) {
         if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
 
         using var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
-        Save(stream);
+        Save(stream, useEntryAssembly);
     }
 
     /// <summary>
@@ -368,9 +379,20 @@ public class Document : IDisposable {
     /// <exception cref="ArgumentNullException">Stream cannot be null.</exception>
     /// <exception cref="NotSupportedException">Missing passphrase.</exception>
     public void Save(Stream stream) {
+        Save(stream, useEntryAssembly: false);
+    }
+
+    /// <summary>
+    /// Save document using the same password as for Load.
+    /// </summary>
+    /// <param name="stream">Stream.</param>
+    /// <param name="useEntryAssembly">If true, the entry assembly will be used to determine assembly name instead of the executing assembly.</param>
+    /// <exception cref="ArgumentNullException">Stream cannot be null.</exception>
+    /// <exception cref="NotSupportedException">Missing passphrase.</exception>
+    public void Save(Stream stream, bool useEntryAssembly) {
         var passphraseBytes = GetPassphrase() ?? throw new NotSupportedException("Missing passphrase.");
         try {
-            Save(stream, passphraseBytes);
+            Save(stream, passphraseBytes, useEntryAssembly);
         } finally {
             Array.Clear(passphraseBytes, 0, passphraseBytes.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
         }
@@ -383,10 +405,21 @@ public class Document : IDisposable {
     /// <param name="passphrase">Password.</param>
     /// <exception cref="ArgumentNullException">File name cannot be null. -or- Passphrase cannot be null.</exception>
     public void Save(string fileName, string passphrase) {
+        Save(fileName, passphrase, useEntryAssembly: false);
+    }
+
+    /// <summary>
+    /// Save document.
+    /// </summary>
+    /// <param name="fileName">File name.</param>
+    /// <param name="passphrase">Password.</param>
+    /// <param name="useEntryAssembly">If true, the entry assembly will be used to determine assembly name instead of the executing assembly.</param>
+    /// <exception cref="ArgumentNullException">File name cannot be null. -or- Passphrase cannot be null.</exception>
+    public void Save(string fileName, string passphrase, bool useEntryAssembly) {
         if (fileName == null) { throw new ArgumentNullException(nameof(fileName), "File name cannot be null."); }
 
         using var stream = new FileStream(fileName, FileMode.Create, FileAccess.Write);
-        Save(stream, passphrase);
+        Save(stream, passphrase, useEntryAssembly);
     }
 
     /// <summary>
@@ -396,12 +429,23 @@ public class Document : IDisposable {
     /// <param name="passphrase">Password.</param>
     /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
     public void Save(Stream stream, string passphrase) {
+        Save(stream, passphrase, useEntryAssembly: false);
+    }
+
+    /// <summary>
+    /// Save document.
+    /// </summary>
+    /// <param name="stream">Stream.</param>
+    /// <param name="passphrase">Password.</param>
+    /// <param name="useEntryAssembly">If true, the entry assembly will be used to determine assembly name instead of the executing assembly.</param>
+    /// <exception cref="ArgumentNullException">Stream cannot be null. -or- Passphrase cannot be null.</exception>
+    public void Save(Stream stream, string passphrase, bool useEntryAssembly) {
         if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
         if (passphrase == null) { throw new ArgumentNullException(nameof(passphrase), "Passphrase cannot be null."); }
 
         var passphraseBytes = Utf8Encoding.GetBytes(passphrase);
         try {
-            Save(stream, passphraseBytes);
+            Save(stream, passphraseBytes, useEntryAssembly);
         } finally {
             Array.Clear(passphraseBytes, 0, passphraseBytes.Length); //remove passphrase bytes from memory - nothing to do about the string. :(
         }
@@ -414,8 +458,19 @@ public class Document : IDisposable {
     /// <param name="stream">Stream.</param>
     /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
     public void Save(Stream stream, byte[] passphraseBuffer) {
+        Save(stream, passphraseBuffer, useEntryAssembly: false);
+    }
+
+    /// <summary>
+    /// Save document.
+    /// </summary>
+    /// <param name="stream">Stream.</param>
+    /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+    /// <param name="useEntryAssembly">If true, the entry assembly will be used to determine assembly name instead of the executing assembly.</param>
+    /// <exception cref="ArgumentNullException">Stream cannot be null.</exception>
+    public void Save(Stream stream, byte[] passphraseBuffer, bool useEntryAssembly) {
         if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
-        InternalSave(stream, passphraseBuffer, null);
+        InternalSave(stream, passphraseBuffer, null, useEntryAssembly);
     }
 
     /// <summary>
@@ -425,8 +480,19 @@ public class Document : IDisposable {
     /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
     /// <exception cref="ArgumentOutOfRangeException">Keys must be 64 bytes long.</exception>
     public void SaveWithKey(Stream stream, byte[] keyBuffer) {
+        SaveWithKey(stream, keyBuffer, useEntryAssembly: false);
+    }
+
+    /// <summary>
+    /// Save document.
+    /// </summary>
+    /// <param name="stream">Stream.</param>
+    /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
+    /// <param name="useEntryAssembly">If true, the entry assembly will be used to determine assembly name instead of the executing assembly.</param>
+    /// <exception cref="ArgumentOutOfRangeException">Keys must be 64 bytes long.</exception>
+    public void SaveWithKey(Stream stream, byte[] keyBuffer, bool useEntryAssembly) {
         if (stream == null) { throw new ArgumentNullException(nameof(stream), "Stream cannot be null."); }
-        InternalSave(stream, null, keyBuffer);
+        InternalSave(stream, null, keyBuffer, useEntryAssembly);
     }
 
     /// <summary>
@@ -437,7 +503,8 @@ public class Document : IDisposable {
     /// <param name="stream">Stream.</param>
     /// <param name="passphraseBuffer">Password bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
     /// <param name="keyBuffer">Key bytes containing both key K and L. Must be 64 bytes. Caller has to avoid keeping bytes unencrypted in memory.</param>
-    internal void InternalSave(Stream stream, byte[]? passphraseBuffer, byte[]? keyBuffer) {
+    /// <param name="useEntryAssembly">If true, the entry assembly will be used to determine assembly name instead of the executing assembly.</param>
+    internal void InternalSave(Stream stream, byte[]? passphraseBuffer, byte[]? keyBuffer, bool useEntryAssembly) {
         passphraseBuffer ??= GetPassphrase(); //first try old passphrase
         if (passphraseBuffer == null) { throw new ArgumentNullException(nameof(passphraseBuffer), "Passphrase cannot be null."); }
         if ((keyBuffer != null) && (keyBuffer.Length != 64)) { throw new ArgumentOutOfRangeException(nameof(keyBuffer), "Keys must be 64 bytes long."); }
@@ -445,7 +512,7 @@ public class Document : IDisposable {
         if (!IsReadOnly && TrackModify) {
             Headers[HeaderType.TimestampOfLastSave].Time = DateTime.UtcNow;
 
-            var assemblyName = GetApplicationAssemblyName();
+            var assemblyName = GetApplicationAssemblyName(useEntryAssembly);
             Headers[HeaderType.WhatPerformedLastSave].Text = string.Format(CultureInfo.InvariantCulture, "{0} V{1}.{2:00}", assemblyName.Name, assemblyName.Version?.Major ?? 0, assemblyName.Version?.Minor ?? 0);
 
             Headers[HeaderType.LastSavedByUser].Text = Environment.UserName;
@@ -748,8 +815,12 @@ public class Document : IDisposable {
         Changed?.Invoke(this, EventArgs.Empty);
     }
 
-    private static AssemblyName GetApplicationAssemblyName() {
-        return (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()).GetName();
+    private static AssemblyName GetApplicationAssemblyName(bool useEntryAssembly) {
+        if (useEntryAssembly) {
+            return (Assembly.GetEntryAssembly() ?? Assembly.GetExecutingAssembly()).GetName();
+        } else {
+            return Assembly.GetExecutingAssembly().GetName();
+        }
     }
 
 
