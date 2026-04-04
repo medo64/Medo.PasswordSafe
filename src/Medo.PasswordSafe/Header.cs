@@ -89,6 +89,6 @@ public class Header : Field {
     }
 
 
-    internal static ushort DefaultVersion = 0x030D;
+    internal static ushort DefaultVersion = 0x0311;
 
 }

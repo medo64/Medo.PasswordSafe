@@ -133,6 +133,11 @@ public enum RecordType {
     QRCode = 0x20,
 
     /// <summary>
+    /// Custom fields consist of property entries with property name, value, and sensitivity data.
+    /// </summary>
+    CustomTextField = 0x30,
+
+    /// <summary>
     /// End of entries.
     /// </summary>
     EndOfEntry = 0xFF,

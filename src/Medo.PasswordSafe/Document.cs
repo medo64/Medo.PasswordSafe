@@ -143,7 +143,6 @@ public class Document : IDisposable {
     /// <summary>
     /// Gets list of headers.
     /// </summary>
-    /// 
     public HeaderCollection Headers { get; }
 
     /// <summary>
@@ -321,7 +320,10 @@ public class Document : IDisposable {
                         records = [];
                         recordFields.Add(records);
                     }
-                    records.Add(new Record(fieldType, fieldData));
+                    records.Add(fieldType switch {
+                        RecordType.CustomTextField => new CustomTextRecord(fieldData),
+                        _ => new Record(fieldType, fieldData)
+                    });
                 } finally {
                     Array.Clear(fieldData, 0, fieldData.Length);
                 }

@@ -306,9 +306,17 @@ public class RecordCollection : IList<Record> {
                 }
             }
 
-            if (IsReadOnly) { return new Record(type); } //return dummy record if collection is read-only 
+            if (IsReadOnly) {
+                return type switch {  // return dummy record if collection is read-only
+                    RecordType.CustomTextField => new CustomTextRecord(),
+                    _ => new Record(type),
+                };
+            }
 
-            var newField = new Record(this, type); //create a new field if one cannot be found
+            var newField = type switch {  // create a new field if one cannot be found
+                RecordType.CustomTextField => new CustomTextRecord(this),
+                _ => new Record(this, type),
+            };
 
             int index;
             for (index = 0; index < BaseCollection.Count; index++) {

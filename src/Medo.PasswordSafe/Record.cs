@@ -1,7 +1,7 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Diagnostics;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
 
 /// <summary>
 /// Record field.
@@ -43,7 +43,7 @@ public class Record : Field {
     /// Gets caption.
     /// Caption is not localized.
     /// </summary>
-    public string? Caption {
+    public virtual string? Caption {
         get {
             return RecordType switch {
                 RecordType.Uuid => "UUID",
@@ -73,6 +73,9 @@ public class Record : Field {
                 RecordType.TwoFactorKey => "Two-factor key",
                 _ => null,
             };
+        }
+        set {
+            throw new NotSupportedException("Custom caption is not supported for this field type.");
         }
     }
 
@@ -119,6 +122,46 @@ public class Record : Field {
         get { return Owner?.IsReadOnly ?? false; }
     }
 
+    /// <summary>
+    /// Gets if object is sensitive.
+    /// Sensitive fields should be shown to user hidden by default.
+    /// </summary>
+    public virtual bool IsSensitive {
+        get {
+            return RecordType switch {
+                RecordType.Uuid => false,
+                RecordType.Group => false,
+                RecordType.Title => false,
+                RecordType.UserName => false,
+                RecordType.Notes => false,
+                RecordType.Password => true,
+                RecordType.Url => false,
+                RecordType.Autotype => false,
+                RecordType.PasswordHistory => false,
+                RecordType.PasswordPolicy => false,
+                RecordType.RunCommand => false,
+                RecordType.EmailAddress => false,
+                RecordType.OwnSymbolsForPassword => false,
+                RecordType.PasswordPolicyName => false,
+                RecordType.CreditCardNumber => false,
+                RecordType.CreditCardExpiration => false,
+                RecordType.CreditCardVerificationValue => false,
+                RecordType.CreditCardPin => true,
+                RecordType.QRCode => false,
+                RecordType.CreationTime => false,
+                RecordType.PasswordModificationTime => false,
+                RecordType.LastAccessTime => false,
+                RecordType.PasswordExpiryTime => false,
+                RecordType.LastModificationTime => false,
+                RecordType.TwoFactorKey => true,
+                _ => false,
+            };
+        }
+        set {
+            throw new NotSupportedException("Custom sensitivity is not supported for this field type.");
+        }
+    }
+
 
     /// <summary>
     /// Gets underlying data type for field.
@@ -162,7 +205,7 @@ public class Record : Field {
     /// <summary>
     /// Returns the exact copy of the record.
     /// </summary>
-    public Record Clone() {
+    public virtual Record Clone() {
         return new Record(RecordType, base.GetRawDataDirect());
     }
 
