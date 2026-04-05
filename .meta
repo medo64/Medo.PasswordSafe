@@ -1,3 +1,4 @@
 PROJECT_NAME:             Medo.PasswordSafe
 PROJECT_ENTRYPOINT:       src/Medo.PasswordSafe/Medo.PasswordSafe.csproj
 PACKAGE_NUGET:            Medo.PasswordSafe
+PACKAGE_NUGET_ENTRYPOINT: src/MultiFramework/Medo.PasswordSafe.csproj
