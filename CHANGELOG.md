@@ -1,5 +1,15 @@
 # Changelog
 
+
+## [6.5.0] - 2026-04-04
+
+- added support for custom text field (0x30)
+- added AotCompatible for .NET 10
+- file version bumped to 3.31
+- removed explicit support for .NET 6
+- custom assembly name in - courtesy of Qiao Wang
+
+
 ## [6.4.0] - 2025-11-27
 
 - added support for .NET Standard 2.0
@@ -53,6 +63,7 @@
 
 
 [unreleased]: https://github.com/medo64/Medo.PasswordSafe/
+[6.5.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.5.0
 [6.4.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.4.0
 [6.3.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.3.0
 [6.2.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.2.0
