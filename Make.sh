@@ -6,6 +6,7 @@ SCRIPT_NAME=`basename $0`
 if [ -t 1 ]; then
     ANSI_RESET="$(tput sgr0)"
     ANSI_RED="`[ $(tput colors) -ge 16 ] && tput setaf 9 || tput setaf 1 bold`"
+    ANSI_GREEN="`[ $(tput colors) -ge 16 ] && tput setaf 10 || tput setaf 2 bold`"
     ANSI_YELLOW="`[ $(tput colors) -ge 16 ] && tput setaf 11 || tput setaf 3 bold`"
     ANSI_MAGENTA="`[ $(tput colors) -ge 16 ] && tput setaf 13 || tput setaf 5 bold`"
     ANSI_PURPLE="$(tput setaf 5)"
@@ -261,6 +262,18 @@ if [ "$PACKAGE_NUGET" != "" ]; then
         echo "${ANSI_PURPLE}NuGET package key ...: ${ANSI_YELLOW}(not configured)${ANSI_RESET}" >&2
     else
         echo "${ANSI_PURPLE}NuGET package key ...: ${ANSI_MAGENTA}(configured)${ANSI_RESET}"
+    fi
+fi
+
+PUBLISH_GITHUB_URL=$( cat "$SCRIPT_DIR/.meta" "$SCRIPT_DIR/.meta.private" 2>/dev/null | grep -E "^PUBLISH_GITHUB_URL:" | sed  -n 1p | cut -d: -sf2- | xargs )
+if [ "$PUBLISH_GITHUB_URL" != "" ]; then
+    echo "${ANSI_PURPLE}GitHub URL ..........: ${ANSI_MAGENTA}$PUBLISH_GITHUB_URL${ANSI_RESET}" >&2
+
+    PUBLISH_GITHUB_KEY=$( cat "$SCRIPT_DIR/.meta.private" 2>/dev/null | grep -E "^PUBLISH_GITHUB_KEY:" | sed  -n 1p | cut -d: -sf2- | xargs )
+    if [ "$PUBLISH_GITHUB_KEY" = "" ]; then
+        echo "${ANSI_PURPLE}GitHub API key ......: ${ANSI_YELLOW}(not configured)${ANSI_RESET}" >&2
+    else
+        echo "${ANSI_PURPLE}GitHub API key ......: ${ANSI_MAGENTA}(configured)${ANSI_RESET}"
     fi
 fi
 
@@ -777,6 +790,7 @@ make_publish() {
     echo
 
     ANYTHING_DONE=0
+    GITHUB_UPLOAD_FILES=
 
     if [ "$PUBLISH_LINUX_ARCHIVE" != "" ]; then
         if [ "$GIT_VERSION" != "" ]; then
@@ -788,7 +802,8 @@ make_publish() {
                 esac
 
                 ANYTHING_DONE=1
-                echo "${ANSI_MAGENTA}archive $ARCHIVE_NAME_CURR ($RUNTIME)${ANSI_RESET}"
+                echo "${ANSI_MAGENTA}Published archive $ARCHIVE_NAME_CURR ($RUNTIME)${ANSI_RESET}"
+                GITHUB_UPLOAD_FILES="$GITHUB_UPLOAD_FILES dist/$ARCHIVE_NAME_CURR"
 
                 rsync --no-g --no-o --progress --chmod=D755,F644  "dist/$ARCHIVE_NAME_CURR" $PUBLISH_LINUX_ARCHIVE || exit 113
                 echo "${ANSI_CYAN}$PUBLISH_LINUX_ARCHIVE/$ARCHIVE_NAME_CURR${ANSI_RESET}"
@@ -808,7 +823,8 @@ make_publish() {
             esac
 
             ANYTHING_DONE=1
-            echo "${ANSI_MAGENTA}appimage ($RUNTIME)${ANSI_RESET}"
+            echo "${ANSI_MAGENTA}Published appimage ($RUNTIME)${ANSI_RESET}"
+            GITHUB_UPLOAD_FILES="$GITHUB_UPLOAD_FILES dist/$APPIMAGE_NAME_CURR"
 
             rsync --no-g --no-o --progress --chmod=D755,F644  "dist/$APPIMAGE_NAME_CURR" $PUBLISH_LINUX_APPIMAGE || exit 113
             echo "${ANSI_CYAN}$PUBLISH_LINUX_APPIMAGE${ANSI_RESET}"
@@ -825,7 +841,8 @@ make_publish() {
             esac
 
             ANYTHING_DONE=1
-            echo "${ANSI_MAGENTA}deb ($RUNTIME: $DEB_ARCHITECTURE)${ANSI_RESET}"
+            echo "${ANSI_MAGENTA}Published deb ($RUNTIME: $DEB_ARCHITECTURE)${ANSI_RESET}"
+            GITHUB_UPLOAD_FILES="$GITHUB_UPLOAD_FILES dist/$APPIMAGE_NAME_CURR"
 
             PUBLISH_LINUX_DEB_CURR="$( echo "$PUBLISH_LINUX_DEB" | sed "s/<DEB_ARCHITECTURE>/$DEB_ARCHITECTURE/g" )"
 
@@ -871,19 +888,69 @@ make_publish() {
     fi
 
     if [ "$PUBLISH_NUGET_KEY" != "" ]; then
-        ANYTHING_DONE=1
-
-        if [ "$PACKAGE_NUGET_VERSION" = "0.0.0" ]; then
-            echo "${ANSI_RED}Not pushing version 0.0.0!${ANSI_RESET}" >&2
-            return 1;
+        if [ "$PACKAGE_NUGET_VERSION" != "" ] && [ "$PACKAGE_NUGET_VERSION" != "0.0.0" ]; then
+            dotnet nuget push   \
+                --source "https://api.nuget.org/v3/index.json"           \
+                --api-key "$PUBLISH_NUGET_KEY"                           \
+                --symbol-api-key "$PUBLISH_NUGET_KEY"                    \
+                "./dist/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.nupkg" || return 1
+            ANYTHING_DONE=1
+            PACKAGE_NUGET_FILENAME=$PACKAGE_NUGET_ID-$PACKAGE_NUGET_VERSION.nupkg
+            echo "${ANSI_GREEN}Sent ${ANSI_CYAN}dist/$PACKAGE_NUGET_FILENAME${ANSI_RESET}"
+            GITHUB_UPLOAD_FILES="$GITHUB_UPLOAD_FILES dist/$PACKAGE_NUGET_FILENAME"
+            echo
+        else
+            echo "${ANSI_RED}Not pushing to NuGET without a version${ANSI_RESET}" >&2
         fi
-        dotnet nuget push   \
-            --source "https://api.nuget.org/v3/index.json"           \
-            --api-key "$PUBLISH_NUGET_KEY"                           \
-            --symbol-api-key "$PUBLISH_NUGET_KEY"                    \
-            "./dist/$PACKAGE_NUGET_ID.$PACKAGE_NUGET_VERSION.nupkg" || return 1
-        echo "${ANSI_GREEN}Sent ${ANSI_CYAN}dist/$PACKAGE_NUGET_ID-$PACKAGE_NUGET_VERSION.nupkg${ANSI_RESET}"
-        echo
+    fi
+
+    if [ "$PUBLISH_GITHUB_KEY" != "" ] && [ "$PUBLISH_GITHUB_URL" != "" ]; then
+        if [ "$GIT_VERSION" != "" ] && [ "$GIT_VERSION" != "0.0.0" ]; then
+            PUBLISH_GITHUB_OWNER=$( echo "$PUBLISH_GITHUB_URL" | cut -d/ -f4 )
+            PUBLISH_GITHUB_REPO=$( echo "$PUBLISH_GITHUB_URL" | cut -d/ -f5 )
+            echo "${ANSI_CYAN}Pusing to $PUBLISH_GITHUB_OWNER:$PUBLISH_GITHUB_REPO${ANSI_RESET}" >&2
+
+            if [ "$GITHUB_UPLOAD_FILES" != "" ]; then
+                PUBLISH_GITHUB_EXISTING_RELEASE_ID=$( curl -s https://api.github.com/repos/$PUBLISH_GITHUB_OWNER/$PUBLISH_GITHUB_REPO/releases \
+                                                              -H "Authorization: Bearer $PUBLISH_GITHUB_KEY" \
+                                                      | jq -r ".[] | select(.tag_name==\"$GIT_VERSION\") | .id" 2>/dev/null )
+                if [ "$PUBLISH_GITHUB_EXISTING_RELEASE_ID" != "" ]; then
+                    echo "${ANSI_YELLOW}Release with tag $GIT_VERSION already exists, deleting it first${ANSI_RESET}" >&2
+                    curl -X DELETE https://api.github.com/repos/$PUBLISH_GITHUB_OWNER/$PUBLISH_GITHUB_REPO/releases/$PUBLISH_GITHUB_EXISTING_RELEASE_ID \
+                                   -H "Authorization: Bearer $PUBLISH_GITHUB_KEY" >/dev/null 2>&1 || true
+                fi
+
+                PUBLISH_GITHUB_RELEASE_ID=$( curl -X POST https://api.github.com/repos/$PUBLISH_GITHUB_OWNER/$PUBLISH_GITHUB_REPO/releases \
+                                                          -H "Authorization: Bearer $PUBLISH_GITHUB_KEY" \
+                                                          -H "Accept: application/vnd.github+json" \
+                                                          -d "{
+                                                              \"tag_name\": \"$GIT_VERSION\",
+                                                              \"name\": \"$GIT_VERSION\",
+                                                              \"body\": \"\",
+                                                              \"draft\": false,
+                                                              \"prerelease\": false
+                                                          }" 2>/dev/null | jq -r .id )
+                if [ "$PUBLISH_GITHUB_RELEASE_ID" = "" ] || [ "$PUBLISH_GITHUB_RELEASE_ID" = "null" ]; then
+                    echo "${ANSI_RED}Failed to create GitHub release for version $GIT_VERSION${ANSI_RESET}" >&2
+                    return 1
+                fi
+                echo "${ANSI_CYAN}Created release $GIT_VERSION ($PUBLISH_GITHUB_RELEASE_ID)${ANSI_RESET}" >&2
+
+                for GITHUB_UPLOAD_FILE in $GITHUB_UPLOAD_FILES ; do
+                    GITHUB_UPLOAD_FILENAME=$( basename "$GITHUB_UPLOAD_FILE" )
+                    echo "${ANSI_CYAN}Uploading $GITHUB_UPLOAD_FILE${ANSI_RESET}"
+                    curl -X POST "https://uploads.github.com/repos/$PUBLISH_GITHUB_OWNER/$PUBLISH_GITHUB_REPO/releases/$PUBLISH_GITHUB_RELEASE_ID/assets?name=$GITHUB_UPLOAD_FILENAME" \
+                                  -H "Authorization: Bearer $PUBLISH_GITHUB_KEY" \
+                                  -H "Content-Type: application/octet-stream" \
+                                  --data-binary @$GITHUB_UPLOAD_FILE >/dev/null 2>&1 || return 1
+                    ANYTHING_DONE=1
+                    echo "${ANSI_GREEN}Pushed $GITHUB_UPLOAD_FILE${ANSI_RESET}" >&2
+                done
+            fi
+        else
+            echo "${ANSI_RED}Not pushing to GitHub without a version${ANSI_RESET}" >&2
+        fi
+        GIT_VERSION=
     fi
 
     if [ "$ANYTHING_DONE" -eq 0 ]; then
