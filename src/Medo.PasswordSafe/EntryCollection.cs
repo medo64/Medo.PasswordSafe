@@ -1,9 +1,9 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
 
 /// <summary>
 /// Collection of entries.
@@ -266,7 +266,7 @@ public class EntryCollection : IList<Entry> {
                 }
             }
 
-            if (IsReadOnly) { return new Entry(); } //return dummy entry if collection is read-only 
+            if (IsReadOnly) { return new Entry(); } //return dummy entry if collection is read-only
 
             var newEntry = new Entry(title);
             Add(newEntry);
@@ -292,7 +292,7 @@ public class EntryCollection : IList<Entry> {
                 }
             }
 
-            if (IsReadOnly) { return new Entry(); } //return dummy entry if collection is read-only 
+            if (IsReadOnly) { return new Entry(); } //return dummy entry if collection is read-only
 
             var newEntry = new Entry(group, title);
             Add(newEntry);

@@ -1,8 +1,8 @@
+namespace PasswordSafe;
+
 using System;
 using System.IO;
 using System.Security.Cryptography;
-
-namespace PasswordSafe;
 
 internal static class Helpers {
 

@@ -1,10 +1,10 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Diagnostics;
 using System.Security.Cryptography;
 using System.Text;
-using static PasswordSafe.Helpers;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
+using static global::PasswordSafe.Helpers;
 
 /// <summary>
 /// One entry in password history.

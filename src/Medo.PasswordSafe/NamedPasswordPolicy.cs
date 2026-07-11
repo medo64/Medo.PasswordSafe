@@ -1,8 +1,8 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
 
 /// <summary>
 /// Password policy definition.

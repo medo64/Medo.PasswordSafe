@@ -1,9 +1,9 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
 
 /// <summary>
 /// Collection of header fields.
@@ -273,7 +273,7 @@ public class HeaderCollection : IList<Header> {
                 }
             }
 
-            if (IsReadOnly) { return new Header(type); } //return dummy header if collection is read-only 
+            if (IsReadOnly) { return new Header(type); } //return dummy header if collection is read-only
 
             var newField = new Header(this, type); //create a new field if one cannot be found
 

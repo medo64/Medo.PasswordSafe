@@ -1,10 +1,10 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using static PasswordSafe.Helpers;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
+using static global::PasswordSafe.Helpers;
 
 /// <summary>
 /// Abstract field.

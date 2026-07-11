@@ -1,7 +1,7 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Diagnostics;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
 
 /// <summary>
 /// Header field.

@@ -1,6 +1,6 @@
-using System;
-
 namespace Medo.Security.Cryptography.PasswordSafe;
+
+using System;
 
 /// <summary>
 /// Header field types.

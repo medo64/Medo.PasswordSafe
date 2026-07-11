@@ -1,3 +1,5 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -5,9 +7,8 @@ using System.IO;
 using System.Reflection;
 using System.Security.Cryptography;
 using System.Text;
-using static PasswordSafe.Helpers;
 
-namespace Medo.Security.Cryptography.PasswordSafe;
+using static global::PasswordSafe.Helpers;
 
 /// <summary>
 /// Password Safe document.

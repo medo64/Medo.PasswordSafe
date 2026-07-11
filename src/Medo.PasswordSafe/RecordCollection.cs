@@ -1,9 +1,9 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
 
 /// <summary>
 /// Collection of record fields.

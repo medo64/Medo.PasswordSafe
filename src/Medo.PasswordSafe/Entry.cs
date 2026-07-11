@@ -1,7 +1,7 @@
+namespace Medo.Security.Cryptography.PasswordSafe;
+
 using System;
 using System.Collections.Generic;
-
-namespace Medo.Security.Cryptography.PasswordSafe;
 
 /// <summary>
 /// Entry.
