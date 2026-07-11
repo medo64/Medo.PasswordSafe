@@ -26,7 +26,7 @@ if [ "$1" = "--help" ] || [ "$1" = "-h" ]; then
     echo "  release    Compile in release mode"
     echo "  package    Package the project"
     echo "  publish    Publish the project"
-    echo "  tools      Compile tools"
+    echo "  tools      Compile tools used by project"
     echo
     echo "Actions with '~' prefix are negated"
     echo
@@ -93,13 +93,29 @@ fi
 echo "${ANSI_PURPLE}Assembly version ....: ${ANSI_MAGENTA}$ASSEMBLY_VERSION${ANSI_RESET}"
 echo "${ANSI_PURPLE}Assembly version text: ${ANSI_MAGENTA}$ASSEMBLY_VERSION_TEXT${ANSI_RESET}"
 
-PROJECT_ENTRYPOINT=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_ENTRYPOINT:" | sed  -n 1p | cut -d: -sf2- | xargs )
-if [ "$PROJECT_ENTRYPOINT" = "" ]; then  # auto-detect
-    PROJECT_ENTRYPOINT=$( find "$SCRIPT_DIR/src" -type f -name "*.csproj" -print | sed -n 1p )
-    PROJECT_ENTRYPOINT=$( echo "$PROJECT_ENTRYPOINT" | sed "s|$SCRIPT_DIR/||g" )
+PROJECT_ENTRYPOINTS=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_ENTRYPOINT:" | cut -d: -sf2- | xargs )
+if [ "$PROJECT_ENTRYPOINTS" = "" ]; then  # auto-detect
+    PROJECT_ENTRYPOINTS=$( find "$SCRIPT_DIR/src" -type f -name "*.csproj" -print | sed -n 1p )
+    PROJECT_ENTRYPOINTS=$( echo "$PROJECT_ENTRYPOINTS" | sed "s|$SCRIPT_DIR/||g" )
 fi
-if [ "$PROJECT_ENTRYPOINT" != "" ] && [ -e "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" ]; then
-    echo "${ANSI_PURPLE}Project entry point .: ${ANSI_MAGENTA}$PROJECT_ENTRYPOINT${ANSI_RESET}"
+if [ "$PROJECT_ENTRYPOINTS" != "" ]; then
+    FIRST_LINE=1
+    for PROJECT_ENTRYPOINT in $PROJECT_ENTRYPOINTS; do
+        if [ "$FIRST_LINE" -ne 0 ]; then
+            echo -n "${ANSI_PURPLE}Project entry point .: "
+            FIRST_LINE=0
+        else
+            echo -n "${ANSI_PURPLE}                       "
+        fi
+        if [ -e "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" ]; then
+            echo "${ANSI_MAGENTA}$PROJECT_ENTRYPOINT${ANSI_RESET}"
+        else
+            echo "${ANSI_RED}not found${ANSI_RESET}" >&2
+            exit 113
+        fi
+    done
+    # main entrypoint controls everything, other entry point is just to build them all
+    PROJECT_ENTRYPOINT=$( echo "$PROJECT_ENTRYPOINTS" | tr ' ' '\n' | sed -n 1p )
 else
     echo "${ANSI_PURPLE}Project entry point .: ${ANSI_RED}not found${ANSI_RESET}" >&2
     exit 113
@@ -132,6 +148,24 @@ if [ "$PROJECT_RUNTIMES" = "" ]; then
 fi
 echo "${ANSI_PURPLE}Project runtimes ....: ${ANSI_MAGENTA}$PROJECT_RUNTIMES${ANSI_RESET}"
 
+PROJECT_EXAMPLES=$( cat "$SCRIPT_DIR/.meta" | grep -E "^PROJECT_EXAMPLES_DIR:" | cut -d: -sf2- | xargs )
+if [ "$PROJECT_EXAMPLES" != "" ]; then
+    FIRST_LINE=1
+    for PROJECT_EXAMPLE in $PROJECT_EXAMPLES; do
+        if [ "$FIRST_LINE" -ne 0 ]; then
+            echo -n "${ANSI_PURPLE}Project examples ....: "
+            FIRST_LINE=0
+        else
+            echo -n "${ANSI_PURPLE}                       "
+        fi
+        if [ -e "$SCRIPT_DIR/$PROJECT_EXAMPLE" ]; then
+            echo "${ANSI_MAGENTA}$PROJECT_EXAMPLE${ANSI_RESET}"
+        else
+            echo "${ANSI_RED}not found${ANSI_RESET}" >&2
+            exit 113
+        fi
+    done
+fi
 
 DOCKER_FILE="$(find "$SCRIPT_DIR/src" -type f -name "Dockerfile" -print | sed -n 1p)"
 
@@ -496,7 +530,16 @@ make_tools() {
         echo "${ANSI_MAGENTA}$(basename $PROJECT_FILE) ($(basename $(dirname $PROJECT_FILE)))${ANSI_RESET}"
 
         mkdir -p "$SCRIPT_DIR/bin"
-        dotnet build "$PROJECT_FILE" --configuration Release --output "$SCRIPT_DIR/bin"
+        dotnet publish "$PROJECT_FILE"                                             \
+            --configuration Release                                                \
+            -p:DebugType=embedded -p:PathMap="$SCRIPT_DIR=/"                       \
+            -p:CopyDebugSymbolFilesFromPackages=false                              \
+            -p:Deterministic=true -p:ContinuousIntegrationBuild=true               \
+            -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION  \
+            -p:Version=$ASSEMBLY_VERSION_TEXT                                      \
+            -p:EnableNETAnalyzers=false                                            \
+            -p:PublishSingleFile=true --self-contained true                        \
+            --output "$SCRIPT_DIR/bin/tools"                                      || exit 113
         echo
     done
 
@@ -513,14 +556,40 @@ make_debug() {
     echo "${ANSI_MAGENTA}┗━━━━━━━┛${ANSI_RESET}"
     echo
 
-    echo "${ANSI_MAGENTA}$(basename $PROJECT_ENTRYPOINT)${ANSI_RESET}"
+    mkdir -p "$SCRIPT_DIR/bin/debug"
+    for ENTRYPOINT in $PROJECT_ENTRYPOINTS; do
+        echo "${ANSI_MAGENTA}$(basename $ENTRYPOINT)${ANSI_RESET}"
 
-    mkdir -p "$SCRIPT_DIR/bin"
-    dotnet build                           \
-        --configuration Debug              \
-        --output "$SCRIPT_DIR/bin"         \
-        -p:EnableNETAnalyzers=false        \
-        "$SCRIPT_DIR/$PROJECT_ENTRYPOINT" || exit 113
+        PUBLISH_EXTRA_ARGS=
+        if [ "$PROJECT_SINGLEFILE" = "true" ]; then
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained true -p:PublishSingleFile=true"
+        elif [ "$PROJECT_SINGLEFILE" = "false" ]; then
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained false -p:PublishSingleFile=false"
+        fi
+
+        ENTRYPOINT_OUTPUTTYPE=$( cat "$SCRIPT_DIR/$ENTRYPOINT" | grep -E "<OutputType>" | sed -n 1p | sed -E "s|.*<OutputType>(.*)</OutputType>.*|\1|g" | xargs | tr '[:upper:]' '[:lower:]' )
+        if [ "$ENTRYPOINT_OUTPUTTYPE" = "exe" ] || [ "$ENTRYPOINT_OUTPUTTYPE" = "winexe" ]; then
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS -p:PublishReadyToRun=true"
+        elif [ "$ENTRYPOINT_OUTPUTTYPE" = "library" ]; then  # libraries cannot be published as a single file
+            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS -p:GenerateDocumentationFile=true"
+        else
+            echo "${ANSI_RED}Cannot compile project type'$ENTRYPOINT_OUTPUTTYPE'${ANSI_RESET}" >&2
+            exit 113
+        fi
+
+        dotnet publish "$SCRIPT_DIR/$ENTRYPOINT"                                   \
+            --configuration Debug                                                  \
+            -p:DebugType=portable -p:PathMap="$SCRIPT_DIR=/"                       \
+            -p:CopyDebugSymbolFilesFromPackages=true                               \
+            -p:Deterministic=true -p:ContinuousIntegrationBuild=true               \
+            -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION  \
+            -p:Version=$ASSEMBLY_VERSION_TEXT                                      \
+            -p:EnableNETAnalyzers=true                                             \
+            $PUBLISH_EXTRA_ARGS --output "$SCRIPT_DIR/bin/debug"                   \
+        && echo "${ANSI_CYAN}$SCRIPT_DIR/bin/debug/${ANSI_RESET}"                  || exit 113
+
+        echo
+    done
 }
 
 make_release() {
@@ -533,51 +602,59 @@ make_release() {
     mkdir -p "$SCRIPT_DIR/bin"
     PROJECT_RUNTIME_COUNT=$(echo $PROJECT_RUNTIMES | wc -w)
     for RUNTIME in $PROJECT_RUNTIMES; do
-        echo "${ANSI_MAGENTA}$(basename $PROJECT_ENTRYPOINT) ($RUNTIME)${ANSI_RESET}"
+        for ENTRYPOINT in $PROJECT_ENTRYPOINTS; do
+            echo "${ANSI_MAGENTA}$(basename $ENTRYPOINT) ($RUNTIME)${ANSI_RESET}"
 
-        PUBLISH_EXTRA_ARGS=
-        if [ "$PROJECT_SINGLEFILE" = "true" ]; then
-            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained true -p:PublishSingleFile=true"
-        elif [ "$PROJECT_SINGLEFILE" = "false" ]; then
-            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained false -p:PublishSingleFile=false"
-        fi
-
-        if [ "$PROJECT_OUTPUTTYPE" = "exe" ] || [ "$PROJECT_OUTPUTTYPE" = "winexe" ]; then
-            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS -p:PublishReadyToRun=true"
-        elif [ "$PROJECT_OUTPUTTYPE" = "library" ]; then  # libraries cannot be published as a single file
-            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS -p:GenerateDocumentationFile=true"
-        else
-            echo "${ANSI_RED}Cannot compile project type'$PROJECT_OUTPUTTYPE'${ANSI_RESET}" >&2
-            exit 113
-        fi
-
-        if [ "$RUNTIME" = "current" ]; then
-            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --use-current-runtime"
-            if [ "$PROJECT_RUNTIME_COUNT" -eq 1 ]; then
-                PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin"
-            else
-                PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin/current"
+            PUBLISH_EXTRA_ARGS=
+            if [ "$PROJECT_SINGLEFILE" = "true" ]; then
+                PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained true -p:PublishSingleFile=true"
+            elif [ "$PROJECT_SINGLEFILE" = "false" ]; then
+                PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --self-contained false -p:PublishSingleFile=false"
             fi
-        else
-            PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --runtime $RUNTIME"
-            PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin/$RUNTIME"
-        fi
 
-        dotnet publish "$SCRIPT_DIR/$PROJECT_ENTRYPOINT"                           \
-            --configuration Release                                                \
-            -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION  \
-            -p:Version=$ASSEMBLY_VERSION_TEXT                                      \
-            -p:EnableNETAnalyzers=false                                            \
-            $PUBLISH_EXTRA_ARGS --output "$PUBLISH_OUTPUT_DIR"                     \
-        && echo "${ANSI_CYAN}$SCRIPT_DIR/bin${ANSI_RESET}"                        || exit 113
+            ENTRYPOINT_OUTPUTTYPE=$( cat "$SCRIPT_DIR/$ENTRYPOINT" | grep -E "<OutputType>" | sed -n 1p | sed -E "s|.*<OutputType>(.*)</OutputType>.*|\1|g" | xargs | tr '[:upper:]' '[:lower:]' )
+            if [ "$ENTRYPOINT_OUTPUTTYPE" = "exe" ] || [ "$ENTRYPOINT_OUTPUTTYPE" = "winexe" ]; then
+                PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS -p:PublishReadyToRun=true"
+            elif [ "$ENTRYPOINT_OUTPUTTYPE" = "library" ]; then  # libraries cannot be published as a single file
+                PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS -p:GenerateDocumentationFile=true"
+            else
+                echo "${ANSI_RED}Cannot compile project type'$ENTRYPOINT_OUTPUTTYPE'${ANSI_RESET}" >&2
+                exit 113
+            fi
 
-        if [ -e "$SCRIPT_DIR/examples/content" ]; then
+            if [ "$RUNTIME" = "current" ]; then
+                PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --use-current-runtime"
+                if [ "$PROJECT_RUNTIME_COUNT" -eq 1 ]; then
+                    PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin"
+                else
+                    PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin/current"
+                fi
+            else
+                PUBLISH_EXTRA_ARGS="$PUBLISH_EXTRA_ARGS --runtime $RUNTIME"
+                PUBLISH_OUTPUT_DIR="$SCRIPT_DIR/bin/$RUNTIME"
+            fi
+
+            dotnet publish "$SCRIPT_DIR/$ENTRYPOINT"                                   \
+                --configuration Release                                                \
+                -p:DebugType=embedded -p:PathMap="$SCRIPT_DIR=/"                       \
+                -p:CopyDebugSymbolFilesFromPackages=false                              \
+                -p:Deterministic=true -p:ContinuousIntegrationBuild=true               \
+                -p:AssemblyVersion=$ASSEMBLY_VERSION -p:FileVersion=$ASSEMBLY_VERSION  \
+                -p:Version=$ASSEMBLY_VERSION_TEXT                                      \
+                -p:EnableNETAnalyzers=false                                            \
+                $PUBLISH_EXTRA_ARGS --output "$PUBLISH_OUTPUT_DIR"                     \
+            && echo "${ANSI_CYAN}$SCRIPT_DIR/bin/${ANSI_RESET}"                        || exit 113
+
+            echo
+        done
+
+        for PROJECT_EXAMPLE in $PROJECT_EXAMPLES; do
+            echo "${ANSI_MAGENTA}examples: $PROJECT_EXAMPLE ($RUNTIME)${ANSI_RESET}"
             mkdir -p "$PUBLISH_OUTPUT_DIR/examples"
-            (cd "$SCRIPT_DIR/examples/content" && find . -type d -exec mkdir -p "$PUBLISH_OUTPUT_DIR/examples/{}" \;)
-            (cd "$SCRIPT_DIR/examples/content" && find . -type f -exec cp --parents {} "$PUBLISH_OUTPUT_DIR/examples/" \;)
-        fi
-
-        echo
+            (cd "$SCRIPT_DIR/$PROJECT_EXAMPLE" && find . -type d -exec mkdir -p "$PUBLISH_OUTPUT_DIR/examples/{}" \;)
+            (cd "$SCRIPT_DIR/$PROJECT_EXAMPLE" && find . -type f -exec cp --parents {} "$PUBLISH_OUTPUT_DIR/examples/" \;)
+            echo
+        done
     done
 }
 
@@ -695,7 +772,7 @@ make_package() {
             fi
 
             mkdir -p  "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/$PROJECT_NAME/"
-            rsync -a "$SCRIPT_DIR/bin/linux-x64/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/$PROJECT_NAME/" || exit 113
+            rsync -a "$SCRIPT_DIR/bin/linux-x64/" "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/opt/$PROJECT_NAME_LOWER/" || exit 113
 
             if [ -e "$SCRIPT_DIR/packaging/linux-deb/copyright" ]; then
                 mkdir -p "$SCRIPT_DIR/build/$DEB_PACKAGE_NAME/usr/share/doc/$PROJECT_NAME/"
@@ -833,23 +910,27 @@ make_publish() {
     fi
 
     if [ "$PUBLISH_LINUX_DEB" != "" ]; then
-        for RUNTIME in $PROJECT_RUNTIMES; do
-            case $RUNTIME in
-                linux-x64)   DEB_ARCHITECTURE=amd64 ; DEB_PACKAGE_CURR=$DEB_PACKAGE_AMD64 ;;
-                linux-arm64) DEB_ARCHITECTURE=arm64 ; DEB_PACKAGE_CURR=$DEB_PACKAGE_ARM64 ;;
-                *)           continue ;;
-            esac
+        if [ "$PACKAGE_NUGET_VERSION" != "" ] && [ "$PACKAGE_NUGET_VERSION" != "0.0.0" ]; then
+            for RUNTIME in $PROJECT_RUNTIMES; do
+                case $RUNTIME in
+                    linux-x64)   DEB_ARCHITECTURE=amd64 ; DEB_PACKAGE_CURR=$DEB_PACKAGE_AMD64 ;;
+                    linux-arm64) DEB_ARCHITECTURE=arm64 ; DEB_PACKAGE_CURR=$DEB_PACKAGE_ARM64 ;;
+                    *)           continue ;;
+                esac
 
-            ANYTHING_DONE=1
-            echo "${ANSI_MAGENTA}Published deb ($RUNTIME: $DEB_ARCHITECTURE)${ANSI_RESET}"
-            GITHUB_UPLOAD_FILES="$GITHUB_UPLOAD_FILES dist/$APPIMAGE_NAME_CURR"
+                ANYTHING_DONE=1
+                echo "${ANSI_MAGENTA}Published deb ($RUNTIME: $DEB_ARCHITECTURE)${ANSI_RESET}"
+                GITHUB_UPLOAD_FILES="$GITHUB_UPLOAD_FILES dist/$APPIMAGE_NAME_CURR"
 
-            PUBLISH_LINUX_DEB_CURR="$( echo "$PUBLISH_LINUX_DEB" | sed "s/<DEB_ARCHITECTURE>/$DEB_ARCHITECTURE/g" )"
+                PUBLISH_LINUX_DEB_CURR="$( echo "$PUBLISH_LINUX_DEB" | sed "s/<DEB_ARCHITECTURE>/$DEB_ARCHITECTURE/g" )"
 
-            rsync --no-g --no-o --progress "dist/$DEB_PACKAGE_CURR" $PUBLISH_LINUX_DEB_CURR || exit 113
-            echo "${ANSI_CYAN}$PUBLISH_LINUX_DEB_CURR${ANSI_RESET}"
-            echo
-        done
+                rsync --no-g --no-o --progress "dist/$DEB_PACKAGE_CURR" $PUBLISH_LINUX_DEB_CURR || exit 113
+                echo "${ANSI_CYAN}$PUBLISH_LINUX_DEB_CURR${ANSI_RESET}"
+                echo
+            done
+        else
+            echo "${ANSI_RED}Not sending to remote without a version${ANSI_RESET}" >&2
+        fi
     fi
 
     if [ "$PUBLISH_LINUX_DOCKER" != "" ]; then
@@ -913,7 +994,7 @@ make_publish() {
             if [ "$GITHUB_UPLOAD_FILES" != "" ]; then
                 PUBLISH_GITHUB_EXISTING_RELEASE_ID=$( curl -s https://api.github.com/repos/$PUBLISH_GITHUB_OWNER/$PUBLISH_GITHUB_REPO/releases \
                                                               -H "Authorization: Bearer $PUBLISH_GITHUB_KEY" \
-                                                      | jq -r ".[] | select(.tag_name==\"$GIT_VERSION\") | .id" 2>/dev/null )
+                                                      | jq -r ".[] | select(.tag_name==\"v$GIT_VERSION\") | .id" 2>/dev/null )
                 if [ "$PUBLISH_GITHUB_EXISTING_RELEASE_ID" != "" ]; then
                     echo "${ANSI_YELLOW}Release with tag $GIT_VERSION already exists, deleting it first${ANSI_RESET}" >&2
                     curl -X DELETE https://api.github.com/repos/$PUBLISH_GITHUB_OWNER/$PUBLISH_GITHUB_REPO/releases/$PUBLISH_GITHUB_EXISTING_RELEASE_ID \
@@ -924,7 +1005,7 @@ make_publish() {
                                                           -H "Authorization: Bearer $PUBLISH_GITHUB_KEY" \
                                                           -H "Accept: application/vnd.github+json" \
                                                           -d "{
-                                                              \"tag_name\": \"$GIT_VERSION\",
+                                                              \"tag_name\": \"v$GIT_VERSION\",
                                                               \"name\": \"$GIT_VERSION\",
                                                               \"body\": \"\",
                                                               \"draft\": false,
