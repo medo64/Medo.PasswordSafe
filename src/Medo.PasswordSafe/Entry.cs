@@ -2,6 +2,7 @@ namespace Medo.Security.Cryptography.PasswordSafe;
 
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Globalization;
 using System.IO;
 using System.Text;
@@ -399,29 +400,61 @@ public class Entry {
     }
 
     /// <summary>
-    /// Imports entry from a JSON object.
+    /// Returns imported entry based on JSON object text.
     /// </summary>
+    /// <param name="jsonText">JSON object.</param>
     public static Entry ImportFromJson(string jsonText) {
+        (var entry, var exceptionText) = ImportFromJsonInt(jsonText);
+        if (entry != null) {
+            return entry;
+        } else {
+            throw new InvalidDataException(exceptionText ?? "Unknown error.");
+        }
+    }
+
+    /// <summary>
+    /// Returns true if entry based on JSON object text could be parsed.
+    /// </summary>
+    /// <param name="jsonText">JSON object.</param>
+    /// <param name="entry">Output entry.</param>
+#if NET8_0_OR_GREATER
+    public static bool TryImportFromJson(string jsonText, [NotNullWhen(true)] out Entry? entry) {
+#else
+    public static bool TryImportFromJson(string jsonText, out Entry? entry) {
+#endif
+        (entry, var exception) = ImportFromJsonInt(jsonText);
+        if (entry != null) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    /// <summary>
+    /// Returns imported entry based on JSON object text.
+    /// </summary>
+    public static (Entry? entry, string? exceptionText) ImportFromJsonInt(string jsonText) {
+        if (string.IsNullOrWhiteSpace(jsonText)) { return (null, "No data."); }
+
         var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonText));
+        if (!reader.Read() ||(reader.TokenType != JsonTokenType.StartObject)) { return (null, "Cannot find JSON start object."); }
 
         var records = new List<Record>();
-
-        if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject) { return new Entry(records); }
 
         while (reader.Read()) {
             if (reader.TokenType == JsonTokenType.PropertyName) {
                 var propName = reader.GetString();
                 if (propName == null) {
-                    throw new InvalidDataException("Unexpected null property name.");
-                } else if (propName.Equals("kind",StringComparison.Ordinal)) {
+                    return (null, "Unexpected null property name.");
+                } else if (propName.Equals("kind", StringComparison.Ordinal)) {
                     reader.Read();
                     if (reader.TokenType == JsonTokenType.String) {
                         var content = reader.GetString() ?? throw new InvalidDataException("Unexpected null kind.");
                         if (!content.Equals("PWSafe3.Entry", StringComparison.Ordinal)) { throw new InvalidDataException("Unknown kind."); }
                     } else {
-                        throw new InvalidDataException("Cannot determine kind.");
+                        return (null, "Cannot determine kind.");
                     }
-                } else if (propName.Equals("records",StringComparison.Ordinal)) {
+                } else if (propName.Equals("records", StringComparison.Ordinal)) {
                     if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray) { continue; }
 
                     while (reader.Read()) {
@@ -451,10 +484,10 @@ public class Entry {
                                         if (Enum.TryParse<RecordType>(content, out var parsed)) {
                                             recordType = parsed;
                                         } else {
-                                            throw new InvalidDataException($"Cannot convert '{content}' to record type.");
+                                            return (null, $"Cannot convert '{content}' to record type.");
                                         }
                                     } else {
-                                        throw new InvalidDataException("Unexpected record type.");
+                                        return (null, "Unexpected record type.");
                                     }
                                     break;
 
@@ -462,7 +495,7 @@ public class Entry {
                                     if (reader.TokenType == JsonTokenType.String) {
                                         caption = reader.GetString();
                                     } else {
-                                        throw new InvalidDataException("Unexpected caption type.");
+                                        return (null, "Unexpected caption type.");
                                     }
                                     break;
 
@@ -470,7 +503,7 @@ public class Entry {
                                     if (reader.TokenType == JsonTokenType.String) {
                                         text = reader.GetString();
                                     } else {
-                                        throw new InvalidDataException("Unexpected text type.");
+                                        return (null, "Unexpected text type.");
                                     }
                                     break;
 
@@ -480,23 +513,23 @@ public class Entry {
                                         if (Guid.TryParse(content, out var parsed)) {
                                             uuid = parsed;
                                         } else {
-                                            throw new InvalidDataException($"Cannot convert '{content}' to UUID.");
+                                            return (null, $"Cannot convert '{content}' to UUID.");
                                         }
                                     } else {
-                                        throw new InvalidDataException("Unexpected UUID type.");
+                                        return (null, "Unexpected UUID type.");
                                     }
                                     break;
 
                                 case "time":
-                                    if (reader.TokenType == JsonTokenType.String) { 
+                                    if (reader.TokenType == JsonTokenType.String) {
                                         var content = reader.GetString();
                                         if (DateTime.TryParse(content, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var value)) {
                                             time = value;
                                         } else {
-                                            throw new InvalidDataException($"Cannot convert '{content}' to time.");
+                                            return (null, $"Cannot convert '{content}' to time.");
                                         }
                                     } else {
-                                        throw new InvalidDataException("Unexpected time type.");
+                                        return (null, "Unexpected time type.");
                                     }
                                     break;
 
@@ -506,10 +539,10 @@ public class Entry {
                                         if (int.TryParse(content, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) {
                                             version = value;
                                         } else {
-                                            throw new InvalidDataException($"Cannot convert '{content}' to version.");
+                                            return (null, $"Cannot convert '{content}' to version.");
                                         }
                                     } else {
-                                        throw new InvalidDataException("Unexpected version type.");
+                                        return (null, "Unexpected version type.");
                                     }
                                     break;
 
@@ -522,17 +555,17 @@ public class Entry {
                                             binary = new byte[bytesInBuffer];
                                             Buffer.BlockCopy(binaryBuffer, 0, binary, 0, binary.Length);
                                         } else {
-                                            throw new InvalidDataException($"Cannot convert '{content}' to binary.");
+                                            return (null, $"Cannot convert '{content}' to binary.");
                                         }
 #else
                                         try {
                                             binary = Convert.FromBase64String(content);
                                         } catch (FormatException) {
-                                            throw new InvalidDataException($"Cannot convert '{content}' to binary.");
+                                            return (null, $"Cannot convert '{content}' to binary.");
                                         }
 #endif
                                     } else {
-                                        throw new InvalidDataException("Unexpected binary type.");
+                                        return (null, "Unexpected binary type.");
                                     }
                                     break;
 
@@ -542,31 +575,31 @@ public class Entry {
                                     } else if (reader.TokenType == JsonTokenType.False) {
                                         isSensitive = false;
                                     } else {
-                                        throw new InvalidDataException("Unexpected isSensitive type.");
+                                        return (null, "Unexpected isSensitive type.");
                                     }
                                     break;
 
 
-                                default: throw new InvalidDataException($"Unexpected '{name}' property.");
+                                default: return (null, $"Unexpected '{name}' property.");
                             }
                         }
 
                         if (recordType != null) {
                             switch (Record.GetDataType(recordType.Value)) {
                                 case PasswordSafeFieldDataType.Version:
-                                    if (version == null) { throw new InvalidDataException("Version is missing."); }
+                                    if (version == null) { return (null, "Version is missing."); }
                                     records.Add(new Record(recordType.Value) {
                                         Version = version.Value
                                     });
                                     break;
                                 case PasswordSafeFieldDataType.Uuid:
-                                    if (uuid == null) { throw new InvalidDataException("UUID is missing."); }
+                                    if (uuid == null) { return (null, "UUID is missing."); }
                                     records.Add(new Record(recordType.Value) {
                                         Uuid = uuid.Value
                                     });
                                     break;
                                 case PasswordSafeFieldDataType.Time:
-                                    if (time == null) { throw new InvalidDataException("Time is missing."); }
+                                    if (time == null) { return (null, "Time is missing."); }
                                     records.Add(new Record(recordType.Value) {
                                         Time = time.Value
                                     });
@@ -577,7 +610,7 @@ public class Entry {
                                     });
                                     break;
                                 case PasswordSafeFieldDataType.Binary:
-                                    if (binary == null) { throw new InvalidDataException("Binary data is missing."); }
+                                    if (binary == null) { return (null, "Binary data is missing."); }
                                     var record = new Record(recordType.Value);
                                     record.SetBytes(binary);
                                     break;
@@ -593,33 +626,33 @@ public class Entry {
                                         var recordA = new Record(recordType.Value);
                                         if (text != null) {
                                             recordA.Text = text;
-                                        } else  if (time != null) {
+                                        } else if (time != null) {
                                             recordA.Time = time.Value;
-                                        } else  if (uuid != null) {
+                                        } else if (uuid != null) {
                                             recordA.Uuid = uuid.Value;
-                                        } else  if (version != null) {
+                                        } else if (version != null) {
                                             recordA.Version = version.Value;
-                                        } else  if (binary != null) {
+                                        } else if (binary != null) {
                                             recordA.SetBytes(binary);
                                         } else {
-                                            throw new InvalidDataException("Record data cannot be determined.");
+                                            return (null, "Record data cannot be determined.");
                                         }
                                     }
                                     break;
                             }
                         } else {
-                            throw new InvalidDataException("Record type is missing.");
+                            return (null, "Record type is missing.");
                         }
                     }
                 } else {
-                    throw new InvalidDataException($"Unexpected '{propName}' property.");
+                    return (null, $"Unexpected '{propName}' property.");
                 }
             } else if (reader.TokenType == JsonTokenType.EndObject) {
                 break;
             }
         }
 
-        return new Entry(records);
+        return (new Entry(records), null);
 
     }
 

@@ -478,9 +478,43 @@ public class Entry_Tests {
         Assert.AreEqual(exported, exported2);
     }
 
+    public void Entry_ExportImport_TryImport() {
+        var entry = new Entry("Title");
+        entry.Uuid = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
+        entry.Records.Add(new CustomTextRecord() {
+            Caption = "Caption",
+            Text = "Text",
+            IsSensitive = true,
+        });
+
+        var exported = entry.ExportToJson();
+        Assert.AreEqual("""{"kind":"PWSafe3.Entry","records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text","isSensitive":true}]}""", exported);
+
+        Assert.IsTrue(Entry.TryImportFromJson(exported, out var imported));
+        var exported2 = imported.ExportToJson();
+
+        Assert.AreEqual(exported, exported2);
+    }
+
     [TestMethod]
     public void Entry_ExportImport_WrongKind() {
         var exported = """{"kind":"X","records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text","isSensitive":true}]}""";
+        Assert.Throws<InvalidDataException>(() => {
+            Entry.ImportFromJson(exported);
+        });
+    }
+
+    [TestMethod]
+    public void Entry_ExportImport_NoData() {
+        var exported = "";
+        Assert.Throws<InvalidDataException>(() => {
+            Entry.ImportFromJson(exported);
+        });
+    }
+
+    [TestMethod]
+    public void Entry_ExportImport_WrongData() {
+        var exported = "[]";
         Assert.Throws<InvalidDataException>(() => {
             Entry.ImportFromJson(exported);
         });
