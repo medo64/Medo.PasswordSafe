@@ -64,7 +64,7 @@ public class Header : Field {
     /// <summary>
     /// Gets underlying data type for field.
     /// </summary>
-    protected override PasswordSafeFieldDataType DataType {
+    internal override PasswordSafeFieldDataType DataType {
         get {
             return HeaderType switch {
                 HeaderType.Version => PasswordSafeFieldDataType.Version,

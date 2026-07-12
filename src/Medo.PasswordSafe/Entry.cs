@@ -2,6 +2,10 @@ namespace Medo.Security.Cryptography.PasswordSafe;
 
 using System;
 using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Text;
+using System.Text.Json;
 
 /// <summary>
 /// Entry.
@@ -336,5 +340,213 @@ public class Entry {
     }
 
     #endregion
+
+
+    #region Export/Import
+
+    /// <summary>
+    /// Exports entry to a JSON object.
+    /// </summary>
+    public string ExportToJson() {
+        using var stream = new MemoryStream();
+        using var writer = new Utf8JsonWriter(stream);
+
+        writer.WriteStartObject();
+        writer.WritePropertyName("records");
+        writer.WriteStartArray();
+
+        foreach (var record in Records) {
+            writer.WriteStartObject();
+            writer.WriteString("caption", record.Caption);
+            writer.WriteString("type", record.RecordType.ToString());
+            switch (record.DataType) {
+                case PasswordSafeFieldDataType.Unknown:
+                    writer.WriteString("binary", Convert.ToBase64String(record.RawData));
+                    break;
+                case PasswordSafeFieldDataType.Version:
+                    writer.WriteString("version", record.Version.ToString(CultureInfo.InvariantCulture));
+                    break;
+                case PasswordSafeFieldDataType.Uuid:
+                    writer.WriteString("uuid", record.Uuid.ToString());
+                    break;
+                case PasswordSafeFieldDataType.Text:
+                    writer.WriteString("text", record.Text);
+                    break;
+                case PasswordSafeFieldDataType.Time:
+                    writer.WriteString("time", record.Time.ToString("O", CultureInfo.InvariantCulture));
+                    break;
+                case PasswordSafeFieldDataType.Binary:
+                    writer.WriteString("binary", Convert.ToBase64String(record.RawData));
+                    break;
+                default:
+                    writer.WriteString("binary", Convert.ToBase64String(record.RawData));
+                    break;
+            }
+            writer.WriteEndObject();
+        }
+
+        writer.WriteEndArray();
+        writer.WriteEndObject();
+        writer.Flush();
+
+        return UTF8Encoding.UTF8.GetString(stream.ToArray());
+    }
+
+    /// <summary>
+    /// Imports entry from a JSON object.
+    /// </summary>
+    public static Entry ImportFromJson(string jsonText) {
+        var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonText));
+
+        var records = new List<Record>();
+
+        if (!reader.Read() || reader.TokenType != JsonTokenType.StartObject) { return new Entry(records); }
+        while (reader.Read()) {
+            if (reader.TokenType == JsonTokenType.PropertyName) {
+                var propName = reader.GetString();
+                if (propName == "records") {
+                    if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray) { continue; }
+
+                    while (reader.Read()) {
+                        if (reader.TokenType == JsonTokenType.EndArray) { break; }
+                        if (reader.TokenType != JsonTokenType.StartObject) { continue; }
+
+                        RecordType? recordType = null;
+                        string? text = null;
+                        string? uuid = null;
+                        string? time = null;
+                        string? version = null;
+                        string? binaryB64 = null;
+
+                        while (reader.Read()) {
+                            if (reader.TokenType == JsonTokenType.EndObject) { break; }
+                            if (reader.TokenType != JsonTokenType.PropertyName) { continue; }
+
+                            var name = reader.GetString();
+                            if (!reader.Read()) { break; }
+
+                            switch (name) {
+                                case "type":
+                                    if (reader.TokenType == JsonTokenType.String) {
+                                        var recType = reader.GetString();
+                                        if (!string.IsNullOrEmpty(recType) && Enum.TryParse<RecordType>(recType, out var rt)) { recordType = rt; }
+                                    }
+                                    break;
+                                case "text":
+                                    if (reader.TokenType == JsonTokenType.String) { text = reader.GetString(); }
+                                    break;
+                                case "uuid":
+                                    if (reader.TokenType == JsonTokenType.String) { uuid = reader.GetString(); }
+                                    break;
+                                case "time":
+                                    if (reader.TokenType == JsonTokenType.String) { time = reader.GetString(); }
+                                    break;
+                                case "version":
+                                    if (reader.TokenType == JsonTokenType.String) { version = reader.GetString(); }
+                                    break;
+                                case "binary":
+                                    if (reader.TokenType == JsonTokenType.String) { binaryB64 = reader.GetString(); }
+                                    break;
+                                default:
+                                    binaryB64 = reader.GetString();
+                                    break;
+                            }
+                        }
+
+                        if (recordType.HasValue) {
+                            var record = new Record(recordType.Value);
+
+                            switch (record.DataType) {
+                                case PasswordSafeFieldDataType.Version:
+                                    if (int.TryParse(version, NumberStyles.Integer, CultureInfo.InvariantCulture, out var versionValue)) {
+                                        record.Version = versionValue;
+                                    } else {
+                                        throw new InvalidDataException("Cannot convert record to version.");
+                                    }
+                                    break;
+                                case PasswordSafeFieldDataType.Uuid:
+                                    if (Guid.TryParse(uuid, out var uuidValue)) {
+                                        record.Uuid = uuidValue;
+                                    } else {
+                                        throw new InvalidDataException("Cannot convert record to UUID.");
+                                    }
+                                    break;
+                                case PasswordSafeFieldDataType.Text:
+                                    record.Text = text;
+                                    break;
+                                case PasswordSafeFieldDataType.Time:
+                                    if (DateTime.TryParse(time, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var timeValue)) {
+                                        record.Time = timeValue;
+                                    } else {
+                                        throw new InvalidDataException("Cannot convert record to Time.");
+                                    }
+                                    break;
+                                case PasswordSafeFieldDataType.Binary:
+                                    if (binaryB64 != null) {
+                                        var binaryBuffer = new byte[binaryB64.Length];
+#if NET10_0_OR_GREATER
+                                        if (Convert.TryFromBase64String(binaryB64, binaryBuffer, out var bytesInBuffer)) {
+                                            var data = new byte[bytesInBuffer];
+                                            Buffer.BlockCopy(binaryBuffer, 0, data, 0, data.Length);
+                                            record.SetBytes(data);
+                                        } else {
+                                            throw new InvalidDataException("Cannot find binary.");
+                                        }
+#else
+                                        try {
+                                            record.SetBytes(Convert.FromBase64String(binaryB64));
+                                        } catch (FormatException) {
+                                            throw new InvalidDataException("Cannot find binary.");
+                                        }
+#endif
+                                    } else {
+                                        throw new InvalidDataException("Cannot decode base64 binary.");
+                                    }
+                                    break;
+                                case PasswordSafeFieldDataType.Unknown:
+                                default:  // try auto-detect
+                                    if ((version != null) && int.TryParse(version, NumberStyles.Integer, CultureInfo.InvariantCulture, out var versionValue2)) {
+                                        record.Version = versionValue2;
+                                    } else if ((uuid != null) && Guid.TryParse(uuid, out var uuidValue2)) {
+                                        record.Uuid = uuidValue2;
+                                    } else if ((time != null) && DateTime.TryParse(time, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var timeValue2)) {
+                                        record.Time = timeValue2;
+                                    } else if (binaryB64 != null) {
+#if NET10_0_OR_GREATER
+                                        var binaryBuffer2 = new byte[binaryB64.Length];
+                                        if (Convert.TryFromBase64String(binaryB64, binaryBuffer2, out var bytesInBuffer)) {
+                                            var data = new byte[bytesInBuffer];
+                                            Buffer.BlockCopy(binaryBuffer2, 0, data, 0, data.Length);
+                                            record.SetBytes(data);
+                                        } else {
+                                            throw new InvalidDataException("Cannot decode base64 binary.");
+                                        }
+#else
+                                        try {
+                                            record.SetBytes(Convert.FromBase64String(binaryB64));
+                                        } catch (FormatException) {
+                                            throw new InvalidDataException("Cannot find binary.");
+                                        }
+#endif
+                                    } else {
+                                        record.Text = text;
+                                    }
+                                    break;
+                            }
+
+                            records.Add(record);
+                        }
+                    }
+                }
+            } else if (reader.TokenType == JsonTokenType.EndObject) {
+                break;
+            }
+        }
+
+        return new Entry(records);
+
+    }
+
+    #endregion Export/Import
 
 }

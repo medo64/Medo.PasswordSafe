@@ -259,38 +259,7 @@ public abstract class Field {
     /// <summary>
     /// Gets underlying data type for field.
     /// </summary>
-    protected abstract PasswordSafeFieldDataType DataType { get; }
-
-
-    /// <summary>
-    /// Underlying data type enumeration used for data parsing.
-    /// </summary>
-    protected enum PasswordSafeFieldDataType {
-        /// <summary>
-        /// Unknown data type.
-        /// </summary>
-        Unknown,
-        /// <summary>
-        /// Version.
-        /// </summary>
-        Version,
-        /// <summary>
-        /// UUID.
-        /// </summary>
-        Uuid,
-        /// <summary>
-        /// Text.
-        /// </summary>
-        Text,
-        /// <summary>
-        /// Time.
-        /// </summary>
-        Time,
-        /// <summary>
-        /// Bytes.
-        /// </summary>
-        Binary,
-    }
+    internal abstract PasswordSafeFieldDataType DataType { get; }
 
 
     /// <summary>

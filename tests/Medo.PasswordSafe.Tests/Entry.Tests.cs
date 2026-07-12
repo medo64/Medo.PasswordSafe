@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.TestTools.UnitTesting;
 using PwSafe = Medo.Security.Cryptography.PasswordSafe;
 
 using static Tests.Helpers;
+using Medo.Security.Cryptography.PasswordSafe;
 
 namespace Tests;
 
@@ -393,6 +394,53 @@ public class Entry_Tests {
         Assert.AreEqual(@"W", string.Join(" ", GetExampleEntry(autoTypeText).AutotypeTokens));
     }
 
-    #endregion
+    #endregion Typos
+
+
+    #region Export/Import
+
+    [TestMethod]
+    public void Entry_Export() {
+        var entry = new PwSafe.Entry();
+
+        var exported = entry.ExportToJson();
+        var exported2 = exported.Replace(entry.Uuid.ToString(), "01234567-89ab-cdef-0123-456789abcdef");
+        Assert.AreEqual("""{"records":[{"caption":"UUID","type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"caption":"Title","type":"Title","text":""},{"caption":"Password","type":"Password","text":""}]}""", exported2);
+
+        var imported = Entry.ImportFromJson(exported);
+        Assert.AreEqual(3, entry.Records.Count);
+        Assert.AreEqual(entry.Uuid, imported.Uuid);
+        Assert.AreEqual(entry.Title, imported.Title);
+        Assert.AreEqual(entry.Password, imported.Password);
+    }
+
+    [TestMethod]
+    public void Entry_AllTypes() {
+        var entry = new PwSafe.Entry();
+        entry.Uuid = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
+        entry.Group = "Group";
+        entry.Title = "Title";
+        entry.UserName = "UserName";
+        entry.Notes = "Notes";
+        entry.Password = "Password";
+        entry.CreationTime = new DateTime(2001, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        entry.PasswordModificationTime = new DateTime(2002, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        entry.LastAccessTime = new DateTime(2003, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        entry.PasswordExpiryTime = new DateTime(2004, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        entry.LastModificationTime = new DateTime(2005, 1, 1, 0, 0, 0, DateTimeKind.Utc);
+        entry.Url = "http://example.com";
+        entry.Email = "example@example.com";
+        entry.SetTwoFactorKey([0, 1, 2, 3, 4, 5, 6, 7, 8, 9]);
+        entry.CreditCardNumber = "1234 5678 9012 3456";
+        entry.CreditCardExpiration = "Title";
+        entry.CreditCardVerificationValue = "0987";
+        entry.CreditCardPin = "6543";
+        entry.QRCode = "https://medo64.com/";
+
+        var exported = entry.ExportToJson();
+        Assert.AreEqual("""{"records":[{"caption":"UUID","type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"caption":"Group","type":"Group","text":"Group"},{"caption":"Title","type":"Title","text":"Title"},{"caption":"User name","type":"UserName","text":"UserName"},{"caption":"Notes","type":"Notes","text":"Notes"},{"caption":"Password","type":"Password","text":"Password"},{"caption":"Cration time","type":"CreationTime","time":"2001-01-01T00:00:00.0000000Z"},{"caption":"Password modification time","type":"PasswordModificationTime","time":"2002-01-01T00:00:00.0000000Z"},{"caption":"Last access time","type":"LastAccessTime","time":"2003-01-01T00:00:00.0000000Z"},{"caption":"Password expiry time","type":"PasswordExpiryTime","time":"2004-01-01T00:00:00.0000000Z"},{"caption":"Last modification time","type":"LastModificationTime","time":"2005-01-01T00:00:00.0000000Z"},{"caption":"URL","type":"Url","text":"http://example.com"},{"caption":"Email address","type":"EmailAddress","text":"example@example.com"},{"caption":"Two-factor key","type":"TwoFactorKey","binary":"AAECAwQFBgcICQ=="},{"caption":"Card number","type":"CreditCardNumber","text":"1234 5678 9012 3456"},{"caption":"Card expiration","type":"CreditCardExpiration","text":"Title"},{"caption":"Card verification code","type":"CreditCardVerificationValue","text":"0987"},{"caption":"Card pin","type":"CreditCardPin","text":"6543"},{"caption":"QR code","type":"QRCode","text":"https://medo64.com/"}]}""", exported);
+    }
+
+    #endregion Export/Import
 
 }

@@ -166,7 +166,7 @@ public class Record : Field {
     /// <summary>
     /// Gets underlying data type for field.
     /// </summary>
-    protected override PasswordSafeFieldDataType DataType {
+    internal override PasswordSafeFieldDataType DataType {
         get {
             return RecordType switch {
                 RecordType.Uuid => PasswordSafeFieldDataType.Uuid,
