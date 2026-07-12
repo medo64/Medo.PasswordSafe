@@ -451,13 +451,33 @@ public class Entry_Tests {
         });
 
         var exported = entry.ExportToJson();
-        Assert.AreEqual("""{"records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"","text":""}]}""", exported);
+        Assert.AreEqual("""{"records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text"}]}""", exported);
 
         var imported = Entry.ImportFromJson(exported);
         var exported2 = imported.ExportToJson();
 
         Assert.AreEqual(exported, exported2);
     }
+
+    [TestMethod]
+    public void Entry_CustomTextFieldSensitive() {
+        var entry = new PwSafe.Entry("Title");
+        entry.Uuid = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
+        entry.Records.Add(new PwSafe.CustomTextRecord() {
+            Caption = "Caption",
+            Text = "Text",
+            IsSensitive = true,
+        });
+
+        var exported = entry.ExportToJson();
+        Assert.AreEqual("""{"records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text","isSensitive":true}]}""", exported);
+
+        var imported = Entry.ImportFromJson(exported);
+        var exported2 = imported.ExportToJson();
+
+        Assert.AreEqual(exported, exported2);
+    }
+
 
     #endregion Export/Import
 

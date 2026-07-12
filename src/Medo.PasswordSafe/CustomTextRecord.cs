@@ -39,7 +39,7 @@ public sealed class CustomTextRecord : Record {
             return caption;
         }
         set {
-
+            SetData(value, Text, IsSensitive);
         }
     }
 
@@ -54,6 +54,7 @@ public sealed class CustomTextRecord : Record {
             return text;
         }
         set {
+            SetData(Caption, value, IsSensitive);
         }
     }
 
@@ -67,7 +68,7 @@ public sealed class CustomTextRecord : Record {
             return isSensitive;
         }
         set {
-
+            SetData(Caption, Text, value);
         }
     }
 
@@ -119,5 +120,29 @@ public sealed class CustomTextRecord : Record {
         }
         return true;
     }
+
+    private void SetData(string? caption, string? text, bool isSensitive) {
+        var sb = new StringBuilder();
+        if (caption != null) {
+            sb.Append("01");
+            sb.Append(caption.Length.ToString("X4", CultureInfo.InvariantCulture));
+            sb.Append(caption);
+        }
+        if (text != null) {
+            sb.Append("02");
+            sb.Append(text.Length.ToString("X4", CultureInfo.InvariantCulture));
+            sb.Append(text);
+        }
+        if (isSensitive != false) {
+            sb.Append("03");
+            sb.Append("0001");
+            sb.Append("1");
+        }
+        RawData = UTF8Encoding.UTF8.GetBytes(sb.ToString());
+        sb.Length = 0;
+        sb = null;
+        GC.Collect();  // try cleaning from memory TODO: Rework to use byte array instead
+    }
+
 
 }

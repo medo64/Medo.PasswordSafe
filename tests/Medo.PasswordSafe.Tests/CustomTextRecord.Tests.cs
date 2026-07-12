@@ -106,4 +106,31 @@ public class CustomTextRecord_Tests {
         Assert.AreEqual(false, field.IsSensitive);
     }
 
+    [TestMethod]
+    public void CustomTextRecord_SetData() {
+        var field = new PwSafe.CustomTextRecord() {
+            Caption = "Test",
+            Text = "Value",
+        };
+        Assert.AreEqual("Test", field.Caption);
+        Assert.AreEqual("Value", field.Text);
+        Assert.IsFalse(field.IsSensitive);
+        var content = UTF8Encoding.UTF8.GetString(field.RawData);
+        Assert.AreEqual("010004Test020005Value", content);
+    }
+
+    [TestMethod]
+    public void CustomTextRecord_SetSensitiveData() {
+        var field = new PwSafe.CustomTextRecord() {
+            Caption = "Test",
+            Text = "Value",
+            IsSensitive = true,
+        };
+        Assert.AreEqual("Test", field.Caption);
+        Assert.AreEqual("Value", field.Text);
+        Assert.IsTrue(field.IsSensitive);
+        var content = UTF8Encoding.UTF8.GetString(field.RawData);
+        Assert.AreEqual("010004Test020005Value0300011", content);
+    }
+
 }
