@@ -352,6 +352,7 @@ public class Entry {
         using var writer = new Utf8JsonWriter(stream);
 
         writer.WriteStartObject();
+        writer.WriteString("kind", "PWSafe3.Entry");
         writer.WritePropertyName("records");
         writer.WriteStartArray();
 
@@ -410,7 +411,17 @@ public class Entry {
         while (reader.Read()) {
             if (reader.TokenType == JsonTokenType.PropertyName) {
                 var propName = reader.GetString();
-                if (propName == "records") {
+                if (propName == null) {
+                    throw new InvalidDataException("Unexpected null property name.");
+                } else if (propName.Equals("kind",StringComparison.Ordinal)) {
+                    reader.Read();
+                    if (reader.TokenType == JsonTokenType.String) {
+                        var content = reader.GetString() ?? throw new InvalidDataException("Unexpected null kind.");
+                        if (!content.Equals("PWSafe3.Entry", StringComparison.Ordinal)) { throw new InvalidDataException("Unknown kind."); }
+                    } else {
+                        throw new InvalidDataException("Cannot determine kind.");
+                    }
+                } else if (propName.Equals("records",StringComparison.Ordinal)) {
                     if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray) { continue; }
 
                     while (reader.Read()) {
@@ -600,6 +611,8 @@ public class Entry {
                             throw new InvalidDataException("Record type is missing.");
                         }
                     }
+                } else {
+                    throw new InvalidDataException($"Unexpected '{propName}' property.");
                 }
             } else if (reader.TokenType == JsonTokenType.EndObject) {
                 break;

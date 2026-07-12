@@ -405,7 +405,7 @@ public class Entry_Tests {
 
         var exported = entry.ExportToJson();
         var exported2 = exported.Replace(entry.Uuid.ToString(), "01234567-89ab-cdef-0123-456789abcdef");
-        Assert.AreEqual("""{"records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":""},{"type":"Password","text":""}]}""", exported2);
+        Assert.AreEqual("""{"kind":"PWSafe3.Entry","records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":""},{"type":"Password","text":""}]}""", exported2);
 
         var imported = Entry.ImportFromJson(exported);
         Assert.AreEqual(3, entry.Records.Count);
@@ -415,7 +415,7 @@ public class Entry_Tests {
     }
 
     [TestMethod]
-    public void Entry_AllTypes() {
+    public void Entry_ExportImport_AllTypes() {
         var entry = new PwSafe.Entry();
         entry.Uuid = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
         entry.Group = "Group";
@@ -438,11 +438,11 @@ public class Entry_Tests {
         entry.QRCode = "https://medo64.com/";
 
         var exported = entry.ExportToJson();
-        Assert.AreEqual("""{"records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Group","text":"Group"},{"type":"Title","text":"Title"},{"type":"UserName","text":"UserName"},{"type":"Notes","text":"Notes"},{"type":"Password","text":"Password"},{"type":"CreationTime","time":"2001-01-01T00:00:00.0000000Z"},{"type":"PasswordModificationTime","time":"2002-01-01T00:00:00.0000000Z"},{"type":"LastAccessTime","time":"2003-01-01T00:00:00.0000000Z"},{"type":"PasswordExpiryTime","time":"2004-01-01T00:00:00.0000000Z"},{"type":"LastModificationTime","time":"2005-01-01T00:00:00.0000000Z"},{"type":"Url","text":"http://example.com"},{"type":"EmailAddress","text":"example@example.com"},{"type":"TwoFactorKey","binary":"AAECAwQFBgcICQ=="},{"type":"CreditCardNumber","text":"1234 5678 9012 3456"},{"type":"CreditCardExpiration","text":"Title"},{"type":"CreditCardVerificationValue","text":"0987"},{"type":"CreditCardPin","text":"6543"},{"type":"QRCode","text":"https://medo64.com/"}]}""", exported);
+        Assert.AreEqual("""{"kind":"PWSafe3.Entry","records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Group","text":"Group"},{"type":"Title","text":"Title"},{"type":"UserName","text":"UserName"},{"type":"Notes","text":"Notes"},{"type":"Password","text":"Password"},{"type":"CreationTime","time":"2001-01-01T00:00:00.0000000Z"},{"type":"PasswordModificationTime","time":"2002-01-01T00:00:00.0000000Z"},{"type":"LastAccessTime","time":"2003-01-01T00:00:00.0000000Z"},{"type":"PasswordExpiryTime","time":"2004-01-01T00:00:00.0000000Z"},{"type":"LastModificationTime","time":"2005-01-01T00:00:00.0000000Z"},{"type":"Url","text":"http://example.com"},{"type":"EmailAddress","text":"example@example.com"},{"type":"TwoFactorKey","binary":"AAECAwQFBgcICQ=="},{"type":"CreditCardNumber","text":"1234 5678 9012 3456"},{"type":"CreditCardExpiration","text":"Title"},{"type":"CreditCardVerificationValue","text":"0987"},{"type":"CreditCardPin","text":"6543"},{"type":"QRCode","text":"https://medo64.com/"}]}""", exported);
     }
 
     [TestMethod]
-    public void Entry_CustomTextField() {
+    public void Entry_ExportImport_CustomTextField() {
         var entry = new PwSafe.Entry("Title");
         entry.Uuid = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
         entry.Records.Add(new PwSafe.CustomTextRecord() {
@@ -451,7 +451,7 @@ public class Entry_Tests {
         });
 
         var exported = entry.ExportToJson();
-        Assert.AreEqual("""{"records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text"}]}""", exported);
+        Assert.AreEqual("""{"kind":"PWSafe3.Entry","records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text"}]}""", exported);
 
         var imported = Entry.ImportFromJson(exported);
         var exported2 = imported.ExportToJson();
@@ -460,7 +460,7 @@ public class Entry_Tests {
     }
 
     [TestMethod]
-    public void Entry_CustomTextFieldSensitive() {
+    public void Entry_ExportImport_CustomTextFieldSensitive() {
         var entry = new PwSafe.Entry("Title");
         entry.Uuid = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
         entry.Records.Add(new PwSafe.CustomTextRecord() {
@@ -470,7 +470,7 @@ public class Entry_Tests {
         });
 
         var exported = entry.ExportToJson();
-        Assert.AreEqual("""{"records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text","isSensitive":true}]}""", exported);
+        Assert.AreEqual("""{"kind":"PWSafe3.Entry","records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text","isSensitive":true}]}""", exported);
 
         var imported = Entry.ImportFromJson(exported);
         var exported2 = imported.ExportToJson();
@@ -478,6 +478,13 @@ public class Entry_Tests {
         Assert.AreEqual(exported, exported2);
     }
 
+    [TestMethod]
+    public void Entry_ExportImport_WrongKind() {
+        var exported = """{"kind":"X","records":[{"type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"type":"Title","text":"Title"},{"type":"Password","text":""},{"type":"CustomTextField","caption":"Caption","text":"Text","isSensitive":true}]}""";
+        Assert.Throws<InvalidDataException>(() => {
+            Entry.ImportFromJson(exported);
+        });
+    }
 
     #endregion Export/Import
 
