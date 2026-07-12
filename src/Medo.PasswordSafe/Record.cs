@@ -167,36 +167,41 @@ public class Record : Field {
     /// Gets underlying data type for field.
     /// </summary>
     internal override PasswordSafeFieldDataType DataType {
-        get {
-            return RecordType switch {
-                RecordType.Uuid => PasswordSafeFieldDataType.Uuid,
-                RecordType.Group => PasswordSafeFieldDataType.Text,
-                RecordType.Title => PasswordSafeFieldDataType.Text,
-                RecordType.UserName => PasswordSafeFieldDataType.Text,
-                RecordType.Notes => PasswordSafeFieldDataType.Text,
-                RecordType.Password => PasswordSafeFieldDataType.Text,
-                RecordType.Url => PasswordSafeFieldDataType.Text,
-                RecordType.Autotype => PasswordSafeFieldDataType.Text,
-                RecordType.PasswordHistory => PasswordSafeFieldDataType.Text,
-                RecordType.PasswordPolicy => PasswordSafeFieldDataType.Text,
-                RecordType.RunCommand => PasswordSafeFieldDataType.Text,
-                RecordType.EmailAddress => PasswordSafeFieldDataType.Text,
-                RecordType.OwnSymbolsForPassword => PasswordSafeFieldDataType.Text,
-                RecordType.PasswordPolicyName => PasswordSafeFieldDataType.Text,
-                RecordType.CreditCardNumber => PasswordSafeFieldDataType.Text,
-                RecordType.CreditCardExpiration => PasswordSafeFieldDataType.Text,
-                RecordType.CreditCardVerificationValue => PasswordSafeFieldDataType.Text,
-                RecordType.CreditCardPin => PasswordSafeFieldDataType.Text,
-                RecordType.QRCode => PasswordSafeFieldDataType.Text,
-                RecordType.CreationTime => PasswordSafeFieldDataType.Time,
-                RecordType.PasswordModificationTime => PasswordSafeFieldDataType.Time,
-                RecordType.LastAccessTime => PasswordSafeFieldDataType.Time,
-                RecordType.PasswordExpiryTime => PasswordSafeFieldDataType.Time,
-                RecordType.LastModificationTime => PasswordSafeFieldDataType.Time,
-                RecordType.TwoFactorKey => PasswordSafeFieldDataType.Binary,
-                _ => PasswordSafeFieldDataType.Unknown,
-            };
-        }
+        get { return GetDataType(RecordType); }
+    }
+
+    /// <summary>
+    /// Gets underlying data type for field.
+    /// </summary>
+    internal static PasswordSafeFieldDataType GetDataType(RecordType recordType) {
+        return recordType switch {
+            RecordType.Uuid => PasswordSafeFieldDataType.Uuid,
+            RecordType.Group => PasswordSafeFieldDataType.Text,
+            RecordType.Title => PasswordSafeFieldDataType.Text,
+            RecordType.UserName => PasswordSafeFieldDataType.Text,
+            RecordType.Notes => PasswordSafeFieldDataType.Text,
+            RecordType.Password => PasswordSafeFieldDataType.Text,
+            RecordType.Url => PasswordSafeFieldDataType.Text,
+            RecordType.Autotype => PasswordSafeFieldDataType.Text,
+            RecordType.PasswordHistory => PasswordSafeFieldDataType.Text,
+            RecordType.PasswordPolicy => PasswordSafeFieldDataType.Text,
+            RecordType.RunCommand => PasswordSafeFieldDataType.Text,
+            RecordType.EmailAddress => PasswordSafeFieldDataType.Text,
+            RecordType.OwnSymbolsForPassword => PasswordSafeFieldDataType.Text,
+            RecordType.PasswordPolicyName => PasswordSafeFieldDataType.Text,
+            RecordType.CreditCardNumber => PasswordSafeFieldDataType.Text,
+            RecordType.CreditCardExpiration => PasswordSafeFieldDataType.Text,
+            RecordType.CreditCardVerificationValue => PasswordSafeFieldDataType.Text,
+            RecordType.CreditCardPin => PasswordSafeFieldDataType.Text,
+            RecordType.QRCode => PasswordSafeFieldDataType.Text,
+            RecordType.CreationTime => PasswordSafeFieldDataType.Time,
+            RecordType.PasswordModificationTime => PasswordSafeFieldDataType.Time,
+            RecordType.LastAccessTime => PasswordSafeFieldDataType.Time,
+            RecordType.PasswordExpiryTime => PasswordSafeFieldDataType.Time,
+            RecordType.LastModificationTime => PasswordSafeFieldDataType.Time,
+            RecordType.TwoFactorKey => PasswordSafeFieldDataType.Binary,
+            _ => PasswordSafeFieldDataType.Unknown,
+        };
     }
 
 
