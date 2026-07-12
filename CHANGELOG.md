@@ -1,13 +1,15 @@
-# Changelog
+CHANGELOG
+
+Changelog at https://github.com/medo64/Medo.PasswordSafe/blob/main/CHANGELOG.md
 
 
-## [6.6.0] - 2026-07-11
+[6.6.0] (2026-07-11)
 
 - fixed custom text field support
 - added support for entry import/export
 
 
-## [6.5.0] - 2026-04-04
+[6.5.0] (2026-04-04)
 
 - added support for custom text field (0x30)
 - added AotCompatible for .NET 10
@@ -16,17 +18,17 @@
 - custom assembly name in - courtesy of Qiao Wang
 
 
-## [6.4.0] - 2025-11-27
+[6.4.0] (2025-11-27)
 
 - added support for .NET Standard 2.0
 
 
-## [6.3.1] - 2025-07-13
+[6.3.1] (2025-07-13)
 
 - added Record.Caption
 
 
-## [6.3.0] - 2025-05-25
+[6.3.0] (2025-05-25)
 
 - added support for .NET Standard 2.0
 - added .NET 9.0 compile target
@@ -34,41 +36,42 @@
 - minor fixes and refactorings
 
 
-## [6.2.1] - 2024-01-21
+[6.2.1] (2024-01-21)
 
 - adding/removing password policies - courtesy of Qiao Wang
 
 
-## [6.2.0] - 2023-06-19
+[6.2.0] (2023-06-19)
 
 - Changed NuGet package name to Medo.PasswordSafe
 - Obsoleted NuGet package PasswordSafe
 
 
-## [6.1.0] - 2023-01-15
+[6.1.0] (2023-01-15)
 
 - .NET 7
 - C# 11
 - Cleanup
 
 
-## [6.0.0] - 2022-06-26
+[6.0.0] (2022-06-26)
 
 - Updated for .NET 6
 
 
-## [1.10.0] - 2017-08-18
+[1.10.0] (2017-08-18)
 
 - Added GetBytesSilently method
 
 
-## [1.0.0] - 2017-08-17
+[1.0.0] (2017-08-17)
 
 - The first release
 
 
 
 [unreleased]: https://github.com/medo64/Medo.PasswordSafe/
+[6.6.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.6.0
 [6.5.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.5.0
 [6.4.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.4.0
 [6.3.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.3.0
