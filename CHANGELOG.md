@@ -1,6 +1,12 @@
 # Changelog
 
 
+## [6.6.0] - 2026-07-11
+
+- fixed custom text field support
+- added support for entry import/export
+
+
 ## [6.5.0] - 2026-04-04
 
 - added support for custom text field (0x30)
