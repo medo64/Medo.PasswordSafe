@@ -360,9 +360,6 @@ public class Entry {
             writer.WriteString("caption", record.Caption);
             writer.WriteString("type", record.RecordType.ToString());
             switch (record.DataType) {
-                case PasswordSafeFieldDataType.Unknown:
-                    writer.WriteString("binary", Convert.ToBase64String(record.RawData));
-                    break;
                 case PasswordSafeFieldDataType.Version:
                     writer.WriteString("version", record.Version.ToString(CultureInfo.InvariantCulture));
                     break;
@@ -378,8 +375,16 @@ public class Entry {
                 case PasswordSafeFieldDataType.Binary:
                     writer.WriteString("binary", Convert.ToBase64String(record.RawData));
                     break;
+                case PasswordSafeFieldDataType.Unknown:
                 default:
-                    writer.WriteString("binary", Convert.ToBase64String(record.RawData));
+                    if (record is CustomTextRecord customTextRecord) {
+                        writer.WriteString("text", customTextRecord.Text);
+                        if (customTextRecord.IsSensitive) {
+                            writer.WriteBoolean("isSensitive", customTextRecord.IsSensitive);
+                        }
+                    } else {
+                        writer.WriteString("binary", Convert.ToBase64String(record.RawData));
+                    }
                     break;
             }
             writer.WriteEndObject();
@@ -419,6 +424,7 @@ public class Entry {
                         DateTime? time = null;
                         int? version = null;
                         byte[]? binary = null;
+                        bool? isSensitive = null;
 
                         while (reader.Read()) {
                             if (reader.TokenType == JsonTokenType.EndObject) { break; }
@@ -519,6 +525,17 @@ public class Entry {
                                     }
                                     break;
 
+                                case "isSensitive":
+                                    if (reader.TokenType == JsonTokenType.True) {
+                                        isSensitive = true;
+                                    } else if (reader.TokenType == JsonTokenType.False) {
+                                        isSensitive = false;
+                                    } else {
+                                        throw new InvalidDataException("Unexpected isSensitive type.");
+                                    }
+                                    break;
+
+
                                 default: throw new InvalidDataException($"Unexpected '{name}' property.");
                             }
                         }
@@ -555,19 +572,27 @@ public class Entry {
                                     break;
                                 case PasswordSafeFieldDataType.Unknown:
                                 default:
-                                    var recordA = new Record(recordType.Value);
-                                    if (text != null) {
-                                        recordA.Text = text;
-                                    } else  if (time != null) {
-                                        recordA.Time = time.Value;
-                                    } else  if (uuid != null) {
-                                        recordA.Uuid = uuid.Value;
-                                    } else  if (version != null) {
-                                        recordA.Version = version.Value;
-                                    } else  if (binary != null) {
-                                        recordA.SetBytes(binary);
+                                    if (recordType == RecordType.CustomTextField) {
+                                        records.Add(new CustomTextRecord() {
+                                            Caption = caption,
+                                            Text = text,
+                                            IsSensitive = isSensitive ?? false
+                                        });
                                     } else {
-                                        throw new InvalidDataException("Record data cannot be determined.");
+                                        var recordA = new Record(recordType.Value);
+                                        if (text != null) {
+                                            recordA.Text = text;
+                                        } else  if (time != null) {
+                                            recordA.Time = time.Value;
+                                        } else  if (uuid != null) {
+                                            recordA.Uuid = uuid.Value;
+                                        } else  if (version != null) {
+                                            recordA.Version = version.Value;
+                                        } else  if (binary != null) {
+                                            recordA.SetBytes(binary);
+                                        } else {
+                                            throw new InvalidDataException("Record data cannot be determined.");
+                                        }
                                     }
                                     break;
                             }

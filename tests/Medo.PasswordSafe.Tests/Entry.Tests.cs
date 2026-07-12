@@ -441,6 +441,24 @@ public class Entry_Tests {
         Assert.AreEqual("""{"records":[{"caption":"UUID","type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"caption":"Group","type":"Group","text":"Group"},{"caption":"Title","type":"Title","text":"Title"},{"caption":"User name","type":"UserName","text":"UserName"},{"caption":"Notes","type":"Notes","text":"Notes"},{"caption":"Password","type":"Password","text":"Password"},{"caption":"Cration time","type":"CreationTime","time":"2001-01-01T00:00:00.0000000Z"},{"caption":"Password modification time","type":"PasswordModificationTime","time":"2002-01-01T00:00:00.0000000Z"},{"caption":"Last access time","type":"LastAccessTime","time":"2003-01-01T00:00:00.0000000Z"},{"caption":"Password expiry time","type":"PasswordExpiryTime","time":"2004-01-01T00:00:00.0000000Z"},{"caption":"Last modification time","type":"LastModificationTime","time":"2005-01-01T00:00:00.0000000Z"},{"caption":"URL","type":"Url","text":"http://example.com"},{"caption":"Email address","type":"EmailAddress","text":"example@example.com"},{"caption":"Two-factor key","type":"TwoFactorKey","binary":"AAECAwQFBgcICQ=="},{"caption":"Card number","type":"CreditCardNumber","text":"1234 5678 9012 3456"},{"caption":"Card expiration","type":"CreditCardExpiration","text":"Title"},{"caption":"Card verification code","type":"CreditCardVerificationValue","text":"0987"},{"caption":"Card pin","type":"CreditCardPin","text":"6543"},{"caption":"QR code","type":"QRCode","text":"https://medo64.com/"}]}""", exported);
     }
 
+    [TestMethod]
+    public void Entry_CustomTextField() {
+        var entry = new PwSafe.Entry("Title");
+        entry.Uuid = Guid.Parse("01234567-89ab-cdef-0123-456789abcdef");
+        entry.Records.Add(new PwSafe.CustomTextRecord() {
+            Caption = "Caption",
+            Text = "Text",
+        });
+
+        var exported = entry.ExportToJson();
+        Assert.AreEqual("""{"records":[{"caption":"UUID","type":"Uuid","uuid":"01234567-89ab-cdef-0123-456789abcdef"},{"caption":"Title","type":"Title","text":"Title"},{"caption":"Password","type":"Password","text":""},{"caption":"","type":"CustomTextField","text":""}""", exported);
+
+        var imported = Entry.ImportFromJson(exported);
+        var exported2 = imported.ExportToJson();
+
+        Assert.AreEqual(exported, exported2);
+    }
+
     #endregion Export/Import
 
 }
