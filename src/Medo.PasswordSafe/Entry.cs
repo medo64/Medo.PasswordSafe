@@ -357,7 +357,6 @@ public class Entry {
 
         foreach (var record in Records) {
             writer.WriteStartObject();
-            writer.WriteString("caption", record.Caption);
             writer.WriteString("type", record.RecordType.ToString());
             switch (record.DataType) {
                 case PasswordSafeFieldDataType.Version:
@@ -378,6 +377,7 @@ public class Entry {
                 case PasswordSafeFieldDataType.Unknown:
                 default:
                     if (record is CustomTextRecord customTextRecord) {
+                        writer.WriteString("caption", record.Caption);
                         writer.WriteString("text", customTextRecord.Text);
                         if (customTextRecord.IsSensitive) {
                             writer.WriteBoolean("isSensitive", customTextRecord.IsSensitive);
