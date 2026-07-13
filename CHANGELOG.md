@@ -3,6 +3,11 @@ CHANGELOG
 Changelog at https://github.com/medo64/Medo.PasswordSafe/blob/main/CHANGELOG.md
 
 
+[6.6.2] (2026-07-12)
+
+- fixed TryImportFromJson when input is not a valid JSON
+
+
 [6.6.1] (2026-07-12)
 
 - added TryImportFromJson
@@ -76,6 +81,7 @@ Changelog at https://github.com/medo64/Medo.PasswordSafe/blob/main/CHANGELOG.md
 
 
 [unreleased]: https://github.com/medo64/Medo.PasswordSafe/
+[6.6.2]: https://www.nuget.org/packages/Medo.PasswordSafe/6.6.2
 [6.6.1]: https://www.nuget.org/packages/Medo.PasswordSafe/6.6.1
 [6.6.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.6.0
 [6.5.0]: https://www.nuget.org/packages/Medo.PasswordSafe/6.5.0

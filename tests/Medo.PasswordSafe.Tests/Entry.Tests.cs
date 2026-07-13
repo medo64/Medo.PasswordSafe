@@ -518,6 +518,15 @@ public class Entry_Tests {
         });
     }
 
+    [TestMethod]
+    public void Entry_ExportImport_NonJson() {
+        var exported = "C";
+        Assert.Throws<InvalidDataException>(() => {
+            Entry.ImportFromJson(exported);
+        });
+        Assert.IsFalse(Entry.TryImportFromJson(exported, out _));
+    }
+
     #endregion Export/Import
 
 }

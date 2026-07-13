@@ -436,127 +436,128 @@ public class Entry {
     public static (Entry? entry, string? exceptionText) ImportFromJsonInt(string jsonText) {
         if (string.IsNullOrWhiteSpace(jsonText)) { return (null, "No data."); }
 
-        var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonText));
-        if (!reader.Read() ||(reader.TokenType != JsonTokenType.StartObject)) { return (null, "Cannot find JSON start object."); }
+        try {
+            var reader = new Utf8JsonReader(Encoding.UTF8.GetBytes(jsonText));
+            if (!reader.Read() || (reader.TokenType != JsonTokenType.StartObject)) { return (null, "Cannot find JSON start object."); }
 
-        var records = new List<Record>();
+            var records = new List<Record>();
 
-        while (reader.Read()) {
-            if (reader.TokenType == JsonTokenType.PropertyName) {
-                var propName = reader.GetString();
-                if (propName == null) {
-                    return (null, "Unexpected null property name.");
-                } else if (propName.Equals("kind", StringComparison.Ordinal)) {
-                    reader.Read();
-                    if (reader.TokenType == JsonTokenType.String) {
-                        var content = reader.GetString() ?? throw new InvalidDataException("Unexpected null kind.");
-                        if (!content.Equals("PWSafe3.Entry", StringComparison.Ordinal)) { throw new InvalidDataException("Unknown kind."); }
-                    } else {
-                        return (null, "Cannot determine kind.");
-                    }
-                } else if (propName.Equals("records", StringComparison.Ordinal)) {
-                    if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray) { continue; }
-
-                    while (reader.Read()) {
-                        if (reader.TokenType == JsonTokenType.EndArray) { break; }
-                        if (reader.TokenType != JsonTokenType.StartObject) { continue; }
-
-                        RecordType? recordType = null;
-                        string? caption = null;
-                        string? text = null;
-                        Guid? uuid = null;
-                        DateTime? time = null;
-                        int? version = null;
-                        byte[]? binary = null;
-                        bool? isSensitive = null;
+            while (reader.Read()) {
+                if (reader.TokenType == JsonTokenType.PropertyName) {
+                    var propName = reader.GetString();
+                    if (propName == null) {
+                        return (null, "Unexpected null property name.");
+                    } else if (propName.Equals("kind", StringComparison.Ordinal)) {
+                        reader.Read();
+                        if (reader.TokenType == JsonTokenType.String) {
+                            var content = reader.GetString() ?? throw new InvalidDataException("Unexpected null kind.");
+                            if (!content.Equals("PWSafe3.Entry", StringComparison.Ordinal)) { throw new InvalidDataException("Unknown kind."); }
+                        } else {
+                            return (null, "Cannot determine kind.");
+                        }
+                    } else if (propName.Equals("records", StringComparison.Ordinal)) {
+                        if (!reader.Read() || reader.TokenType != JsonTokenType.StartArray) { continue; }
 
                         while (reader.Read()) {
-                            if (reader.TokenType == JsonTokenType.EndObject) { break; }
-                            if (reader.TokenType != JsonTokenType.PropertyName) { continue; }
+                            if (reader.TokenType == JsonTokenType.EndArray) { break; }
+                            if (reader.TokenType != JsonTokenType.StartObject) { continue; }
 
-                            var name = reader.GetString();
-                            if (!reader.Read()) { break; }
+                            RecordType? recordType = null;
+                            string? caption = null;
+                            string? text = null;
+                            Guid? uuid = null;
+                            DateTime? time = null;
+                            int? version = null;
+                            byte[]? binary = null;
+                            bool? isSensitive = null;
 
-                            switch (name) {
-                                case "type":
-                                    if (reader.TokenType == JsonTokenType.String) {
-                                        var content = reader.GetString();
-                                        if (Enum.TryParse<RecordType>(content, out var parsed)) {
-                                            recordType = parsed;
+                            while (reader.Read()) {
+                                if (reader.TokenType == JsonTokenType.EndObject) { break; }
+                                if (reader.TokenType != JsonTokenType.PropertyName) { continue; }
+
+                                var name = reader.GetString();
+                                if (!reader.Read()) { break; }
+
+                                switch (name) {
+                                    case "type":
+                                        if (reader.TokenType == JsonTokenType.String) {
+                                            var content = reader.GetString();
+                                            if (Enum.TryParse<RecordType>(content, out var parsed)) {
+                                                recordType = parsed;
+                                            } else {
+                                                return (null, $"Cannot convert '{content}' to record type.");
+                                            }
                                         } else {
-                                            return (null, $"Cannot convert '{content}' to record type.");
+                                            return (null, "Unexpected record type.");
                                         }
-                                    } else {
-                                        return (null, "Unexpected record type.");
-                                    }
-                                    break;
+                                        break;
 
-                                case "caption":
-                                    if (reader.TokenType == JsonTokenType.String) {
-                                        caption = reader.GetString();
-                                    } else {
-                                        return (null, "Unexpected caption type.");
-                                    }
-                                    break;
-
-                                case "text":
-                                    if (reader.TokenType == JsonTokenType.String) {
-                                        text = reader.GetString();
-                                    } else {
-                                        return (null, "Unexpected text type.");
-                                    }
-                                    break;
-
-                                case "uuid":
-                                    if (reader.TokenType == JsonTokenType.String) {
-                                        var content = reader.GetString();
-                                        if (Guid.TryParse(content, out var parsed)) {
-                                            uuid = parsed;
+                                    case "caption":
+                                        if (reader.TokenType == JsonTokenType.String) {
+                                            caption = reader.GetString();
                                         } else {
-                                            return (null, $"Cannot convert '{content}' to UUID.");
+                                            return (null, "Unexpected caption type.");
                                         }
-                                    } else {
-                                        return (null, "Unexpected UUID type.");
-                                    }
-                                    break;
+                                        break;
 
-                                case "time":
-                                    if (reader.TokenType == JsonTokenType.String) {
-                                        var content = reader.GetString();
-                                        if (DateTime.TryParse(content, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var value)) {
-                                            time = value;
+                                    case "text":
+                                        if (reader.TokenType == JsonTokenType.String) {
+                                            text = reader.GetString();
                                         } else {
-                                            return (null, $"Cannot convert '{content}' to time.");
+                                            return (null, "Unexpected text type.");
                                         }
-                                    } else {
-                                        return (null, "Unexpected time type.");
-                                    }
-                                    break;
+                                        break;
 
-                                case "version":
-                                    if (reader.TokenType == JsonTokenType.String) {
-                                        var content = reader.GetString();
-                                        if (int.TryParse(content, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) {
-                                            version = value;
+                                    case "uuid":
+                                        if (reader.TokenType == JsonTokenType.String) {
+                                            var content = reader.GetString();
+                                            if (Guid.TryParse(content, out var parsed)) {
+                                                uuid = parsed;
+                                            } else {
+                                                return (null, $"Cannot convert '{content}' to UUID.");
+                                            }
                                         } else {
-                                            return (null, $"Cannot convert '{content}' to version.");
+                                            return (null, "Unexpected UUID type.");
                                         }
-                                    } else {
-                                        return (null, "Unexpected version type.");
-                                    }
-                                    break;
+                                        break;
 
-                                case "binary":
-                                    if (reader.TokenType == JsonTokenType.String) {
-                                        var content = reader.GetString() ?? "";
+                                    case "time":
+                                        if (reader.TokenType == JsonTokenType.String) {
+                                            var content = reader.GetString();
+                                            if (DateTime.TryParse(content, CultureInfo.InvariantCulture, DateTimeStyles.RoundtripKind, out var value)) {
+                                                time = value;
+                                            } else {
+                                                return (null, $"Cannot convert '{content}' to time.");
+                                            }
+                                        } else {
+                                            return (null, "Unexpected time type.");
+                                        }
+                                        break;
+
+                                    case "version":
+                                        if (reader.TokenType == JsonTokenType.String) {
+                                            var content = reader.GetString();
+                                            if (int.TryParse(content, NumberStyles.Integer, CultureInfo.InvariantCulture, out var value)) {
+                                                version = value;
+                                            } else {
+                                                return (null, $"Cannot convert '{content}' to version.");
+                                            }
+                                        } else {
+                                            return (null, "Unexpected version type.");
+                                        }
+                                        break;
+
+                                    case "binary":
+                                        if (reader.TokenType == JsonTokenType.String) {
+                                            var content = reader.GetString() ?? "";
 #if NET10_0_OR_GREATER
-                                        var binaryBuffer = new byte[content.Length];
-                                        if (Convert.TryFromBase64String(content, binaryBuffer, out var bytesInBuffer)) {
-                                            binary = new byte[bytesInBuffer];
-                                            Buffer.BlockCopy(binaryBuffer, 0, binary, 0, binary.Length);
-                                        } else {
-                                            return (null, $"Cannot convert '{content}' to binary.");
-                                        }
+                                            var binaryBuffer = new byte[content.Length];
+                                            if (Convert.TryFromBase64String(content, binaryBuffer, out var bytesInBuffer)) {
+                                                binary = new byte[bytesInBuffer];
+                                                Buffer.BlockCopy(binaryBuffer, 0, binary, 0, binary.Length);
+                                            } else {
+                                                return (null, $"Cannot convert '{content}' to binary.");
+                                            }
 #else
                                         try {
                                             binary = Convert.FromBase64String(content);
@@ -564,96 +565,98 @@ public class Entry {
                                             return (null, $"Cannot convert '{content}' to binary.");
                                         }
 #endif
-                                    } else {
-                                        return (null, "Unexpected binary type.");
-                                    }
-                                    break;
-
-                                case "isSensitive":
-                                    if (reader.TokenType == JsonTokenType.True) {
-                                        isSensitive = true;
-                                    } else if (reader.TokenType == JsonTokenType.False) {
-                                        isSensitive = false;
-                                    } else {
-                                        return (null, "Unexpected isSensitive type.");
-                                    }
-                                    break;
-
-
-                                default: return (null, $"Unexpected '{name}' property.");
-                            }
-                        }
-
-                        if (recordType != null) {
-                            switch (Record.GetDataType(recordType.Value)) {
-                                case PasswordSafeFieldDataType.Version:
-                                    if (version == null) { return (null, "Version is missing."); }
-                                    records.Add(new Record(recordType.Value) {
-                                        Version = version.Value
-                                    });
-                                    break;
-                                case PasswordSafeFieldDataType.Uuid:
-                                    if (uuid == null) { return (null, "UUID is missing."); }
-                                    records.Add(new Record(recordType.Value) {
-                                        Uuid = uuid.Value
-                                    });
-                                    break;
-                                case PasswordSafeFieldDataType.Time:
-                                    if (time == null) { return (null, "Time is missing."); }
-                                    records.Add(new Record(recordType.Value) {
-                                        Time = time.Value
-                                    });
-                                    break;
-                                case PasswordSafeFieldDataType.Text:
-                                    records.Add(new Record(recordType.Value) {
-                                        Text = text
-                                    });
-                                    break;
-                                case PasswordSafeFieldDataType.Binary:
-                                    if (binary == null) { return (null, "Binary data is missing."); }
-                                    var record = new Record(recordType.Value);
-                                    record.SetBytes(binary);
-                                    break;
-                                case PasswordSafeFieldDataType.Unknown:
-                                default:
-                                    if (recordType == RecordType.CustomTextField) {
-                                        records.Add(new CustomTextRecord() {
-                                            Caption = caption,
-                                            Text = text,
-                                            IsSensitive = isSensitive ?? false
-                                        });
-                                    } else {
-                                        var recordA = new Record(recordType.Value);
-                                        if (text != null) {
-                                            recordA.Text = text;
-                                        } else if (time != null) {
-                                            recordA.Time = time.Value;
-                                        } else if (uuid != null) {
-                                            recordA.Uuid = uuid.Value;
-                                        } else if (version != null) {
-                                            recordA.Version = version.Value;
-                                        } else if (binary != null) {
-                                            recordA.SetBytes(binary);
                                         } else {
-                                            return (null, "Record data cannot be determined.");
+                                            return (null, "Unexpected binary type.");
                                         }
-                                    }
-                                    break;
+                                        break;
+
+                                    case "isSensitive":
+                                        if (reader.TokenType == JsonTokenType.True) {
+                                            isSensitive = true;
+                                        } else if (reader.TokenType == JsonTokenType.False) {
+                                            isSensitive = false;
+                                        } else {
+                                            return (null, "Unexpected isSensitive type.");
+                                        }
+                                        break;
+
+
+                                    default: return (null, $"Unexpected '{name}' property.");
+                                }
                             }
-                        } else {
-                            return (null, "Record type is missing.");
+
+                            if (recordType != null) {
+                                switch (Record.GetDataType(recordType.Value)) {
+                                    case PasswordSafeFieldDataType.Version:
+                                        if (version == null) { return (null, "Version is missing."); }
+                                        records.Add(new Record(recordType.Value) {
+                                            Version = version.Value
+                                        });
+                                        break;
+                                    case PasswordSafeFieldDataType.Uuid:
+                                        if (uuid == null) { return (null, "UUID is missing."); }
+                                        records.Add(new Record(recordType.Value) {
+                                            Uuid = uuid.Value
+                                        });
+                                        break;
+                                    case PasswordSafeFieldDataType.Time:
+                                        if (time == null) { return (null, "Time is missing."); }
+                                        records.Add(new Record(recordType.Value) {
+                                            Time = time.Value
+                                        });
+                                        break;
+                                    case PasswordSafeFieldDataType.Text:
+                                        records.Add(new Record(recordType.Value) {
+                                            Text = text
+                                        });
+                                        break;
+                                    case PasswordSafeFieldDataType.Binary:
+                                        if (binary == null) { return (null, "Binary data is missing."); }
+                                        var record = new Record(recordType.Value);
+                                        record.SetBytes(binary);
+                                        break;
+                                    case PasswordSafeFieldDataType.Unknown:
+                                    default:
+                                        if (recordType == RecordType.CustomTextField) {
+                                            records.Add(new CustomTextRecord() {
+                                                Caption = caption,
+                                                Text = text,
+                                                IsSensitive = isSensitive ?? false
+                                            });
+                                        } else {
+                                            var recordA = new Record(recordType.Value);
+                                            if (text != null) {
+                                                recordA.Text = text;
+                                            } else if (time != null) {
+                                                recordA.Time = time.Value;
+                                            } else if (uuid != null) {
+                                                recordA.Uuid = uuid.Value;
+                                            } else if (version != null) {
+                                                recordA.Version = version.Value;
+                                            } else if (binary != null) {
+                                                recordA.SetBytes(binary);
+                                            } else {
+                                                return (null, "Record data cannot be determined.");
+                                            }
+                                        }
+                                        break;
+                                }
+                            } else {
+                                return (null, "Record type is missing.");
+                            }
                         }
+                    } else {
+                        return (null, $"Unexpected '{propName}' property.");
                     }
-                } else {
-                    return (null, $"Unexpected '{propName}' property.");
+                } else if (reader.TokenType == JsonTokenType.EndObject) {
+                    break;
                 }
-            } else if (reader.TokenType == JsonTokenType.EndObject) {
-                break;
             }
+
+            return (new Entry(records), null);
+        } catch (JsonException ex) {
+            return (null, ex.Message);
         }
-
-        return (new Entry(records), null);
-
     }
 
     #endregion Export/Import
